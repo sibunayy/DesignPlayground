@@ -1,0 +1,95 @@
+:root {
+  color-scheme: light;
+
+  /* Swiss Modernist Print Studio (Light Paper Default) */
+  --bg-paper: #f7f6f2;
+  --bg-surface: #ffffff;
+  --bg-subtle: #efede6;
+  --bg-elevated: #ffffff;
+
+  --ink-primary: #141413;
+  --ink-secondary: #585650;
+  --ink-muted: #848179;
+
+  --rule: rgba(20, 20, 19, 0.12);
+  --rule-strong: rgba(20, 20, 19, 0.24);
+
+  /* Single disciplined vermilion CTA & diagnostic error accent */
+  --accent: #d94526;
+  --accent-ink: #ffffff;
+  --accent-tint: rgba(217, 69, 38, 0.1);
+
+  --ok: #216e4e;
+  --ok-tint: rgba(33, 110, 78, 0.11);
+  --warn: #b56a15;
+  --warn-tint: rgba(181, 106, 21, 0.12);
+
+  /* Fonts */
+  --font-display: 'Newsreader Variable', 'Newsreader', 'EB Garamond', Georgia, serif;
+  --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Major Third (1.25) Type Scale */
+  --text-xs: 0.78rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.563rem;
+  --text-xl: 1.953rem;
+  --text-2xl: 2.441rem;
+
+  /* 8px Spacing Scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 16px;
+  --sp-4: 24px;
+  --sp-5: 32px;
+  --sp-6: 48px;
+  --sp-7: 64px;
+
+  /* Concentric Radius Geometry */
+  --r-card: 16px;
+  --r-inset: 8px;
+  --r-inner: max(0px, calc(var(--r-card) - var(--r-inset)));
+  --r-pill: 999px;
+
+  /* Shadows & Elevation */
+  --shadow-float: 0 8px 28px rgba(20, 20, 19, 0.08), 0 1px 2px rgba(20, 20, 19, 0.06);
+  --shadow-artboard: 0 2px 12px rgba(20, 20, 19, 0.06), 0 0 0 1px rgba(20, 20, 19, 0.08);
+
+  /* Safe-area insets for iPadOS Safari standalone */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Calibrated Darkroom (Lesson 10 compliant: non-pure-black ground + surface elevation) */
+  --bg-paper: #161618;
+  --bg-surface: #1f1f23;
+  --bg-subtle: #25252a;
+  --bg-elevated: #2b2b31;
+
+  --ink-primary: rgba(244, 243, 238, 0.89);
+  --ink-secondary: rgba(244, 243, 238, 0.64);
+  --ink-muted: rgba(244, 243, 238, 0.44);
+
+  --rule: rgba(244, 243, 238, 0.12);
+  --rule-strong: rgba(244, 243, 238, 0.24);
+
+  /* Desaturated accent to prevent Dark Mode vibration */
+  --accent: #e26b52;
+  --accent-ink: #141413;
+  --accent-tint: rgba(226, 107, 82, 0.16);
+
+  --ok: #4ca97e;
+  --ok-tint: rgba(76, 169, 126, 0.16);
+  --warn: #d9943a;
+  --warn-tint: rgba(217, 148, 58, 0.16);
+
+  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.44), 0 0 0 1px rgba(244, 243, 238, 0.1);
+  --shadow-artboard: 0 6px 24px rgba(0, 0, 0, 0.36), 0 0 0 1px rgba(244, 243, 238, 0.12);
+}

@@ -7,6 +7,8 @@ import { generateL01, L01State, scoreL01 } from './scoring/foundationScoring';
 
 export interface ExerciseComponentProps {
   seed: string;
+  styleWorld?: string;
+  styleRef?: string;
   availableLenses: EyeLens[];
   activeLenses: Set<EyeLens>;
   onToggleLens: (lens: EyeLens) => void;
@@ -19,6 +21,8 @@ export interface ExerciseComponentProps {
 
 export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -110,14 +114,15 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
+        background: '#F4F0E7',
+        color: '#191815',
+        borderRadius: 4,
+        border: '1px solid rgba(25, 24, 21, 0.14)',
         boxShadow: 'var(--shadow-artboard)',
         padding: displayState.margin,
         position: 'relative',
         overflow: 'hidden',
-        minHeight: 370,
+        minHeight: 380,
         transition: submitted ? 'padding 220ms ease' : undefined,
       }}
     >
@@ -146,22 +151,22 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
               width: 3,
               height: 44,
               borderRadius: 999,
-              background: 'rgba(20, 20, 19, 0.24)',
+              background: 'rgba(25, 24, 21, 0.28)',
             }}
           />
         </div>
       )}
 
-      {/* Inner Editorial Composition */}
+      {/* Inner Kinfolk Editorial Composition */}
       <div
         style={{
           position: 'relative',
-          border: displayState.hasBox ? '1.5px solid rgba(20, 20, 19, 0.36)' : '1.5px solid transparent',
-          borderRadius: 8,
+          border: displayState.hasBox ? '1.5px solid rgba(25, 24, 21, 0.42)' : '1.5px solid transparent',
+          borderRadius: 2,
           padding: displayState.hasBox ? 14 : 0,
           display: 'grid',
           gridTemplateColumns: '1.15fr 0.85fr',
-          gap: 18,
+          gap: 20,
           alignItems: 'stretch',
         }}
       >
@@ -175,9 +180,9 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
               top: -12,
               right: 12,
               padding: '4px 10px',
-              borderRadius: 999,
-              background: '#141413',
-              color: '#F7F6F2',
+              borderRadius: 4,
+              background: '#191815',
+              color: '#F4F0E7',
               fontSize: 11,
               fontWeight: 600,
               zIndex: 15,
@@ -200,16 +205,16 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: 10.5, letterSpacing: '0.09em', fontWeight: 600, color: '#585650' }}>
-              {scenario.brief.eyebrow}
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#6B665D' }}>
+              {scenario.brief.client}
             </div>
             <h3
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: 25,
-                lineHeight: 1.15,
+                fontSize: 27,
+                lineHeight: 1.12,
                 marginTop: 6,
-                fontWeight: 500,
+                fontWeight: 400,
               }}
             >
               {scenario.brief.headline}
@@ -219,25 +224,25 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
           <div
             style={{
               transform: `translate(${displayState.blockX}px, ${displayState.blockY}px)`,
-              padding: 10,
-              borderRadius: 6,
-              background: !submitted ? 'rgba(20, 20, 19, 0.03)' : 'transparent',
-              border: !submitted ? '1px dashed rgba(20, 20, 19, 0.18)' : 'none',
+              padding: 12,
+              borderRadius: 3,
+              background: !submitted ? 'rgba(25, 24, 21, 0.04)' : 'transparent',
+              border: !submitted ? '1px dashed rgba(25, 24, 21, 0.22)' : 'none',
             }}
           >
-            <p style={{ fontSize: 13.5, lineHeight: 1.5, color: '#383633' }}>
+            <p style={{ fontFamily: 'var(--font-editorial)', fontSize: 15, lineHeight: 1.52, color: '#383630' }}>
               {scenario.brief.subhead}
             </p>
             <div
               style={{
                 marginTop: 14,
                 display: 'inline-flex',
-                padding: '8px 16px',
-                borderRadius: 999,
-                background: '#D94526',
-                color: '#FFFFFF',
+                padding: '9px 18px',
+                borderRadius: 2,
+                background: '#191815',
+                color: '#F4F0E7',
                 fontSize: 12.5,
-                fontWeight: 600,
+                fontWeight: 500,
               }}
             >
               {scenario.brief.ctaLabel}
@@ -248,10 +253,10 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
         {/* Right Photo Specimen */}
         <div
           style={{
-            borderRadius: 'max(0px, calc(16px - 8px))',
+            borderRadius: 2,
             overflow: 'hidden',
-            minHeight: 240,
-            background: '#EFEDE6',
+            minHeight: 245,
+            background: '#E5E0D5',
           }}
         >
           <img
@@ -271,15 +276,15 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
               top: 108,
               width: trappedWidth + 24,
               height: 92,
-              borderRadius: 8,
-              background: 'rgba(217, 69, 38, 0.14)',
-              border: '1.5px dashed #D94526',
+              borderRadius: 3,
+              background: 'rgba(200, 50, 38, 0.14)',
+              border: '1.5px dashed #C83226',
               pointerEvents: 'none',
               display: 'grid',
               placeItems: 'center',
             }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#D94526' }}>Trapped Void</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#C83226' }}>Trapped Void</span>
           </div>
         )}
       </div>
@@ -290,8 +295,8 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
           style={{
             position: 'absolute',
             inset: scenario.targetMargin,
-            border: '1.5px dashed #216E4E',
-            borderRadius: 8,
+            border: '1.5px dashed #157347',
+            borderRadius: 3,
             pointerEvents: 'none',
           }}
         >
@@ -302,11 +307,11 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
               right: 8,
               fontSize: 10.5,
               fontWeight: 600,
-              color: '#216E4E',
-              background: 'rgba(255,255,255,0.96)',
+              color: '#157347',
+              background: 'rgba(244,240,231,0.96)',
               padding: '1px 6px',
-              borderRadius: 4,
-              border: '1px solid rgba(33,110,78,0.25)',
+              borderRadius: 3,
+              border: '1px solid rgba(21,115,71,0.28)',
             }}
           >
             Ideal {scenario.targetMargin}px Perimeter
@@ -364,6 +369,8 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
   return (
     <StudioFrame
       prompt="Release the trapped interior void back to the edge: drag the copy flush left, widen outer breathing margins, and strip the unnecessary border box."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

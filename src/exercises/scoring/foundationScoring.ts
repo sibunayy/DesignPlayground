@@ -249,7 +249,7 @@ export function scoreL03(state: L03State, scenario: L03Scenario): ExerciseResult
   let diagnosis = 'Cards align cleanly to column edges, leaving gutters empty and padding quantized on 8 px steps.';
   if (!gutterClear || err1 + err2 > 14) {
     diagnosis =
-      'Cards bleed into the dividing gutter instead of ending cleanly at column tracks—snap both edges back to column bounds.';
+      'Cards bleed into the dividing gutter instead of ending cleanly at column tracks: snap both edges back to column bounds.';
   } else if (!is8px) {
     diagnosis =
       `Column spans are clean, though ${state.cardPad} px padding breaks the 8 px spacing scale (snap to 16 px or 24 px).`;

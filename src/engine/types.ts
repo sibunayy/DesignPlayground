@@ -31,6 +31,8 @@ export interface LessonDefinition {
   title: string;
   shortTitle: string;
   subtitle: string;
+  styleWorld: string;
+  styleRef: string;
   ruleOfThumb: string;
   summary: string; // 2-3 concise editorial sentences
   availableLenses: EyeLens[];

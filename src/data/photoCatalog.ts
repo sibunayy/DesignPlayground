@@ -33,7 +33,7 @@ export interface EditorialPhotoMeta {
 export const EDITORIAL_PHOTOS: EditorialPhotoMeta[] = [
   {
     id: 'portrait-architect',
-    title: 'Studio Portrait — Architect',
+    title: 'Studio Portrait: Architect',
     url: assetUrl('photos/portrait-architect.webp'),
     naturalWidth: 896,
     naturalHeight: 1200,
@@ -55,7 +55,7 @@ export const EDITORIAL_PHOTOS: EditorialPhotoMeta[] = [
   },
   {
     id: 'figure-ceramicist',
-    title: 'Full Figure — Ceramicist',
+    title: 'Full Figure: Ceramicist',
     url: assetUrl('photos/figure-ceramicist.webp'),
     naturalWidth: 896,
     naturalHeight: 1200,
@@ -80,7 +80,7 @@ export const EDITORIAL_PHOTOS: EditorialPhotoMeta[] = [
   },
   {
     id: 'figure-dancer',
-    title: 'Full Figure — Contemporary Study',
+    title: 'Full Figure: Contemporary Study',
     url: assetUrl('photos/figure-dancer.webp'),
     naturalWidth: 896,
     naturalHeight: 1200,
@@ -105,7 +105,7 @@ export const EDITORIAL_PHOTOS: EditorialPhotoMeta[] = [
   },
   {
     id: 'editorial-gallery',
-    title: 'Architectural Horizon — Concrete Gallery',
+    title: 'Architectural Horizon: Concrete Gallery',
     url: assetUrl('photos/editorial-gallery.webp'),
     naturalWidth: 1200,
     naturalHeight: 805,

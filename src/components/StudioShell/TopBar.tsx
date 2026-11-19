@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  BookOpen,
   ChevronLeft,
+  Compass,
   Hash,
   Moon,
   PanelLeft,
   PanelRight,
   Shuffle,
-  Sliders,
+  SlidersHorizontal,
   Sun,
 } from 'lucide-react';
 import { LessonDefinition } from '../../engine/types';
 import { normalizeSeedCode } from '../../engine/prng';
+import { LessonCraftIcon, SightlineEmblem } from '../Icons/CraftIcons';
 
 interface TopBarProps {
   lesson?: LessonDefinition;
@@ -45,6 +48,17 @@ export const TopBar: React.FC<TopBarProps> = ({
   const [seedDraft, setSeedDraft] = useState(seed ?? '4F9A');
   const [prefsOpen, setPrefsOpen] = useState(false);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSeedOpen(false);
+        setPrefsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   const commitSeed = (e: React.FormEvent) => {
     e.preventDefault();
     if (onChangeSeed) {
@@ -57,7 +71,7 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   return (
     <header className="studio-topbar">
-      {/* Left: Back + Lesson Title */}
+      {/* Left: Back + Custom Craft Icon + Lesson Title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
         <button
           type="button"
@@ -68,27 +82,30 @@ export const TopBar: React.FC<TopBarProps> = ({
             display: 'inline-flex',
             alignItems: 'center',
             gap: 4,
-            padding: '0 8px 0 4px',
+            padding: '0 10px 0 6px',
             borderRadius: 8,
             color: 'var(--ink-secondary)',
             fontSize: 13.5,
             fontWeight: 500,
           }}
         >
-          <ChevronLeft size={18} strokeWidth={1.75} />
+          <ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" />
           <span>Index</span>
         </button>
 
-        {lesson && (
+        {lesson ? (
           <div
             style={{
               display: 'flex',
-              alignItems: 'baseline',
-              gap: 8,
+              alignItems: 'center',
+              gap: 9,
               minWidth: 0,
               overflow: 'hidden',
             }}
           >
+            <span style={{ color: 'var(--ink-primary)', flexShrink: 0, display: 'inline-flex' }}>
+              <LessonCraftIcon lessonId={lesson.id} size={20} />
+            </span>
             <span className="tabular" style={{ fontSize: 12.5, color: 'var(--ink-muted)' }}>
               {lesson.number}
             </span>
@@ -105,6 +122,10 @@ export const TopBar: React.FC<TopBarProps> = ({
               {lesson.shortTitle}
             </span>
           </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <SightlineEmblem size={22} />
+          </div>
         )}
 
         {dailyBadge && (
@@ -113,7 +134,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               fontSize: 12,
               fontWeight: 600,
               padding: '4px 10px',
-              borderRadius: 999,
+              borderRadius: 6,
               background: 'var(--bg-subtle)',
               color: 'var(--ink-primary)',
             }}
@@ -123,7 +144,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         )}
       </div>
 
-      {/* Center: Learn / Practice Segmented Switch */}
+      {/* Center: Learn / Practice Hardware Switch */}
       {mode && onChangeMode && (
         <div
           role="tablist"
@@ -131,36 +152,55 @@ export const TopBar: React.FC<TopBarProps> = ({
           style={{
             display: 'inline-flex',
             padding: 3,
-            borderRadius: 999,
+            borderRadius: 9,
             background: 'var(--bg-subtle)',
             border: '1px solid var(--rule)',
           }}
         >
-          {(['learn', 'practice'] as const).map((m) => {
-            const active = mode === m;
-            return (
-              <button
-                key={m}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => onChangeMode(m)}
-                style={{
-                  minHeight: 32,
-                  padding: '0 14px',
-                  borderRadius: 999,
-                  fontSize: 13,
-                  fontWeight: active ? 600 : 500,
-                  background: active ? 'var(--bg-surface)' : 'transparent',
-                  color: active ? 'var(--ink-primary)' : 'var(--ink-secondary)',
-                  boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {m}
-              </button>
-            );
-          })}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'learn'}
+            onClick={() => onChangeMode('learn')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              minHeight: 34,
+              padding: '0 13px',
+              borderRadius: 6,
+              fontSize: 13,
+              fontWeight: mode === 'learn' ? 600 : 500,
+              background: mode === 'learn' ? 'var(--bg-surface)' : 'transparent',
+              color: mode === 'learn' ? 'var(--ink-primary)' : 'var(--ink-secondary)',
+              boxShadow: mode === 'learn' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+            }}
+          >
+            <BookOpen size={14} aria-hidden="true" />
+            <span>Learn</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'practice'}
+            onClick={() => onChangeMode('practice')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              minHeight: 34,
+              padding: '0 13px',
+              borderRadius: 6,
+              fontSize: 13,
+              fontWeight: mode === 'practice' ? 600 : 500,
+              background: mode === 'practice' ? 'var(--bg-surface)' : 'transparent',
+              color: mode === 'practice' ? 'var(--ink-primary)' : 'var(--ink-secondary)',
+              boxShadow: mode === 'practice' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+            }}
+          >
+            <Compass size={14} aria-hidden="true" />
+            <span>Practice</span>
+          </button>
         </div>
       )}
 
@@ -175,21 +215,22 @@ export const TopBar: React.FC<TopBarProps> = ({
               setPrefsOpen(false);
             }}
             aria-label={`Brief seed ${seed}`}
+            aria-expanded={seedOpen}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 4,
-              minHeight: 36,
+              minHeight: 38,
               padding: '0 10px',
               borderRadius: 8,
-              border: '1px solid var(--rule)',
+              border: '1px solid var(--rule-strong)',
               background: 'var(--bg-surface)',
               fontSize: 12.5,
               color: 'var(--ink-secondary)',
             }}
             className="tabular"
           >
-            <Hash size={12} strokeWidth={2} />
+            <Hash size={12} strokeWidth={2} aria-hidden="true" />
             <span>{seed}</span>
           </button>
         )}
@@ -197,6 +238,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <button
           type="button"
           aria-label="Studio preferences"
+          aria-expanded={prefsOpen}
           onClick={() => {
             setPrefsOpen((p) => !p);
             setSeedOpen(false);
@@ -208,35 +250,41 @@ export const TopBar: React.FC<TopBarProps> = ({
             width: 38,
             height: 38,
             borderRadius: 8,
-            border: '1px solid var(--rule)',
+            border: '1px solid var(--rule-strong)',
             background: 'var(--bg-surface)',
             color: 'var(--ink-secondary)',
           }}
         >
-          <Sliders size={15} strokeWidth={1.75} />
+          <SlidersHorizontal size={15} strokeWidth={1.75} aria-hidden="true" />
         </button>
 
         {/* Seed Popover */}
         {seedOpen && seed && (
           <div
+            role="dialog"
+            aria-label="Scenario seed code"
             style={{
               position: 'absolute',
-              top: 46,
+              top: 48,
               right: 44,
-              width: 240,
+              width: 244,
               padding: 14,
-              borderRadius: 12,
+              borderRadius: 10,
               background: 'var(--bg-surface)',
-              border: '1px solid var(--rule)',
+              border: '1px solid var(--rule-strong)',
               boxShadow: 'var(--shadow-float)',
               zIndex: 60,
             }}
           >
-            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>
+            <label
+              htmlFor="seed-code-input"
+              style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 8 }}
+            >
               Scenario Seed Code
-            </div>
+            </label>
             <form onSubmit={commitSeed} style={{ display: 'flex', gap: 6 }}>
               <input
+                id="seed-code-input"
                 type="text"
                 maxLength={4}
                 value={seedDraft}
@@ -244,9 +292,9 @@ export const TopBar: React.FC<TopBarProps> = ({
                 className="tabular"
                 style={{
                   flex: 1,
-                  minHeight: 36,
+                  minHeight: 38,
                   padding: '0 10px',
-                  borderRadius: 8,
+                  borderRadius: 6,
                   border: '1px solid var(--rule-strong)',
                   background: 'var(--bg-paper)',
                   fontSize: 13.5,
@@ -255,9 +303,9 @@ export const TopBar: React.FC<TopBarProps> = ({
               <button
                 type="submit"
                 style={{
-                  minHeight: 36,
+                  minHeight: 38,
                   padding: '0 12px',
-                  borderRadius: 8,
+                  borderRadius: 6,
                   background: 'var(--ink-primary)',
                   color: 'var(--bg-surface)',
                   fontSize: 12.5,
@@ -277,8 +325,8 @@ export const TopBar: React.FC<TopBarProps> = ({
                 style={{
                   marginTop: 8,
                   width: '100%',
-                  minHeight: 34,
-                  borderRadius: 8,
+                  minHeight: 36,
+                  borderRadius: 6,
                   border: '1px solid var(--rule)',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -288,7 +336,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                   color: 'var(--ink-secondary)',
                 }}
               >
-                <Shuffle size={13} />
+                <Shuffle size={13} aria-hidden="true" />
                 <span>Generate Random Brief</span>
               </button>
             )}
@@ -298,15 +346,17 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Preferences Popover */}
         {prefsOpen && (
           <div
+            role="dialog"
+            aria-label="Studio ergonomics"
             style={{
               position: 'absolute',
-              top: 46,
+              top: 48,
               right: 0,
-              width: 240,
+              width: 244,
               padding: 14,
-              borderRadius: 12,
+              borderRadius: 10,
               background: 'var(--bg-surface)',
-              border: '1px solid var(--rule)',
+              border: '1px solid var(--rule-strong)',
               boxShadow: 'var(--shadow-float)',
               zIndex: 60,
               display: 'flex',
@@ -322,16 +372,16 @@ export const TopBar: React.FC<TopBarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                minHeight: 38,
+                minHeight: 40,
                 padding: '0 10px',
-                borderRadius: 8,
+                borderRadius: 6,
                 background: 'var(--bg-paper)',
                 border: '1px solid var(--rule)',
                 fontSize: 13,
               }}
             >
-              <span>{theme === 'dark' ? 'Darkroom (#161618)' : 'Archival Paper'}</span>
-              {theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />}
+              <span>{theme === 'dark' ? 'Darkroom (#14161A)' : 'Studio Paper'}</span>
+              {theme === 'dark' ? <Moon size={15} aria-hidden="true" /> : <Sun size={15} aria-hidden="true" />}
             </button>
 
             <button
@@ -341,16 +391,20 @@ export const TopBar: React.FC<TopBarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                minHeight: 38,
+                minHeight: 40,
                 padding: '0 10px',
-                borderRadius: 8,
+                borderRadius: 6,
                 background: 'var(--bg-paper)',
                 border: '1px solid var(--rule)',
                 fontSize: 13,
               }}
             >
               <span>Rail: {railSide === 'right' ? 'Right Hand' : 'Left Hand'}</span>
-              {railSide === 'right' ? <PanelRight size={15} /> : <PanelLeft size={15} />}
+              {railSide === 'right' ? (
+                <PanelRight size={15} aria-hidden="true" />
+              ) : (
+                <PanelLeft size={15} aria-hidden="true" />
+              )}
             </button>
           </div>
         )}

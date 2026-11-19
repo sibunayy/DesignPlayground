@@ -8,6 +8,8 @@ import { generateL03, gridColBounds, L03State, scoreL03 } from './scoring/founda
 
 export const L03Grids: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -106,13 +108,46 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
+        background: '#FAF9F6',
+        color: '#111111',
+        borderRadius: 2,
+        border: '1px solid #111111',
         padding: 24,
         boxShadow: 'var(--shadow-artboard)',
       }}
     >
+      {/* Swiss Column Index Ruler */}
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: 18,
+          marginBottom: 6,
+          borderBottom: '1px solid rgba(17,17,17,0.2)',
+        }}
+      >
+        {Array.from({ length: scenario.columns }).map((_, col) => {
+          const left = col * (scenario.colWidth + scenario.gutter);
+          return (
+            <span
+              key={col}
+              className="tabular"
+              style={{
+                position: 'absolute',
+                left: toPct(left),
+                width: toPct(scenario.colWidth),
+                textAlign: 'center',
+                fontSize: 10,
+                fontWeight: 600,
+                color: '#525252',
+              }}
+            >
+              C{col + 1}
+            </span>
+          );
+        })}
+      </div>
+
       {/* 8-Column Proportional Stage */}
       <div style={{ position: 'relative', width: '100%', height: 290 }}>
         {/* Underlying Column + Gutter Overlay */}
@@ -127,26 +162,26 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
                 bottom: 0,
                 left: toPct(left),
                 width: toPct(scenario.colWidth),
-                background: showGuides ? 'rgba(33, 110, 78, 0.08)' : 'rgba(217, 69, 38, 0.045)',
-                borderLeft: '1px dashed rgba(20, 20, 19, 0.14)',
-                borderRight: '1px dashed rgba(20, 20, 19, 0.14)',
+                background: showGuides ? 'rgba(21, 115, 71, 0.08)' : 'rgba(29, 78, 216, 0.045)',
+                borderLeft: '1px dashed rgba(17, 17, 17, 0.16)',
+                borderRight: '1px dashed rgba(17, 17, 17, 0.16)',
                 pointerEvents: 'none',
               }}
             />
           );
         })}
 
-        {/* Card 1 */}
+        {/* Card 1 — Swiss Graphic Poster Block */}
         <div
           style={{
             position: 'absolute',
-            top: 16,
-            bottom: 16,
+            top: 14,
+            bottom: 14,
             left: toPct(view.card1X),
             width: toPct(view.card1W),
-            background: '#F7F6F2',
-            borderRadius: 12,
-            border: '1px solid rgba(20, 20, 19, 0.16)',
+            background: '#FFFFFF',
+            borderRadius: 0,
+            border: '1.5px solid #111111',
             padding: view.cardPad,
             display: 'flex',
             flexDirection: 'column',
@@ -154,14 +189,23 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: 10.5, fontWeight: 600, color: '#585650', letterSpacing: '0.07em' }}>
-              {scenario.brief.eyebrow}
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#C83226' }}>
+              {scenario.brief.client}
             </div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 21, lineHeight: 1.18, marginTop: 6 }}>
+            <h3
+              style={{
+                fontFamily: 'var(--font-grotesk)',
+                fontSize: 22,
+                lineHeight: 1.12,
+                marginTop: 6,
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+              }}
+            >
               {scenario.brief.headline}
             </h3>
           </div>
-          <p style={{ fontSize: 12.5, lineHeight: 1.45, color: '#585650' }}>
+          <p style={{ fontSize: 12.5, lineHeight: 1.45, color: '#444444' }}>
             {scenario.brief.subhead}
           </p>
 
@@ -181,22 +225,22 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
                 zIndex: 10,
               }}
             >
-              <div style={{ width: 5, height: 42, borderRadius: 999, background: '#141413' }} />
+              <div style={{ width: 5, height: 42, borderRadius: 2, background: '#111111' }} />
             </div>
           )}
         </div>
 
-        {/* Card 2 */}
+        {/* Card 2 — Bold Cobalt Swiss Block */}
         <div
           style={{
             position: 'absolute',
-            top: 16,
-            bottom: 16,
+            top: 14,
+            bottom: 14,
             left: toPct(view.card2X),
             width: toPct(view.card2W),
-            background: '#141413',
-            color: '#F7F6F2',
-            borderRadius: 12,
+            background: '#1E3A8A',
+            color: '#FFFFFF',
+            borderRadius: 0,
             padding: view.cardPad,
             display: 'flex',
             flexDirection: 'column',
@@ -204,17 +248,17 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: 10.5, opacity: 0.65, letterSpacing: '0.07em' }}>
+            <div className="tabular" style={{ fontSize: 11, opacity: 0.78 }}>
               {scenario.brief.metaTag}
             </div>
-            <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 19, lineHeight: 1.2, marginTop: 8 }}>
-              Studio Notes
+            <h4 style={{ fontFamily: 'var(--font-grotesk)', fontSize: 19, lineHeight: 1.18, marginTop: 8, fontWeight: 600 }}>
+              Exhibition Notes
             </h4>
-            <p style={{ fontSize: 12.5, lineHeight: 1.48, opacity: 0.82, marginTop: 8 }}>
+            <p style={{ fontSize: 12.5, lineHeight: 1.48, opacity: 0.88, marginTop: 8 }}>
               {scenario.brief.body}
             </p>
           </div>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#E26B52' }}>{scenario.brief.ctaLabel} →</span>
+          <span style={{ fontSize: 12.5, fontWeight: 600, textDecoration: 'underline' }}>{scenario.brief.ctaLabel}</span>
 
           {!submitted && (
             <div
@@ -232,7 +276,7 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
                 zIndex: 10,
               }}
             >
-              <div style={{ width: 5, height: 42, borderRadius: 999, background: '#D94526' }} />
+              <div style={{ width: 5, height: 42, borderRadius: 2, background: '#C83226' }} />
             </div>
           )}
         </div>
@@ -246,9 +290,9 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
               bottom: 0,
               left: toPct(t1.w),
               width: toPct(scenario.gutter),
-              background: 'rgba(217, 69, 38, 0.16)',
-              borderLeft: '1.5px solid #216E4E',
-              borderRight: '1.5px solid #216E4E',
+              background: 'rgba(200, 50, 38, 0.16)',
+              borderLeft: '1.5px solid #157347',
+              borderRight: '1.5px solid #157347',
               pointerEvents: 'none',
               display: 'grid',
               placeItems: 'center',
@@ -259,7 +303,7 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
                 writingMode: 'vertical-rl',
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#216E4E',
+                color: '#157347',
                 letterSpacing: '0.08em',
               }}
             >
@@ -332,7 +376,9 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
 
   return (
     <StudioFrame
-      prompt="Pull both cards out of the center gutter so they align cleanly to 4-column spans, and snap card padding to the 8 px spacing scale."
+      prompt="Pull both blocks out of the center gutter so they snap to 4-column tracks, and quantize card padding to the 8 px spacing scale."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

@@ -7,6 +7,8 @@ import { generateL05, HEADLINE_CANDIDATES, L05State, scoreL05 } from './scoring/
 
 export const L05FontPairing: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -71,29 +73,29 @@ export const L05FontPairing: React.FC<ExerciseComponentProps> = ({
     <div
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
-        padding: 28,
+        background: '#FAF8F3',
+        color: '#171916',
+        borderRadius: 10,
+        border: '1px solid rgba(23, 25, 22, 0.14)',
+        overflow: 'hidden',
         boxShadow: 'var(--shadow-artboard)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 20,
       }}
     >
-      {/* Headline Candidate Picker */}
-      <div>
-        <div
-          style={{
-            fontSize: 11,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: '#848179',
-            fontWeight: 600,
-            marginBottom: 8,
-          }}
-        >
-          Headline Partner (Body locked to {scenario.bodyFontName})
+      {/* Typewolf Forest-Emerald Cultural Journal Band */}
+      <div
+        style={{
+          background: '#132A22',
+          color: '#F6F2E9',
+          padding: '22px 26px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}
+      >
+        <div style={{ fontSize: 11.5, fontWeight: 600, color: '#A3C4B5' }}>
+          Select Headline Partner (Body locked to {scenario.bodyFontName})
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: 8 }}>
           {scenario.candidates.map((cand) => {
@@ -105,21 +107,22 @@ export const L05FontPairing: React.FC<ExerciseComponentProps> = ({
                 disabled={submitted}
                 onClick={() => setState((s) => ({ ...s, selectedId: cand.id }))}
                 style={{
-                  minHeight: 46,
+                  minHeight: 48,
                   padding: '8px 12px',
-                  borderRadius: 10,
-                  border: active ? '2px solid #141413' : '1px solid rgba(20,20,19,0.16)',
-                  background: active ? '#F7F6F2' : '#FFFFFF',
+                  borderRadius: 6,
+                  border: active ? '2px solid #F6F2E9' : '1px solid rgba(246,242,233,0.2)',
+                  background: active ? 'rgba(246,242,233,0.14)' : 'rgba(0,0,0,0.18)',
+                  color: '#F6F2E9',
                   textAlign: 'left',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 2,
                 }}
               >
-                <span style={{ fontFamily: cand.cssFamily, fontSize: 15, fontWeight: 600 }}>
+                <span style={{ fontFamily: cand.cssFamily, fontSize: 15.5, fontWeight: 600 }}>
                   {cand.name}
                 </span>
-                <span style={{ fontSize: 10.5, color: '#848179' }}>
+                <span style={{ fontSize: 11, color: '#A3C4B5' }}>
                   {cand.classification === 'serif' ? 'Editorial Serif' : 'Sans-Serif'}
                 </span>
               </button>
@@ -129,58 +132,59 @@ export const L05FontPairing: React.FC<ExerciseComponentProps> = ({
       </div>
 
       {/* Live Specimen Spread */}
-      <div style={{ paddingTop: 12, borderTop: '1px solid rgba(20,20,19,0.1)' }}>
-        <div style={{ fontSize: 10.5, letterSpacing: '0.08em', color: '#848179', fontWeight: 600 }}>
-          {scenario.brief.eyebrow}
+      <div style={{ padding: '24px 26px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div>
+          <div style={{ fontSize: 11.5, color: '#6E7369', fontWeight: 600 }}>
+            {scenario.brief.client}
+          </div>
+          <h3
+            style={{
+              fontFamily: selectedFace.cssFamily,
+              fontSize: h1Size,
+              lineHeight: 1.15,
+              marginTop: 6,
+              fontWeight: 600,
+            }}
+          >
+            {scenario.brief.headline}
+          </h3>
+          <h4
+            style={{
+              fontFamily: selectedFace.cssFamily,
+              fontSize: h2Size,
+              lineHeight: 1.25,
+              marginTop: 8,
+              color: '#464A42',
+              fontWeight: 500,
+            }}
+          >
+            {scenario.brief.subhead}
+          </h4>
+          <p
+            style={{
+              fontFamily: scenario.bodyCssFamily,
+              fontSize: bodySize,
+              lineHeight: 1.55,
+              marginTop: 12,
+              color: '#2B2E28',
+            }}
+          >
+            {scenario.brief.body}
+          </p>
         </div>
-        <h3
-          style={{
-            fontFamily: selectedFace.cssFamily,
-            fontSize: h1Size,
-            lineHeight: 1.15,
-            marginTop: 6,
-            fontWeight: 600,
-          }}
-        >
-          {scenario.brief.headline}
-        </h3>
-        <h4
-          style={{
-            fontFamily: selectedFace.cssFamily,
-            fontSize: h2Size,
-            lineHeight: 1.25,
-            marginTop: 8,
-            color: '#4A4843',
-            fontWeight: 500,
-          }}
-        >
-          {scenario.brief.subhead}
-        </h4>
-        <p
-          style={{
-            fontFamily: scenario.bodyCssFamily,
-            fontSize: bodySize,
-            lineHeight: 1.55,
-            marginTop: 12,
-            color: '#2B2A28',
-          }}
-        >
-          {scenario.brief.body}
-        </p>
-      </div>
 
       {/* Interactive "handgloves" x-height Comparator */}
       <div
         style={{
           padding: '16px 20px',
-          borderRadius: 12,
-          background: '#FAF9F5',
-          border: '1px solid rgba(20,20,19,0.1)',
+          borderRadius: 8,
+          background: '#EFECE3',
+          border: '1px solid rgba(23, 25, 22, 0.1)',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        <div style={{ fontSize: 10.5, fontWeight: 600, color: '#848179', marginBottom: 6 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: '#6E7369', marginBottom: 6 }}>
           “handgloves” x-Height Comparator
         </div>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'baseline', gap: 2, lineHeight: 1 }}>
@@ -201,23 +205,24 @@ export const L05FontPairing: React.FC<ExerciseComponentProps> = ({
                   left: 0,
                   right: 0,
                   bottom: 30,
-                  borderBottom: '1.5px dashed #216E4E',
+                  borderBottom: '1.5px dashed #157347',
                 }}
               />
             </>
           )}
-          <span style={{ fontFamily: selectedFace.cssFamily, fontSize: 42, color: '#141413' }}>
+          <span style={{ fontFamily: selectedFace.cssFamily, fontSize: 42, color: '#171916' }}>
             hand
           </span>
-          <span style={{ fontFamily: scenario.bodyCssFamily, fontSize: 42, color: '#D94526' }}>
+          <span style={{ fontFamily: scenario.bodyCssFamily, fontSize: 42, color: '#132A22' }}>
             gloves
           </span>
         </div>
         {showGuides && (
-          <div className="tabular" style={{ fontSize: 11, color: '#216E4E', marginTop: 8, fontWeight: 600 }}>
+          <div className="tabular" style={{ fontSize: 11, color: '#157347', marginTop: 8, fontWeight: 600 }}>
             x-height ratio: {selectedFace.xHeightRatio.toFixed(2)}× · Scale: {activeState.scaleRatio.toFixed(2)}× (target 1.25×)
           </div>
         )}
+      </div>
       </div>
     </div>
   );
@@ -238,6 +243,8 @@ export const L05FontPairing: React.FC<ExerciseComponentProps> = ({
   return (
     <StudioFrame
       prompt="Pick a headline partner that contrasts clearly with Inter without clashing in x-height, then tune the modular type scale in Fine Sliders."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

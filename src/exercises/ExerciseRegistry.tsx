@@ -1,4 +1,5 @@
 import React from 'react';
+import { getLessonById } from '../data/lessons';
 import { ExerciseComponentProps, L01WhiteSpace } from './L01WhiteSpace';
 import { L02Hierarchy } from './L02Hierarchy';
 import { L03Grids } from './L03Grids';
@@ -33,6 +34,7 @@ export const ExerciseViewport: React.FC<ExerciseComponentProps & { lessonId: str
   lessonId,
   ...props
 }) => {
+  const lesson = getLessonById(lessonId);
   const Comp = REGISTRY[lessonId] ?? L01WhiteSpace;
-  return <Comp {...props} />;
+  return <Comp {...props} styleWorld={lesson.styleWorld} styleRef={lesson.styleRef} />;
 };

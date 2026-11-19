@@ -8,6 +8,8 @@ import { generateL11, IconPoint, L11State, scoreL11 } from './scoring/challengeS
 
 export const L11Iconography: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -95,21 +97,22 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
-        padding: 26,
+        background: '#141923',
+        color: '#E2E8F0',
+        borderRadius: 12,
+        border: '1px solid rgba(148, 163, 184, 0.18)',
+        padding: 24,
         boxShadow: 'var(--shadow-artboard)',
         display: 'grid',
-        gridTemplateColumns: 'minmax(220px, 288px) 1fr',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
         gap: 24,
         alignItems: 'center',
       }}
     >
-      {/* 24x24 Magnified Pixel Artboard */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ fontSize: 11.5, fontWeight: 600, color: '#585650' }}>
-          24×24 Grid · {scenario.iconName}
+      {/* 24x24 Magnified Pixel CAD Artboard */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 290 }}>
+        <div className="tabular" style={{ fontSize: 11.5, fontWeight: 600, color: '#94A3B8' }}>
+          24×24 CAD Matrix · {scenario.iconName}
         </div>
         <svg
           ref={svgRef}
@@ -117,17 +120,17 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
           width="100%"
           style={{
             aspectRatio: '1 / 1',
-            background: '#FAF9F5',
-            borderRadius: 10,
-            border: '1px solid rgba(20,20,19,0.16)',
+            background: '#0D1119',
+            borderRadius: 8,
+            border: '1px solid rgba(96, 165, 250, 0.28)',
             touchAction: 'none',
           }}
         >
           {/* 24x24 Grid Lines */}
           {Array.from({ length: 23 }).map((_, i) => (
             <React.Fragment key={i}>
-              <line x1={i + 1} y1={0} x2={i + 1} y2={24} stroke="rgba(20,20,19,0.08)" strokeWidth={0.05} />
-              <line x1={0} y1={i + 1} x2={24} y2={i + 1} stroke="rgba(20,20,19,0.08)" strokeWidth={0.05} />
+              <line x1={i + 1} y1={0} x2={i + 1} y2={24} stroke="rgba(148,163,184,0.14)" strokeWidth={0.05} />
+              <line x1={0} y1={i + 1} x2={24} y2={i + 1} stroke="rgba(148,163,184,0.14)" strokeWidth={0.05} />
             </React.Fragment>
           ))}
 
@@ -138,15 +141,15 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
             width={20}
             height={20}
             fill="none"
-            stroke="#D94526"
-            strokeOpacity={0.35}
-            strokeWidth={0.08}
+            stroke="#60A5FA"
+            strokeOpacity={0.55}
+            strokeWidth={0.09}
             strokeDasharray="0.4 0.3"
           />
 
           {/* Keyline Templates on Reveal */}
           {showGuides && (
-            <g stroke="#216E4E" strokeOpacity={0.45} strokeWidth={0.12} fill="none">
+            <g stroke="#4ADE80" strokeOpacity={0.55} strokeWidth={0.12} fill="none">
               <circle cx={12} cy={12} r={9.5} />
               <rect x={3} y={3} width={18} height={18} rx={2} />
             </g>
@@ -157,7 +160,7 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
             <polygon
               points={toPoly(scenario.targetPoints)}
               fill="none"
-              stroke="#216E4E"
+              stroke="#4ADE80"
               strokeWidth={scenario.targetStroke}
               strokeOpacity={0.42}
               strokeLinejoin="round"
@@ -168,7 +171,7 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
           <polygon
             points={toPoly(activePoints)}
             fill="none"
-            stroke="#141413"
+            stroke="#F8FAFC"
             strokeWidth={activeStroke}
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -182,8 +185,8 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
                 cx={pt.x}
                 cy={pt.y}
                 r={0.85}
-                fill={selectedPt === idx ? '#D94526' : '#FFFFFF'}
-                stroke="#141413"
+                fill={selectedPt === idx ? '#60A5FA' : '#0D1119'}
+                stroke="#F8FAFC"
                 strokeWidth={0.22}
                 style={{ cursor: 'grab' }}
                 onPointerDown={(e) => {
@@ -201,11 +204,11 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
         </svg>
       </div>
 
-      {/* Actual 1:1 Scale Density Comparison Strip */}
+      {/* Actual 1:1 Scale Density Comparison Toolbar */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div>
-          <div style={{ fontSize: 11.5, fontWeight: 600, color: '#585650', marginBottom: 8 }}>
-            100% Live Scale Comparison (24×24 px)
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#94A3B8', marginBottom: 8 }}>
+            100% Toolbar Parity Check (24×24 px)
           </div>
           <div
             style={{
@@ -213,33 +216,34 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
               alignItems: 'center',
               gap: 18,
               padding: '14px 20px',
-              borderRadius: 12,
-              background: '#FAF9F5',
-              border: '1px solid rgba(20,20,19,0.12)',
+              borderRadius: 10,
+              background: '#FFFFFF',
+              color: '#111317',
+              border: '1px solid rgba(255,255,255,0.2)',
             }}
           >
             {/* Reference Circle */}
             <svg width="24" height="24" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9" fill="none" stroke="#141413" strokeWidth={scenario.targetStroke} />
+              <circle cx="12" cy="12" r="9" fill="none" stroke="#111317" strokeWidth={scenario.targetStroke} />
             </svg>
             {/* User Icon at 1x */}
             <svg width="24" height="24" viewBox="0 0 24 24">
               <polygon
                 points={toPoly(activePoints)}
                 fill="none"
-                stroke="#141413"
+                stroke="#111317"
                 strokeWidth={activeStroke}
                 strokeLinejoin="round"
               />
             </svg>
             {/* Reference Square */}
             <svg width="24" height="24" viewBox="0 0 24 24">
-              <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="#141413" strokeWidth={scenario.targetStroke} />
+              <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="#111317" strokeWidth={scenario.targetStroke} />
             </svg>
           </div>
         </div>
 
-        <div className="tabular" style={{ fontSize: 12.5, color: '#585650', lineHeight: 1.5 }}>
+        <div className="tabular" style={{ fontSize: 12.5, color: '#94A3B8', lineHeight: 1.5 }}>
           Active Vertex #{selectedPt + 1}: ({state.points[selectedPt]?.x.toFixed(1)},{' '}
           {state.points[selectedPt]?.y.toFixed(1)})
         </div>
@@ -291,7 +295,9 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
 
   return (
     <StudioFrame
-      prompt="Drag off-grid vector handles onto crisp integer pixel intersections inside the 2 px red safe margin, and dial stroke weight in Fine Sliders to match neighboring icons."
+      prompt="Drag off-grid vector handles onto crisp integer pixel intersections inside the 2 px live margin, and dial stroke weight in Fine Sliders to match neighboring icons."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

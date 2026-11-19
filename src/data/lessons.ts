@@ -29,7 +29,9 @@ export const LESSONS: LessonDefinition[] = [
     title: 'White Space & Trapped Space',
     shortTitle: 'White Space',
     subtitle: 'Active breathing room vs. enclosed hollow voids',
-    ruleOfThumb: 'Channel empty space outward to the perimeter—strip needless boxes that trap awkward voids inside.',
+    styleWorld: 'Kinfolk Gallery Monograph',
+    styleRef: 'Inspired by Kinfolk & Aesop warm linen editorial spacing',
+    ruleOfThumb: 'Channel empty space outward to the perimeter: strip needless boxes that trap awkward voids inside.',
     summary:
       'Beginners try to fill every corner or draw decorative boxes around groups, creating trapped white pockets that draw the eye like holes. Strip redundant borders and let passive margins protect legibility while active space frames your focal element.',
     availableLenses: ['blur', 'flip'],
@@ -41,6 +43,8 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Visual Hierarchy & Proximity',
     shortTitle: 'Hierarchy & Proximity',
     subtitle: 'Inside vs. outside spacing and one unmistakable first read',
+    styleWorld: 'Precision SaaS Release Sheet',
+    styleRef: 'Inspired by Linear & Stripe crisp software product announcements',
     ruleOfThumb: 'Use roughly 2× more space between groups than inside them, and pull headings closer to what they introduce.',
     summary:
       'Equal top and bottom margins leave headings floating in no-man’s-land, while repeating your brand accent color everywhere dilutes focus. Establish one clear entry point, tighten heading-to-body spacing, and reserve bright accent color strictly for the primary action.',
@@ -53,6 +57,8 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Grids, Margins & Gutters',
     shortTitle: 'Grids & Gutters',
     subtitle: 'Column spans, empty gutters, and 8 px spatial tokens',
+    styleWorld: 'Swiss International Poster',
+    styleRef: 'Inspired by Josef Müller-Brockmann modular Zurich exhibition grids',
     ruleOfThumb: 'Span columns intentionally, keep gutters completely empty, and quantize padding to 8 px steps.',
     summary:
       'A grid breaks the moment content bleeds into column gutters or mixes arbitrary 13 px and 21 px spacing with tokenized gaps. Snap cards crisply from column edge to column edge so gutters stay open negative-space channels.',
@@ -65,6 +71,8 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Macro-Typography & Rhythm',
     shortTitle: 'Macro-Typography',
     subtitle: 'Screen body size, 45–75 char measure, and web leading',
+    styleWorld: 'Stripe Press Essay Folio',
+    styleRef: 'Inspired by Stripe Press long-form book & digital reading spreads',
     ruleOfThumb: 'Set screen body text at 16 px+, 45–75 characters wide, and 140–165% line height (tighter 1.1–1.25× on large headlines).',
     summary:
       'Self-taught designers style headlines first and leave body copy too small, too wide, or choked by print-tight 120% leading. Tune measure, size, and leading together so the eye glides smoothly from the end of one line back to the start of the next.',
@@ -77,6 +85,8 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Font Pairing & Type Scales',
     shortTitle: 'Font Pairing',
     subtitle: 'Contrasting classes, matched x-heights, and modular scales',
+    styleWorld: 'Typewolf Cultural Journal',
+    styleRef: 'Inspired by Typewolf curated serif-sans editorial pairings',
     ruleOfThumb: 'Pair clearly contrasting styles (serif + sans) with x-height ratios near 0.9–1.1, stepped along a 1.25 scale.',
     summary:
       'Combining two overly similar geometric sans-serifs looks like a broken fallback font rather than an intentional system. Pick your readable body face first, verify x-height harmony via “handgloves”, and lock H1–H3 to a deliberate scale.',
@@ -89,6 +99,8 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Paragraph Flow & Rag Craft',
     shortTitle: 'Paragraph Flow',
     subtitle: 'Eliminating runts, rivers, and staircase rags',
+    styleWorld: 'Broadsheet Print Column',
+    styleRef: 'Inspired by Financial Times & New Yorker column typesetting',
     ruleOfThumb: 'Bind orphan final words with non-breaking spaces and switch narrow justified columns to ragged-right or hyphenated flow.',
     summary:
       'Stranded single-word runts mimic awkward blank lines, while narrow justified columns carve distracting white rivers down through prose. Sculpt gentle in-and-out rags and bind trailing short words so paragraphs finish with quiet poise.',
@@ -101,7 +113,9 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Kerning, Tracking & Hanging Margins',
     shortTitle: 'Micro-Typography',
     subtitle: 'Pairwise negative space, ALL CAPS tracking, and optical overhang',
-    ruleOfThumb: 'Never letterspace lowercase; track ALL CAPS +5–12%, tighten large titles −3–5%, and hang opening quotes outside the margin.',
+    styleWorld: 'Atelier Specimen Plaque',
+    styleRef: 'Inspired by luxury architectural monograms & Kern Type drills',
+    ruleOfThumb: 'Never letterspace lowercase; track ALL CAPS +5–12%, tighten large titles -3–5%, and hang opening quotes outside the margin.',
     summary:
       'Overhanging diagonals like AV, To, and WA punch holes in display words unless balanced visually by equalizing area between glyphs. Keep Metrics active for prose, track uppercase headers slightly open, and push opening punctuation cleanly into the left margin.',
     availableLenses: ['blur', 'flip'],
@@ -113,6 +127,8 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Character Hygiene & OpenType Numerals',
     shortTitle: 'Character Hygiene',
     subtitle: 'Smart quotes, true primes, en/em dashes, and figure styles',
+    styleWorld: 'Braun & Teenage Engineering Spec',
+    styleRef: 'Inspired by Dieter Rams technical datasheets & OP-1 telemetry tables',
     ruleOfThumb: 'Use curly quotes in prose, straight primes (′ ″) for measurements, en dashes for ranges, and tabular lining figures in tables.',
     summary:
       'Typewriter straight quotes, double spaces, hyphenated date ranges, and backward ’90s apostrophes silently undermine polished typography. Pair typographically accurate punctuation with proportional oldstyle figures in prose and tabular lining figures in data tables.',
@@ -125,7 +141,9 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Optical Alignment & Concentric Radii',
     shortTitle: 'Optical Geometry',
     subtitle: 'Visual mass centroids and nested corner mathematics',
-    ruleOfThumb: 'Nudge asymmetrical icons opposite their heavy side, and set inner corner radius = max(0 px, outer − padding).',
+    styleWorld: 'Anodized Media Hardware',
+    styleRef: 'Inspired by Apple HIG tactile controls & physical audio hardware',
+    ruleOfThumb: 'Nudge asymmetrical icons opposite their heavy side, and set inner corner radius = max(0 px, outer - padding).',
     summary:
       'Bounding boxes lie: a centered play triangle looks pushed left, and sharing a 16 px radius on a card and its padded image produces pinched outer corners. Trust your squinted eye over geometric centerlines and derive nested corner radii mathematically.',
     availableLenses: ['blur', 'flip'],
@@ -137,7 +155,9 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Perceptual Color: OKLCH, APCA & Dark Mode',
     shortTitle: 'Perceptual Color',
     subtitle: 'Perceived lightness ramps, APCA Lc contrast, and halation',
-    ruleOfThumb: 'Build ramps in OKLCH, target APCA Lc 75+ for body text, separate vibrating hues, and elevate Dark Mode off #121212–#1E1F22.',
+    styleWorld: 'Munsell Colorimeter Lab',
+    styleRef: 'Inspired by scientific OKLCH perceptual colorimetry & WCAG 3 APCA',
+    ruleOfThumb: 'Build ramps in OKLCH, target APCA Lc 75+ for body text, separate vibrating hues, and elevate Dark Mode off #14161A.',
     summary:
       'HSL pretends bright yellow and deep blue share 50% lightness, while WCAG 2 passes strained neon pairings and pure #000000 dark mode triggers astigmatic halation. Work in OKLCH, verify perceptual APCA Lc contrast, and desaturate dark-ground accents.',
     availableLenses: ['grayscale', 'blur'],
@@ -149,6 +169,8 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Iconography Grids & Visual Weight',
     shortTitle: 'Iconography',
     subtitle: '24×24 pixel snapping, keylines, and stroke density parity',
+    styleWorld: 'Vector CAD Workbench',
+    styleRef: 'Inspired by Material keylines & precision pixel-grid icon systems',
     ruleOfThumb: 'Keep strokes centered on integer 24×24 pixels inside a 2 px safe border, and balance dense icons against a circle and square.',
     summary:
       'Fractional coordinates blur crisp edges at 1× scale, and packing intricate detail at 2 px stroke weight makes one icon look twice as heavy as its neighbors. Snap vertices to whole grid intersections inside keyline bounds and verify equal blob density under blur.',
@@ -161,7 +183,9 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Image Framing, Anatomy & Tangents',
     shortTitle: 'Image Framing',
     subtitle: 'Mid-limb crops, upper-third eye alignment, and zero edge tangents',
-    ruleOfThumb: 'Level the horizon first, align portrait eyes near the upper third, and crop mid-limb—never through joints or grazing a contour.',
+    styleWorld: 'Magnum Film Contact Sheet',
+    styleRef: 'Inspired by editorial darkroom contact sheets & classic portrait rules',
+    ruleOfThumb: 'Level the horizon first, align portrait eyes near the upper third, and crop mid-limb rather than through joints or grazing a contour.',
     summary:
       'Arbitrary frame crops amputate elbows, knees, and wrists or pinch heads right against the upper border. Level tilted horizons, keep clean breathing headroom and gaze lead, and avoid edge-kissing tangents where shapes lightly touch the crop boundary.',
     availableLenses: ['flip', 'grayscale'],
@@ -173,6 +197,8 @@ export const LESSONS: LessonDefinition[] = [
     title: 'Print Production & Prepress Hygiene',
     shortTitle: 'Print Prepress',
     subtitle: '3 mm bleed/safe zones, 100% K small type, and vector logos',
+    styleWorld: 'Heidelberg Offset Press Proof',
+    styleRef: 'Inspired by commercial lithographic proof sheets & CMYK color bars',
     ruleOfThumb: 'Extend edge art 3 mm past trim, keep copy 3–5 mm inside trim, use 100% K (not rich black) for small text, and avoid 72 DPI logos.',
     summary:
       'Industrial guillotines drift ±0.5 mm on every stack, leaving stark white slivers on un-bled edges and slicing borders placed too close to trim. Extend full-bleed imagery outward, guard safe text margins, restrict small black type to single-plate K, and place vector marks.',

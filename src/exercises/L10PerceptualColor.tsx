@@ -9,6 +9,8 @@ import { generateL10, L10State, scoreL10 } from './scoring/challengeScoring';
 
 export const L10PerceptualColor: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -107,16 +109,30 @@ export const L10PerceptualColor: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
-        padding: 26,
+        background: '#DCDDE0',
+        color: '#141518',
+        borderRadius: 10,
+        border: '1px solid rgba(20, 21, 24, 0.16)',
+        padding: 24,
         boxShadow: 'var(--shadow-artboard)',
         display: 'flex',
         flexDirection: 'column',
         gap: 18,
       }}
     >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: 11.5,
+          fontWeight: 600,
+          color: '#4B4E57',
+        }}
+      >
+        <span>Munsell Neutral-50 Surround (Colorimetric Bench)</span>
+        <span className="tabular">OKLCH Hue {scenario.targetHue}°</span>
+      </div>
       {/* Specimen Preview Card */}
       {scenario.mode === 'oklch-match' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
@@ -196,7 +212,7 @@ export const L10PerceptualColor: React.FC<ExerciseComponentProps> = ({
             Calm Reading Without Astigmatic Halation
           </h3>
           <p style={{ fontSize: 14.5, lineHeight: 1.5, opacity: 0.85, marginTop: 6 }}>
-            Avoid pure #000000 grounds and radioactive accents—raise base surface lightness slightly and soften chroma.
+            Avoid pure #000000 grounds and radioactive accents: raise base surface lightness slightly and soften chroma.
           </p>
           <div
             style={{
@@ -327,6 +343,8 @@ export const L10PerceptualColor: React.FC<ExerciseComponentProps> = ({
             ? 'Adjust lightness and chroma on the OKLCH plane until the 16 px body copy reads effortlessly above APCA Lc 75.'
             : 'Calibrate this Dark Mode card: raise the pure black ground in Fine Sliders to eliminate halation and desaturate the glowing accent.'
       }
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

@@ -49,7 +49,7 @@ export const HEADLINE_CANDIDATES: FontCandidate[] = [
     classification: 'sans',
     xHeightRatio: 0.99,
     isNearMiss: true,
-    note: 'Too structurally similar to the body sans—reads like an accidental font mismatch.',
+    note: 'Too structurally similar to the body sans; reads like an accidental font mismatch.',
   },
 ];
 
@@ -97,7 +97,7 @@ export function scoreL05(state: L05State, scenario: L05Scenario): ExerciseResult
     diagnosis =
       `${chosen.name} looks too close to ${scenario.bodyFontName}, and the flat ${state.scaleRatio.toFixed(2)}× scale blurs heading hierarchy.`;
   } else if (chosen.isNearMiss) {
-    diagnosis = `${chosen.name} shares the same sans-serif skeleton as ${scenario.bodyFontName}—pair contrasting classes (serif + sans) instead.`;
+    diagnosis = `${chosen.name} shares the same sans-serif skeleton as ${scenario.bodyFontName}; pair contrasting classes (serif + sans) instead.`;
   } else if (scaleErr > 0.07) {
     diagnosis = `${chosen.name} contrasts well, though stepping headings near a 1.25× Major Third ratio gives clearer rhythm.`;
   }
@@ -188,7 +188,7 @@ export function scoreL06(state: L06State, scenario: L06Scenario): ExerciseResult
     problems.push('narrow justified text carves white rivers without hyphenation or ragged-right alignment');
   }
   if (!state.boundLastPair) {
-    problems.push('the final word still risks stranding as a runt—tap the closing word pair to bind it with &nbsp;');
+    problems.push('the final word still risks stranding as a runt: tap the closing word pair to bind it with &nbsp;');
   }
   if (state.widthPx < widthIdealMin) {
     problems.push(`at ${state.widthPx} px the column is too tight for an even rag (${scenario.targetWidthPx} px works smoothly)`);
@@ -305,7 +305,7 @@ export function scoreL07(state: L07State, scenario: L07Scenario): ExerciseResult
     const diagnosis =
       avgErr <= 2.5
         ? `Even negative volume between every letterform gives ${scenario.word} crisp optical poise.`
-        : `The ${pairLabel} pair still sits ${state.offsets[worstIdx + 1] > scenario.targetOffsets[worstIdx + 1] ? 'too loose' : 'too tight'} by ${Math.round(maxErr)} px—equalize the white area between strokes.`;
+        : `The ${pairLabel} pair still sits ${state.offsets[worstIdx + 1] > scenario.targetOffsets[worstIdx + 1] ? 'too loose' : 'too tight'} by ${Math.round(maxErr)} px; equalize the white area between strokes.`;
 
     return {
       score,

@@ -8,6 +8,8 @@ import { CropRect, generateL12, L12State, scoreL12 } from './scoring/challengeSc
 
 export const L12ImageFraming: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -104,29 +106,31 @@ export const L12ImageFraming: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
-        padding: 20,
+        background: '#1A1918',
+        color: '#E8E4DC',
+        borderRadius: 6,
+        border: '1px solid rgba(255,255,255,0.12)',
+        padding: 22,
         boxShadow: 'var(--shadow-artboard)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 12,
+        gap: 14,
       }}
     >
       <div
+        className="tabular"
         style={{
           width: '100%',
           display: 'flex',
           justifyContent: 'space-between',
-          fontSize: 12,
-          color: '#585650',
+          fontSize: 11.5,
+          color: '#B5AEA0',
           fontWeight: 500,
         }}
       >
-        <span>{scenario.photo.title}</span>
-        <span>Target Aspect: {scenario.aspectLabel}</span>
+        <span>35MM CONTACT · {scenario.photo.title}</span>
+        <span>FRAME: {scenario.aspectLabel}</span>
       </div>
 
       {/* Photo Stage */}
@@ -315,6 +319,8 @@ export const L12ImageFraming: React.FC<ExerciseComponentProps> = ({
   return (
     <StudioFrame
       prompt="Drag the frame and bottom-right resize dot to eliminate joint amputations and edge tangents, preserve breathing headroom, and align eyes along the upper third."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

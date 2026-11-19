@@ -9,6 +9,8 @@ import { generateL02, L02State, scoreL02 } from './scoring/foundationScoring';
 
 export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -104,12 +106,13 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        maxWidth: 520,
+        maxWidth: 540,
         margin: '0 auto',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
-        padding: 32,
+        background: '#0E1117',
+        color: '#F1F5F9',
+        borderRadius: 12,
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        padding: 30,
         boxShadow: 'var(--shadow-artboard)',
         position: 'relative',
       }}
@@ -120,8 +123,8 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
             position: 'absolute',
             inset: 0,
             zIndex: 25,
-            background: 'rgba(247, 246, 242, 0.96)',
-            borderRadius: 16,
+            background: 'rgba(14, 17, 23, 0.96)',
+            borderRadius: 12,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -131,10 +134,10 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
             textAlign: 'center',
           }}
         >
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 20 }}>
+          <span style={{ fontFamily: 'var(--font-grotesk)', fontSize: 20, fontWeight: 600 }}>
             2-Second Recall Check
           </span>
-          <p style={{ fontSize: 13.5, color: '#585650', maxWidth: '34ch' }}>
+          <p style={{ fontSize: 13.5, color: '#94A3B8', maxWidth: '34ch' }}>
             What registered first? If your eye bounced between the badge and button, strip the competing accent and widen section spacing.
           </p>
           <button
@@ -143,9 +146,9 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
             style={{
               marginTop: 4,
               padding: '9px 18px',
-              borderRadius: 999,
-              background: '#141413',
-              color: '#FFFFFF',
+              borderRadius: 8,
+              background: '#F8FAFC',
+              color: '#0E1117',
               fontSize: 13,
               fontWeight: 600,
             }}
@@ -165,21 +168,21 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
           alignItems: 'center',
           gap: 6,
           padding: '5px 11px',
-          borderRadius: 999,
-          fontSize: 10.5,
-          letterSpacing: '0.08em',
-          fontWeight: 700,
-          background: viewState.badgeAccent ? '#D94526' : '#EFEDE6',
-          color: viewState.badgeAccent ? '#FFFFFF' : '#585650',
+          borderRadius: 6,
+          fontSize: 11.5,
+          fontWeight: 600,
+          background: viewState.badgeAccent ? '#3B82F6' : 'rgba(255, 255, 255, 0.08)',
+          color: viewState.badgeAccent ? '#FFFFFF' : '#94A3B8',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
         }}
       >
-        <span>{scenario.brief.eyebrow}</span>
-        {!submitted && viewState.badgeAccent && <span style={{ opacity: 0.85 }}>· Tap to neutralize</span>}
+        <span>{scenario.brief.client}</span>
+        {!submitted && viewState.badgeAccent && <span style={{ opacity: 0.85 }}>(Tap to mute)</span>}
       </button>
 
       {/* Section 1 */}
       <div style={{ marginTop: 18 }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: 1.15, fontWeight: 500 }}>
+        <h3 style={{ fontFamily: 'var(--font-grotesk)', fontSize: 25, lineHeight: 1.15, fontWeight: 600, letterSpacing: '-0.02em' }}>
           {scenario.brief.headline}
         </h3>
         <div
@@ -191,12 +194,12 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
             marginRight: -8,
             borderRadius: 6,
             cursor: submitted ? 'default' : 'ns-resize',
-            background: !submitted ? 'rgba(20, 20, 19, 0.025)' : 'transparent',
-            border: !submitted ? '1px dashed rgba(20, 20, 19, 0.14)' : 'none',
+            background: !submitted ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
+            border: !submitted ? '1px dashed rgba(255, 255, 255, 0.2)' : 'none',
             position: 'relative',
           }}
         >
-          <p style={{ fontSize: 14.5, lineHeight: 1.5, color: '#3F3D39' }}>
+          <p style={{ fontSize: 14.5, lineHeight: 1.5, color: '#CBD5E1' }}>
             {scenario.brief.subhead}
           </p>
           {showGuides && (
@@ -210,7 +213,7 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
                 fontWeight: 600,
                 padding: '1px 6px',
                 borderRadius: 4,
-                background: '#216E4E',
+                background: '#157347',
                 color: '#FFFFFF',
               }}
             >
@@ -225,8 +228,8 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
         {...sectionDrag.bind}
         style={{
           marginTop: viewState.sectionGap,
-          paddingTop: 8,
-          borderTop: '1px solid rgba(20, 20, 19, 0.1)',
+          paddingTop: 10,
+          borderTop: '1px solid rgba(255, 255, 255, 0.12)',
           cursor: submitted ? 'default' : 'ns-resize',
           position: 'relative',
         }}
@@ -242,26 +245,26 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
               fontWeight: 600,
               padding: '1px 6px',
               borderRadius: 4,
-              background: ratio >= 2 ? '#216E4E' : '#D94526',
+              background: ratio >= 2 ? '#157347' : '#C83226',
               color: '#FFFFFF',
             }}
           >
             Outside: {viewState.sectionGap}px ({ratio.toFixed(1)}×)
           </span>
         )}
-        <h4 style={{ fontSize: 15, fontWeight: 600 }}>Exhibition Details & Schedule</h4>
-        <p style={{ fontSize: 13.5, lineHeight: 1.5, color: '#585650', marginTop: 6 }}>
+        <h4 style={{ fontSize: 15, fontWeight: 600, color: '#F8FAFC' }}>Release Notes & Schedule</h4>
+        <p style={{ fontSize: 13.5, lineHeight: 1.5, color: '#94A3B8', marginTop: 6 }}>
           {scenario.brief.body}
         </p>
       </div>
 
       {/* Primary Action */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 24 }}>
         <span
           style={{
-            padding: '11px 20px',
-            borderRadius: 999,
-            background: '#D94526',
+            padding: '10px 18px',
+            borderRadius: 8,
+            background: '#3B82F6',
             color: '#FFFFFF',
             fontSize: 13.5,
             fontWeight: 600,
@@ -269,7 +272,7 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
         >
           {scenario.brief.ctaLabel}
         </span>
-        <span style={{ fontSize: 13, color: '#585650', fontWeight: 500 }}>
+        <span style={{ fontSize: 13, color: '#94A3B8', fontWeight: 500 }}>
           {scenario.brief.secondaryLabel}
         </span>
       </div>
@@ -337,7 +340,9 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
 
   return (
     <StudioFrame
-      prompt="Bind the heading to its copy (drag vertically), separate the second section cleanly (~2× gap), and tap the loud eyebrow badge so only the primary CTA wears the accent hue."
+      prompt="Bind the heading to its copy (drag vertically), separate the second section cleanly (~2× gap), and tap the loud tag so only the primary action carries accent blue."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

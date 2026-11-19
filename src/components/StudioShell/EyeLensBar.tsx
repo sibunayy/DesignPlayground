@@ -1,6 +1,6 @@
 import React from 'react';
-import { Contrast, Eye, FlipHorizontal2 } from 'lucide-react';
 import { EyeLens } from '../../engine/types';
+import { AchromatopsiaIcon, MirrorAxisIcon, SquintEyeIcon } from '../Icons/CraftIcons';
 
 interface EyeLensBarProps {
   availableLenses: EyeLens[];
@@ -9,9 +9,9 @@ interface EyeLensBarProps {
 }
 
 const LENS_META: Record<EyeLens, { label: string; icon: React.ReactNode }> = {
-  blur: { label: 'Squint Blur', icon: <Eye size={14} strokeWidth={1.75} /> },
-  grayscale: { label: 'Grayscale', icon: <Contrast size={14} strokeWidth={1.75} /> },
-  flip: { label: 'Flip H', icon: <FlipHorizontal2 size={14} strokeWidth={1.75} /> },
+  blur: { label: 'Squint Blur', icon: <SquintEyeIcon size={16} /> },
+  grayscale: { label: 'Grayscale', icon: <AchromatopsiaIcon size={16} /> },
+  flip: { label: 'Flip H', icon: <MirrorAxisIcon size={16} /> },
 };
 
 export const EyeLensBar: React.FC<EyeLensBarProps> = ({
@@ -30,23 +30,21 @@ export const EyeLensBar: React.FC<EyeLensBarProps> = ({
         alignItems: 'center',
         gap: 4,
         padding: 4,
-        borderRadius: 999,
+        borderRadius: 10,
         background: 'var(--bg-surface)',
-        border: '1px solid var(--rule)',
-        boxShadow: 'var(--shadow-float)',
+        border: '1px solid var(--rule-strong)',
+        boxShadow: 'var(--shadow-tactile)',
       }}
     >
       <span
         style={{
           fontSize: 11,
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
           color: 'var(--ink-muted)',
-          padding: '0 8px 0 10px',
+          padding: '0 8px 0 8px',
           fontWeight: 600,
         }}
       >
-        Eye
+        Lenses
       </span>
       {availableLenses.map((lens) => {
         const active = activeLenses.has(lens);
@@ -61,14 +59,13 @@ export const EyeLensBar: React.FC<EyeLensBarProps> = ({
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
-              minHeight: 34,
+              minHeight: 36,
               padding: '0 12px',
-              borderRadius: 999,
+              borderRadius: 7,
               fontSize: 12.5,
-              fontWeight: 500,
+              fontWeight: active ? 600 : 500,
               background: active ? 'var(--ink-primary)' : 'transparent',
               color: active ? 'var(--bg-surface)' : 'var(--ink-secondary)',
-              transition: 'background 140ms ease, color 140ms ease',
             }}
           >
             {meta.icon}

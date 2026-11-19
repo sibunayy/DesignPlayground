@@ -4,6 +4,7 @@ import { LESSONS } from '../../data/lessons';
 import { dailySeedCode, SeededRng } from '../../engine/prng';
 import { ExerciseResult, EyeLens } from '../../engine/types';
 import { ExerciseViewport } from '../../exercises/ExerciseRegistry';
+import { LessonCraftIcon } from '../Icons/CraftIcons';
 import { TopBar } from '../StudioShell/TopBar';
 
 interface DailyMixRunnerProps {
@@ -87,7 +88,7 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
     return (
       <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
         <TopBar
-          dailyBadge={`Daily Mix · #${dailySeed}`}
+          dailyBadge={`Daily Mix #${dailySeed}`}
           onBack={onExit}
           theme={theme}
           onToggleTheme={onToggleTheme}
@@ -98,7 +99,7 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
         <main
           style={{
             flex: 1,
-            maxWidth: 640,
+            maxWidth: 660,
             width: '100%',
             margin: '0 auto',
             padding: '36px 22px',
@@ -107,10 +108,10 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
             gap: 24,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Award size={28} color="var(--accent)" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Award size={30} color="var(--accent)" aria-hidden="true" />
             <div>
-              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ink-muted)' }}>
+              <div style={{ fontSize: 12.5, color: 'var(--ink-muted)', fontWeight: 500 }}>
                 Daily Calibration Complete
               </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 500 }}>
@@ -123,7 +124,7 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--rule)',
-              borderRadius: 16,
+              borderRadius: 12,
               overflow: 'hidden',
             }}
           >
@@ -134,17 +135,21 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  gap: 12,
                   padding: '14px 18px',
                   borderTop: idx === 0 ? 'none' : '1px solid var(--rule)',
                 }}
               >
-                <div>
-                  <div style={{ fontSize: 14.5, fontWeight: 500 }}>{entry.title}</div>
-                  <div style={{ fontSize: 12.5, color: 'var(--ink-secondary)', marginTop: 2 }}>
-                    {entry.result.diagnosis}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <LessonCraftIcon lessonId={entry.lessonId} size={22} />
+                  <div>
+                    <div style={{ fontSize: 14.5, fontWeight: 600 }}>{entry.title}</div>
+                    <div style={{ fontSize: 12.5, color: 'var(--ink-secondary)', marginTop: 2 }}>
+                      {entry.result.diagnosis}
+                    </div>
                   </div>
                 </div>
-                <span className="tabular" style={{ fontSize: 16, fontWeight: 600, marginLeft: 12 }}>
+                <span className="tabular" style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)' }}>
                   {entry.result.score}
                 </span>
               </div>
@@ -161,14 +166,14 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
               alignItems: 'center',
               gap: 8,
               padding: '0 22px',
-              borderRadius: 999,
+              borderRadius: 8,
               background: 'var(--ink-primary)',
               color: 'var(--bg-surface)',
               fontSize: 14,
               fontWeight: 600,
             }}
           >
-            <Check size={16} />
+            <Check size={16} aria-hidden="true" />
             <span>Return to Studio Index</span>
           </button>
         </main>
@@ -189,7 +194,7 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
         onToggleRailSide={onToggleRailSide}
       />
 
-      {/* Quick Rule Hint Strip */}
+      {/* Calibration Progress Strip + Quick Studio Rule Hint */}
       <div
         style={{
           padding: '8px max(20px, var(--safe-right)) 8px max(20px, var(--safe-left))',
@@ -199,23 +204,45 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 12,
+          flexWrap: 'wrap',
         }}
       >
-        <button
-          type="button"
-          onClick={() => setShowHint((h) => !h)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 12.5,
-            color: 'var(--ink-secondary)',
-            fontWeight: 500,
-          }}
-        >
-          <Lightbulb size={14} color="var(--accent)" />
-          <span>{showHint ? current.lesson.ruleOfThumb : 'Tap for quick studio rule hint'}</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 4 }} aria-hidden="true">
+            {drills.map((d, i) => (
+              <span
+                key={d.lesson.id}
+                style={{
+                  width: 18,
+                  height: 5,
+                  borderRadius: 2,
+                  background:
+                    i < stepIdx
+                      ? 'var(--ok)'
+                      : i === stepIdx
+                        ? 'var(--accent)'
+                        : 'var(--rule-strong)',
+                }}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowHint((h) => !h)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 12.5,
+              color: 'var(--ink-secondary)',
+              fontWeight: 500,
+            }}
+          >
+            <Lightbulb size={14} color="var(--accent)" aria-hidden="true" />
+            <span>{showHint ? current.lesson.ruleOfThumb : 'Tap for quick studio rule'}</span>
+          </button>
+        </div>
 
         {scores.some((s) => s.lessonId === current.lesson.id) && (
           <button
@@ -231,7 +258,7 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
             }}
           >
             <span>{stepIdx === drills.length - 1 ? 'Finish Mix' : 'Next Drill'}</span>
-            <ChevronRight size={14} />
+            <ChevronRight size={14} aria-hidden="true" />
           </button>
         )}
       </div>

@@ -8,6 +8,8 @@ import { generateL09, L09State, scoreL09 } from './scoring/challengeScoring';
 
 export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -88,9 +90,10 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
         className="studio-canvas-surface"
         style={{
           width: '100%',
-          background: '#FFFFFF',
-          color: '#141413',
+          background: '#1C1F26',
+          color: '#F1F5F9',
           borderRadius: 16,
+          border: '1px solid rgba(255,255,255,0.12)',
           padding: 40,
           boxShadow: 'var(--shadow-artboard)',
           display: 'flex',
@@ -99,7 +102,7 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
           gap: 18,
         }}
       >
-        <div style={{ fontSize: 13, color: '#585650', fontWeight: 500 }}>{scenario.label}</div>
+        <div style={{ fontSize: 13.5, color: '#94A3B8', fontWeight: 500 }}>{scenario.label}</div>
 
         <div
           {...shapeDrag.bind}
@@ -329,9 +332,11 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
     <StudioFrame
       prompt={
         scenario.mode === 'optical-center'
-          ? 'Drag the glyph directly (try the Squint Blur eye lens!) until visual ink weight feels balanced—not merely mathematically centered.'
-          : 'Drag the top-left vermilion handle to eliminate pinched corners so the inner arc tracks the outer corner concentrically.'
+          ? 'Drag the glyph directly (try the Squint Blur eye lens!) until visual ink weight feels balanced, not merely mathematically centered.'
+          : 'Drag the top-left handle to eliminate pinched corners so the inner arc tracks the outer corner concentrically.'
       }
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

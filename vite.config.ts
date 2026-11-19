@@ -25,8 +25,8 @@ export default defineConfig({
         start_url: '/sightline/',
         scope: '/sightline/',
         display: 'standalone',
-        background_color: '#F7F6F2',
-        theme_color: '#F7F6F2',
+        background_color: '#F4F5F7',
+        theme_color: '#F4F5F7',
         orientation: 'any',
         icons: [
           {

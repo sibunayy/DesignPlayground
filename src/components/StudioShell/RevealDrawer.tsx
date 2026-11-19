@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Layers, RotateCcw, Shuffle } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Layers, RotateCcw, Shuffle, AlertTriangle, XCircle } from 'lucide-react';
 import { ExerciseResult, OverlayMode } from '../../engine/types';
 
 interface RevealDrawerProps {
@@ -33,68 +33,79 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
       ? 'var(--ok)'
       : result.score >= 65
         ? 'var(--warn)'
-        : 'var(--accent)';
+        : 'var(--signal)';
+
+  const scoreTint =
+    result.score >= 88
+      ? 'var(--ok-tint)'
+      : result.score >= 65
+        ? 'var(--warn-tint)'
+        : 'var(--signal-tint)';
+
+  const r = 24;
+  const circ = 2 * Math.PI * r;
+  const dashOffset = circ * (1 - Math.max(0, Math.min(100, result.score)) / 100);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Score Header */}
+      {/* Score Header with SVG Precision Gauge */}
       <div
         style={{
           display: 'flex',
-          alignItems: 'flex-end',
+          alignItems: 'center',
           justifyContent: 'space-between',
+          gap: 12,
           paddingBottom: 14,
           borderBottom: '1px solid var(--rule)',
         }}
       >
-        <div>
-          <div
-            style={{
-              fontSize: 11,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              color: 'var(--ink-muted)',
-              fontWeight: 600,
-              marginBottom: 2,
-            }}
-          >
-            Closeness Score
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <span
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
+            <circle cx="30" cy="30" r={r} fill="none" stroke="var(--rule)" strokeWidth="5" />
+            <circle
+              cx="30"
+              cy="30"
+              r={r}
+              fill="none"
+              stroke={scoreColor}
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeDasharray={circ}
+              strokeDashoffset={dashOffset}
+              transform="rotate(-90 30 30)"
+            />
+            <text
+              x="30"
+              y="35"
+              textAnchor="middle"
+              fontSize="16"
+              fontWeight="700"
               className="tabular"
+              fill="currentColor"
+            >
+              {result.score}
+            </text>
+          </svg>
+          <div>
+            <div style={{ fontSize: 12, color: 'var(--ink-muted)', fontWeight: 500 }}>
+              Closeness Score
+            </div>
+            <div
               style={{
-                fontSize: 38,
+                display: 'inline-block',
+                marginTop: 4,
+                fontSize: 12,
                 fontWeight: 600,
-                lineHeight: 1,
+                padding: '3px 9px',
+                borderRadius: 6,
+                background: scoreTint,
                 color: scoreColor,
               }}
             >
-              {result.score}
-            </span>
-            <span className="tabular" style={{ fontSize: 14, color: 'var(--ink-muted)' }}>
-              / 100
-            </span>
+              {result.band}
+            </div>
           </div>
         </div>
-
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            padding: '5px 10px',
-            borderRadius: 999,
-            background:
-              result.score >= 88
-                ? 'var(--ok-tint)'
-                : result.score >= 65
-                  ? 'var(--warn-tint)'
-                  : 'var(--accent-tint)',
-            color: scoreColor,
-          }}
-        >
-          {result.band}
-        </span>
       </div>
 
       {/* Overlay View Switcher */}
@@ -104,15 +115,13 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            fontSize: 11,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
+            fontSize: 12,
             color: 'var(--ink-muted)',
             fontWeight: 600,
             marginBottom: 8,
           }}
         >
-          <Layers size={13} strokeWidth={1.75} />
+          <Layers size={14} strokeWidth={1.75} aria-hidden="true" />
           <span>Inspect Layer</span>
         </div>
         <div
@@ -123,8 +132,9 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
             gridTemplateColumns: 'repeat(4, 1fr)',
             gap: 4,
             padding: 4,
-            borderRadius: 10,
+            borderRadius: 8,
             background: 'var(--bg-subtle)',
+            border: '1px solid var(--rule)',
           }}
         >
           {MODES.map((m) => {
@@ -138,12 +148,12 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
                 onClick={() => onChangeOverlayMode(m.id)}
                 style={{
                   minHeight: 34,
-                  borderRadius: 7,
+                  borderRadius: 6,
                   fontSize: 12.5,
                   fontWeight: selected ? 600 : 500,
                   background: selected ? 'var(--bg-surface)' : 'transparent',
                   color: selected ? 'var(--ink-primary)' : 'var(--ink-secondary)',
-                  boxShadow: selected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                  boxShadow: selected ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
                 }}
               >
                 {m.label}
@@ -157,19 +167,17 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
       <div
         style={{
           padding: 14,
-          borderRadius: 10,
+          borderRadius: 8,
           background: 'var(--bg-paper)',
           border: '1px solid var(--rule)',
         }}
       >
         <div
           style={{
-            fontSize: 11,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
+            fontSize: 11.5,
             color: 'var(--ink-muted)',
             fontWeight: 600,
-            marginBottom: 6,
+            marginBottom: 5,
           }}
         >
           Critique Note
@@ -181,14 +189,16 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
 
       {/* Metric Deltas */}
       {result.metrics.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {result.metrics.map((metric) => {
-            const dotColor =
-              metric.status === 'pass'
-                ? 'var(--ok)'
-                : metric.status === 'close'
-                  ? 'var(--warn)'
-                  : 'var(--accent)';
+            const statusIcon =
+              metric.status === 'pass' ? (
+                <CheckCircle2 size={14} color="var(--ok)" aria-hidden="true" />
+              ) : metric.status === 'close' ? (
+                <AlertTriangle size={14} color="var(--warn)" aria-hidden="true" />
+              ) : (
+                <XCircle size={14} color="var(--signal)" aria-hidden="true" />
+              );
             return (
               <div
                 key={metric.label}
@@ -202,21 +212,13 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
                   fontSize: 12.5,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span
-                    style={{
-                      width: 7,
-                      height: 7,
-                      borderRadius: 999,
-                      background: dotColor,
-                      flexShrink: 0,
-                    }}
-                  />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                  {statusIcon}
                   <span style={{ color: 'var(--ink-secondary)' }}>{metric.label}</span>
                 </div>
-                <div className="tabular" style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
-                  <span style={{ color: 'var(--ink-primary)', fontWeight: 500 }}>{metric.yours}</span>
-                  <span style={{ color: 'var(--ink-muted)', fontSize: 11.5 }}>→ {metric.target}</span>
+                <div className="tabular" style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
+                  <span style={{ color: 'var(--ink-primary)', fontWeight: 600 }}>{metric.yours}</span>
+                  <span style={{ color: 'var(--ink-muted)', fontSize: 11.5 }}>vs {metric.target}</span>
                 </div>
               </div>
             );
@@ -236,14 +238,15 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: 6,
-              borderRadius: 10,
+              borderRadius: 8,
               border: '1px solid var(--rule-strong)',
               fontSize: 13.5,
               fontWeight: 500,
               background: 'var(--bg-surface)',
+              boxShadow: 'var(--shadow-tactile)',
             }}
           >
-            <RotateCcw size={15} strokeWidth={1.75} />
+            <RotateCcw size={14} strokeWidth={1.75} aria-hidden="true" />
             <span>Retry Seed</span>
           </button>
 
@@ -256,14 +259,15 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: 6,
-              borderRadius: 10,
+              borderRadius: 8,
               border: '1px solid var(--rule-strong)',
               fontSize: 13.5,
               fontWeight: 500,
               background: 'var(--bg-surface)',
+              boxShadow: 'var(--shadow-tactile)',
             }}
           >
-            <Shuffle size={15} strokeWidth={1.75} />
+            <Shuffle size={14} strokeWidth={1.75} aria-hidden="true" />
             <span>New Brief</span>
           </button>
         </div>
@@ -277,8 +281,8 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 8,
-              borderRadius: 10,
+              gap: 6,
+              borderRadius: 8,
               background: 'var(--ink-primary)',
               color: 'var(--bg-surface)',
               fontSize: 14,
@@ -286,7 +290,7 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
             }}
           >
             <span>{nextLabel}</span>
-            <ArrowRight size={16} strokeWidth={1.75} />
+            <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
           </button>
         )}
       </div>

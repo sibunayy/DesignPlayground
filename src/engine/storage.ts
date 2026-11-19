@@ -107,7 +107,7 @@ export function lessonMasteryAverage(progress?: LessonProgress): number | null {
 
 export function applyThemeMetadata(theme: 'light' | 'dark'): void {
   document.documentElement.setAttribute('data-theme', theme);
-  const themeColor = theme === 'dark' ? '#161618' : '#F7F6F2';
+  const themeColor = theme === 'dark' ? '#14161A' : '#F4F5F7';
   const statusBar = theme === 'dark' ? 'black-translucent' : 'default';
 
   const metaColor = document.querySelector('meta[name="theme-color"]');

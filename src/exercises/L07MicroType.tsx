@@ -8,6 +8,8 @@ import { generateL07, L07State, scoreL07 } from './scoring/buildingScoring';
 
 export const L07MicroType: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -95,9 +97,10 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
         className="studio-canvas-surface"
         style={{
           width: '100%',
-          background: '#FFFFFF',
-          color: '#141413',
-          borderRadius: 16,
+          background: '#171715',
+          color: '#F3EFE6',
+          borderRadius: 10,
+          border: '1px solid rgba(243, 239, 230, 0.14)',
           padding: '44px 24px',
           boxShadow: 'var(--shadow-artboard)',
           display: 'flex',
@@ -106,7 +109,7 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
           gap: 20,
         }}
       >
-        <div style={{ fontSize: 12, color: '#848179', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        <div style={{ fontSize: 12.5, color: '#B4AEA2', fontWeight: 500 }}>
           {scenario.pairNote}
         </div>
 
@@ -148,10 +151,10 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
                   fontWeight: 500,
                   lineHeight: 1,
                   transform: `translateX(${cumulativeShift}px)`,
-                  color: isSelected ? '#D94526' : '#141413',
+                  color: isSelected ? '#60A5FA' : '#F3EFE6',
                   cursor: locked || submitted ? 'default' : 'ew-resize',
                   padding: '0 2px',
-                  borderBottom: isSelected ? '2px solid #D94526' : '2px solid transparent',
+                  borderBottom: isSelected ? '2px solid #60A5FA' : '2px solid transparent',
                 }}
               >
                 {ch}
@@ -163,8 +166,8 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
                       position: 'absolute',
                       left: 2 + (targetCumulative - cumulativeShift),
                       top: 0,
-                      color: '#216E4E',
-                      opacity: 0.42,
+                      color: '#4ADE80',
+                      opacity: 0.45,
                       pointerEvents: 'none',
                     }}
                   >
@@ -185,14 +188,14 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
                   type="button"
                   onClick={() => setSelectedIdx(idx)}
                   style={{
-                    minHeight: 34,
-                    padding: '0 12px',
-                    borderRadius: 999,
-                    border: '1px solid rgba(20,20,19,0.2)',
-                    background: selectedIdx === idx ? '#141413' : '#FAF9F5',
-                    color: selectedIdx === idx ? '#FFFFFF' : '#141413',
+                    minHeight: 36,
+                    padding: '0 13px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(243,239,230,0.22)',
+                    background: selectedIdx === idx ? '#60A5FA' : 'rgba(255,255,255,0.06)',
+                    color: selectedIdx === idx ? '#0F172A' : '#F3EFE6',
                     fontSize: 12.5,
-                    fontWeight: 500,
+                    fontWeight: 600,
                   }}
                 >
                   Letter “{ch}”
@@ -251,7 +254,7 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
             {scenario.quote}
           </blockquote>
 
-          <div style={{ marginTop: 14, fontSize: 13, color: '#848179' }}>— {scenario.author}</div>
+          <div style={{ marginTop: 14, fontSize: 13, color: '#848179' }}>{scenario.author}</div>
         </div>
       </div>
     );
@@ -316,6 +319,8 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
           ? `Drag individual glyphs horizontally in “${scenario.word}” (Apple Pencil nudges at 0.5× precision) until every letter pair shares equal optical area.`
           : 'Open the ALL CAPS eyebrow tracking, restore lowercase prose tracking to 0%, and drag the quote left to hang its opening quotation mark cleanly outside the margin.'
       }
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

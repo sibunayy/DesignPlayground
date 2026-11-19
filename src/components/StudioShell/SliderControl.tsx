@@ -40,9 +40,12 @@ export const SliderControl: React.FC<SliderControlProps> = ({
         <span
           className="tabular"
           style={{
-            fontSize: 13,
-            color: 'var(--ink-secondary)',
-            fontWeight: 500,
+            fontSize: 12.5,
+            color: 'var(--accent)',
+            fontWeight: 600,
+            padding: '2px 7px',
+            borderRadius: 5,
+            background: 'var(--accent-tint)',
           }}
         >
           {display}
@@ -59,15 +62,16 @@ export const SliderControl: React.FC<SliderControlProps> = ({
             width: 38,
             height: 38,
             flexShrink: 0,
-            borderRadius: 8,
-            border: '1px solid var(--rule)',
-            background: 'var(--bg-paper)',
+            borderRadius: 6,
+            border: '1px solid var(--rule-strong)',
+            background: 'var(--bg-surface)',
+            boxShadow: value <= min ? 'none' : 'var(--shadow-tactile)',
             display: 'grid',
             placeItems: 'center',
             opacity: value <= min ? 0.35 : 1,
           }}
         >
-          <Minus size={15} strokeWidth={1.75} />
+          <Minus size={14} strokeWidth={2} aria-hidden="true" />
         </button>
 
         <input
@@ -90,15 +94,16 @@ export const SliderControl: React.FC<SliderControlProps> = ({
             width: 38,
             height: 38,
             flexShrink: 0,
-            borderRadius: 8,
-            border: '1px solid var(--rule)',
-            background: 'var(--bg-paper)',
+            borderRadius: 6,
+            border: '1px solid var(--rule-strong)',
+            background: 'var(--bg-surface)',
+            boxShadow: value >= max ? 'none' : 'var(--shadow-tactile)',
             display: 'grid',
             placeItems: 'center',
             opacity: value >= max ? 0.35 : 1,
           }}
         >
-          <Plus size={15} strokeWidth={1.75} />
+          <Plus size={14} strokeWidth={2} aria-hidden="true" />
         </button>
       </div>
 

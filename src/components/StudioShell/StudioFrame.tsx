@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Check, PenTool, SlidersHorizontal, X } from 'lucide-react';
+import { Check, EyeOff, Palette, PenTool, X } from 'lucide-react';
 import { ExerciseResult, EyeLens, OverlayMode } from '../../engine/types';
+import { FineTuneDialIcon } from '../Icons/CraftIcons';
 import { EyeLensBar } from './EyeLensBar';
 import { RevealDrawer } from './RevealDrawer';
 
 interface StudioFrameProps {
   prompt: string;
+  styleWorld?: string;
+  styleRef?: string;
   availableLenses: EyeLens[];
   activeLenses: Set<EyeLens>;
   onToggleLens: (lens: EyeLens) => void;
@@ -30,6 +33,8 @@ interface StudioFrameProps {
 
 export const StudioFrame: React.FC<StudioFrameProps> = ({
   prompt,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -51,12 +56,13 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
   const [popoutOpen, setPopoutOpen] = useState(false);
 
   const lensFilterStyle: React.CSSProperties = {
-    filter: [
-      activeLenses.has('blur') ? 'blur(3.5px)' : '',
-      activeLenses.has('grayscale') ? 'grayscale(100%)' : '',
-    ]
-      .filter(Boolean)
-      .join(' ') || undefined,
+    filter:
+      [
+        activeLenses.has('blur') ? 'blur(3.5px)' : '',
+        activeLenses.has('grayscale') ? 'grayscale(100%)' : '',
+      ]
+        .filter(Boolean)
+        .join(' ') || undefined,
     transform: activeLenses.has('flip') ? 'scaleX(-1)' : undefined,
     transition: 'filter 160ms ease, transform 160ms ease',
   };
@@ -68,57 +74,78 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
     >
       {/* Main Artboard Stage */}
       <div className="studio-stage">
-        {/* Top prompt bar — clean editorial task caption */}
+        {/* Design World Context + Task Prompt */}
         <div
           style={{
             width: '100%',
-            maxWidth: 740,
+            maxWidth: 760,
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            flexWrap: 'wrap',
+            flexDirection: 'column',
+            gap: 6,
           }}
         >
+          {styleWorld && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: 'var(--accent)',
+                }}
+              >
+                <Palette size={13} aria-hidden="true" />
+                <span>{styleWorld}</span>
+                {styleRef && (
+                  <span style={{ color: 'var(--ink-muted)', fontWeight: 400 }}>
+                    ({styleRef})
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {isPenActive && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      fontSize: 11.5,
+                      padding: '3px 9px',
+                      borderRadius: 6,
+                      background: 'var(--bg-subtle)',
+                      color: 'var(--ink-secondary)',
+                      border: '1px solid var(--rule)',
+                    }}
+                  >
+                    <PenTool size={12} strokeWidth={1.75} aria-hidden="true" />
+                    <span>Apple Pencil 0.5×</span>
+                  </span>
+                )}
+                {stageAction}
+              </div>
+            </div>
+          )}
+
           <p
             style={{
-              fontSize: 13.5,
-              color: 'var(--ink-secondary)',
-              lineHeight: 1.4,
-              maxWidth: '58ch',
+              fontSize: 14,
+              color: 'var(--ink-primary)',
+              lineHeight: 1.45,
+              maxWidth: '64ch',
             }}
           >
             {prompt}
           </p>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {isPenActive && (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  fontSize: 11.5,
-                  padding: '4px 10px',
-                  borderRadius: 999,
-                  background: 'var(--bg-subtle)',
-                  color: 'var(--ink-secondary)',
-                  border: '1px solid var(--rule)',
-                }}
-              >
-                <PenTool size={12} strokeWidth={1.75} />
-                <span>Pencil Fine</span>
-              </span>
-            )}
-            {stageAction}
-          </div>
         </div>
 
         {/* Center Interactive Artboard */}
         <div
           style={{
             width: '100%',
-            maxWidth: 740,
+            maxWidth: 760,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -132,7 +159,7 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
         <div
           style={{
             width: '100%',
-            maxWidth: 740,
+            maxWidth: 760,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -155,18 +182,18 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 7,
-                minHeight: 42,
+                minHeight: 44,
                 padding: '0 14px',
-                borderRadius: 999,
+                borderRadius: 10,
                 background: popoutOpen ? 'var(--ink-primary)' : 'var(--bg-surface)',
                 color: popoutOpen ? 'var(--bg-surface)' : 'var(--ink-primary)',
-                border: '1px solid var(--rule)',
-                boxShadow: 'var(--shadow-float)',
+                border: '1px solid var(--rule-strong)',
+                boxShadow: 'var(--shadow-tactile)',
                 fontSize: 13,
                 fontWeight: 500,
               }}
             >
-              <SlidersHorizontal size={14} strokeWidth={1.75} />
+              <FineTuneDialIcon size={16} />
               <span>{popoutOpen ? 'Hide Fine Sliders' : 'Fine Sliders'}</span>
             </button>
           )}
@@ -177,21 +204,16 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
       <aside className="studio-rail" aria-label="Studio controls and critique">
         {!submitted ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18, height: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    color: 'var(--ink-muted)',
-                    fontWeight: 600,
-                  }}
-                >
-                  Attempt Mode
-                </div>
-                <div style={{ fontSize: 13.5, color: 'var(--ink-secondary)', marginTop: 2 }}>
-                  Score stays hidden until submission
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <EyeOff size={15} color="var(--ink-muted)" aria-hidden="true" />
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-primary)' }}>
+                    Blind Practice
+                  </div>
+                  <div style={{ fontSize: 12.5, color: 'var(--ink-secondary)' }}>
+                    Score stays hidden until you check
+                  </div>
                 </div>
               </div>
               {popoutOpen && (
@@ -201,7 +223,7 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
                   onClick={() => setPopoutOpen(false)}
                   style={{ padding: 6, color: 'var(--ink-muted)' }}
                 >
-                  <X size={16} />
+                  <X size={16} aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -213,7 +235,7 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
                   flexDirection: 'column',
                   gap: 16,
                   padding: 14,
-                  borderRadius: 12,
+                  borderRadius: 10,
                   background: 'var(--bg-paper)',
                   border: '1px solid var(--rule)',
                 }}
@@ -226,26 +248,26 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
               <div
                 style={{
                   padding: 14,
-                  borderRadius: 12,
+                  borderRadius: 10,
                   border: '1px dashed var(--rule-strong)',
                   fontSize: 13,
                   color: 'var(--ink-secondary)',
                   lineHeight: 1.45,
                 }}
               >
-                Drag directly on the artboard with finger or Apple Pencil, or tap{' '}
+                Manipulate elements directly on the specimen with finger or Apple Pencil, or open{' '}
                 <button
                   type="button"
                   onClick={() => setPopoutOpen(true)}
                   style={{
-                    color: 'var(--ink-primary)',
+                    color: 'var(--accent)',
                     textDecoration: 'underline',
-                    fontWeight: 500,
+                    fontWeight: 600,
                   }}
                 >
                   Fine Sliders
                 </button>{' '}
-                for exact numeric nudges.
+                for micro-adjustments.
               </div>
             )}
 
@@ -257,7 +279,7 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
                 style={{
                   width: '100%',
                   minHeight: 48,
-                  borderRadius: 12,
+                  borderRadius: 10,
                   background: 'var(--accent)',
                   color: 'var(--accent-ink)',
                   fontSize: 14.5,
@@ -266,11 +288,11 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
-                  boxShadow: '0 4px 14px rgba(217, 69, 38, 0.22)',
+                  boxShadow: '0 3px 0 rgba(17, 19, 23, 0.2)',
                 }}
               >
-                <Check size={17} strokeWidth={2} />
-                <span>Submit Evaluation</span>
+                <Check size={17} strokeWidth={2.2} aria-hidden="true" />
+                <span>Check Evaluation</span>
               </button>
             </div>
           </div>

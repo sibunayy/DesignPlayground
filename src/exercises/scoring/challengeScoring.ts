@@ -82,7 +82,7 @@ export function scoreL09(state: L09State, scenario: L09Scenario): ExerciseResult
     const diagnosis =
       err <= 2.5
         ? 'Optical nudge offsets the asymmetrical ink weight so the icon looks genuinely centered.'
-        : `Geometric centering leaves visual weight biased—nudge roughly (${scenario.targetX > 0 ? '+' : ''}${scenario.targetX} px, ${scenario.targetY > 0 ? '+' : ''}${scenario.targetY} px) toward the lighter side.`;
+        : `Geometric centering leaves visual weight biased: nudge roughly (${scenario.targetX > 0 ? '+' : ''}${scenario.targetX} px, ${scenario.targetY > 0 ? '+' : ''}${scenario.targetY} px) toward the lighter side.`;
 
     return {
       score,
@@ -104,7 +104,7 @@ export function scoreL09(state: L09State, scenario: L09Scenario): ExerciseResult
   const diagnosis =
     err <= 2
       ? `Inner radius (${Math.round(state.innerRadius)} px) shares the exact arc center of the outer ${scenario.outerRadius} px frame.`
-      : `Equal or mismatched radii pinch the diagonal corners—subtract ${scenario.padding} px padding from ${scenario.outerRadius} px outer radius to get ${scenario.targetInnerRadius} px.`;
+      : `Equal or mismatched radii pinch the diagonal corners: subtract ${scenario.padding} px padding from ${scenario.outerRadius} px outer radius to get ${scenario.targetInnerRadius} px.`;
 
   return {
     score,
@@ -217,7 +217,7 @@ export function scoreL10(state: L10State, scenario: L10Scenario): ExerciseResult
     const diagnosis =
       errL <= 0.035
         ? 'Both hues share matching OKLCH lightness and appear equally balanced in grayscale.'
-        : `Perceived lightness differs by ${(errL * 100).toFixed(0)} points—adjust OKLCH L toward ${scenario.targetLightness.toFixed(2)} so grayscale luminance matches.`;
+        : `Perceived lightness differs by ${(errL * 100).toFixed(0)} points: adjust OKLCH L toward ${scenario.targetLightness.toFixed(2)} so grayscale luminance matches.`;
 
     return {
       score,
@@ -247,7 +247,7 @@ export function scoreL10(state: L10State, scenario: L10Scenario): ExerciseResult
     const diagnosis =
       lc >= scenario.targetLcMin
         ? `Perceptual contrast reaches APCA Lc ${lc.toFixed(0)} (${wcag.toFixed(1)}:1 WCAG), crisp for sustained body reading.`
-        : `Contrast sits at APCA Lc ${lc.toFixed(0)} (below Lc ${scenario.targetLcMin})—lower lightness L or dial back vibrating chroma.`;
+        : `Contrast sits at APCA Lc ${lc.toFixed(0)} (below Lc ${scenario.targetLcMin}): lower lightness L or dial back vibrating chroma.`;
 
     return {
       score,
@@ -597,7 +597,7 @@ export function scoreL12(state: L12State, scenario: L12Scenario): ExerciseResult
   );
 
   const issues: string[] = [];
-  if (cutJoints.length > 0) issues.push(`crop slices near the ${cutJoints[0].label.toLowerCase()}—shift mid-limb instead`);
+  if (cutJoints.length > 0) issues.push(`crop slices near the ${cutJoints[0].label.toLowerCase()}; shift mid-limb instead`);
   if (headPenalty > 0) issues.push('top edge grazes the hairline without breathing headroom');
   if (netTilt > 1.2) issues.push(`horizon leans ${netTilt.toFixed(1)}° off level`);
   if (hitTangents.length > 0) issues.push(`border kisses the ${hitTangents[0].label.toLowerCase()} creating a tangent`);

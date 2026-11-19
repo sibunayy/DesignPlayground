@@ -6,6 +6,8 @@ import { generateL08, L08State, scoreL08 } from './scoring/buildingScoring';
 
 export const L08CharacterHygiene: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -74,31 +76,39 @@ export const L08CharacterHygiene: React.FC<ExerciseComponentProps> = ({
     <div
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
-        padding: 28,
+        background: '#EAEAE4',
+        color: '#191A18',
+        borderRadius: 6,
+        border: '1.5px solid #262724',
+        padding: 26,
         boxShadow: 'var(--shadow-artboard)',
         display: 'flex',
         flexDirection: 'column',
         gap: 20,
       }}
     >
-      <div>
-        <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '0.09em', color: '#848179' }}>
-          {scenario.excerpt.headline}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1.5px solid #262724', paddingBottom: 12 }}>
+        <div>
+          <div className="tabular" style={{ fontSize: 11, fontWeight: 600, color: '#D95D16' }}>
+            {scenario.excerpt.headline}
+          </div>
+          <h3 style={{ fontFamily: 'var(--font-grotesk)', fontSize: 22, marginTop: 4, fontWeight: 600 }}>
+            {scenario.excerpt.title}
+          </h3>
         </div>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 23, marginTop: 4 }}>
-          {scenario.excerpt.title}
-        </h3>
+        <span className="tabular" style={{ fontSize: 11, color: '#585A53' }}>SPEC-08</span>
       </div>
 
       {/* Interactive Proofreading Prose */}
       <div
         style={{
           fontFamily: "'EB Garamond', Georgia, serif",
-          fontSize: 19,
+          fontSize: 19.5,
           lineHeight: 1.65,
+          padding: '14px 16px',
+          background: '#F7F7F4',
+          border: '1px solid rgba(25,26,24,0.12)',
+          borderRadius: 4,
           fontVariantNumeric: activeProseOldstyle ? 'oldstyle-nums proportional-nums' : 'lining-nums tabular-nums',
           position: 'relative',
         }}
@@ -278,7 +288,9 @@ export const L08CharacterHygiene: React.FC<ExerciseComponentProps> = ({
 
   return (
     <StudioFrame
-      prompt="Tap each underlined token in the prose to fix quotes, decade apostrophes, en dashes, primes, and spacing—then assign Oldstyle figures to prose and Tabular figures to the ticking table."
+      prompt="Tap each underlined token in the prose to fix quotes, decade apostrophes, en dashes, primes, and spacing, then assign Oldstyle figures to prose and Tabular figures to the ticking table."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

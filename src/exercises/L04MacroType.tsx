@@ -8,6 +8,8 @@ import { estimateCharsPerLine, generateL04, L04State, scoreL04 } from './scoring
 
 export const L04MacroType: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -96,19 +98,35 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
-        padding: '28px 32px',
+        background: 'linear-gradient(90deg, #EBE5D8 0px, #FBF9F4 22px)',
+        color: '#191815',
+        borderRadius: 6,
+        border: '1px solid rgba(25, 24, 21, 0.14)',
+        padding: '26px 34px 34px 40px',
         boxShadow: 'var(--shadow-artboard)',
         position: 'relative',
         overflowX: 'auto',
       }}
     >
-      <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '0.09em', color: '#848179' }}>
-        {scenario.specimen.kicker}
+      {/* Stripe Press Running Folio Header */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          paddingBottom: 10,
+          marginBottom: 18,
+          borderBottom: '1px solid rgba(25,24,21,0.12)',
+          fontSize: 11.5,
+          color: '#6C665B',
+        }}
+      >
+        <span style={{ fontStyle: 'italic', fontFamily: 'var(--font-editorial)' }}>
+          Stripe Press Essay Specimen
+        </span>
+        <span className="tabular">p. 42</span>
       </div>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: 1.15, marginTop: 6, marginBottom: 16 }}>
+
+      <h3 style={{ fontFamily: 'var(--font-editorial)', fontSize: 28, lineHeight: 1.14, marginBottom: 16, fontWeight: 500 }}>
         {scenario.specimen.title}
       </h3>
 
@@ -119,8 +137,8 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
           position: 'relative',
           width: '100%',
           maxWidth: view.measurePx,
-          borderRight: submitted ? '1px solid rgba(20,20,19,0.12)' : '2px dashed rgba(20, 20, 19, 0.28)',
-          paddingRight: 16,
+          borderRight: submitted ? '1px solid rgba(25,24,21,0.14)' : '2px dashed rgba(29, 78, 216, 0.45)',
+          paddingRight: 18,
           cursor: submitted ? 'default' : 'ns-resize',
         }}
       >
@@ -132,20 +150,20 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
               bottom: 0,
               left: idealMinPx,
               width: Math.max(20, idealMaxPx - idealMinPx),
-              background: 'rgba(33, 110, 78, 0.1)',
-              borderLeft: '1.5px dashed #216E4E',
-              borderRight: '1.5px dashed #216E4E',
+              background: 'rgba(21, 115, 71, 0.1)',
+              borderLeft: '1.5px dashed #157347',
+              borderRight: '1.5px dashed #157347',
               pointerEvents: 'none',
             }}
           >
             <span
               style={{
                 position: 'absolute',
-                bottom: -20,
+                bottom: -22,
                 left: 6,
                 fontSize: 10.5,
                 fontWeight: 600,
-                color: '#216E4E',
+                color: '#157347',
                 whiteSpace: 'nowrap',
               }}
             >
@@ -158,10 +176,10 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
           <p
             key={idx}
             style={{
-              fontFamily: 'var(--font-sans)',
+              fontFamily: 'var(--font-editorial)',
               fontSize: view.fontSize,
               lineHeight: view.leading,
-              color: '#272624',
+              color: '#23211E',
               marginBottom: idx === 0 ? `${view.fontSize * 0.9}px` : 0,
             }}
           >
@@ -186,7 +204,7 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
               zIndex: 10,
             }}
           >
-            <div style={{ width: 5, height: 48, borderRadius: 999, background: '#D94526' }} />
+            <div style={{ width: 5, height: 48, borderRadius: 3, background: '#1D4ED8' }} />
           </div>
         )}
       </div>
@@ -229,6 +247,8 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
   return (
     <StudioFrame
       prompt="Drag the right edge to tame line width (45–75 chars), drag vertically on the copy to open line leading (140–165%), and verify body size in Fine Sliders."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

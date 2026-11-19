@@ -8,6 +8,8 @@ import { generateL13, L13State, scoreL13 } from './scoring/challengeScoring';
 
 export const L13PrintPrepress: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -107,16 +109,35 @@ export const L13PrintPrepress: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        background: '#EAE7DF',
+        background: '#E2DDD2',
         color: '#141413',
-        borderRadius: 16,
+        borderRadius: 4,
+        border: '1px solid rgba(20, 20, 19, 0.2)',
         padding: sheetPad,
         boxShadow: 'var(--shadow-artboard)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 16,
+        gap: 14,
       }}
     >
+      {/* Press Sheet Registration Header */}
+      <div
+        className="tabular"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: 10.5,
+          color: '#5B564D',
+        }}
+      >
+        <span>PROOF SHEET · CMYK + SPOT K</span>
+        <div style={{ display: 'flex', gap: 3 }} aria-hidden="true">
+          {['#00AEEF', '#EC008C', '#FFF200', '#141413'].map((swatch) => (
+            <span key={swatch} style={{ width: 14, height: 8, background: swatch, border: '1px solid rgba(0,0,0,0.18)' }} />
+          ))}
+        </div>
+      </div>
       {/* Interactive Press Sheet */}
       <div
         style={{
@@ -362,6 +383,8 @@ export const L13PrintPrepress: React.FC<ExerciseComponentProps> = ({
   return (
     <StudioFrame
       prompt="Pull the dark background outward to 3 mm bleed, move type inward to a 4 mm safe margin, switch small black text to 100% K, and replace the blurry 72 DPI logo."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

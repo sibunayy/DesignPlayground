@@ -9,6 +9,8 @@ import { generateL06, L06State, scoreL06 } from './scoring/buildingScoring';
 
 export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
   seed,
+  styleWorld,
+  styleRef,
   availableLenses,
   activeLenses,
   onToggleLens,
@@ -104,10 +106,12 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
       className="studio-canvas-surface"
       style={{
         width: '100%',
-        background: '#FFFFFF',
-        color: '#141413',
-        borderRadius: 16,
-        padding: 28,
+        background: '#FAF1EB',
+        color: '#211B18',
+        borderRadius: 4,
+        borderTop: '3px solid #211B18',
+        borderBottom: '1px solid rgba(33, 27, 24, 0.2)',
+        padding: 26,
         boxShadow: 'var(--shadow-artboard)',
         display: 'flex',
         flexDirection: 'column',
@@ -125,10 +129,10 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
           style={{
             minHeight: 38,
             padding: '0 14px',
-            borderRadius: 999,
-            border: '1px solid rgba(20,20,19,0.2)',
-            background: view.align === 'left' ? '#141413' : '#FAF9F5',
-            color: view.align === 'left' ? '#FFFFFF' : '#141413',
+            borderRadius: 6,
+            border: '1px solid rgba(33,27,24,0.24)',
+            background: view.align === 'left' ? '#211B18' : '#FFFFFF',
+            color: view.align === 'left' ? '#FAF1EB' : '#211B18',
             fontSize: 12.5,
             fontWeight: 500,
           }}
@@ -143,10 +147,10 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
           style={{
             minHeight: 38,
             padding: '0 14px',
-            borderRadius: 999,
-            border: '1px solid rgba(20,20,19,0.2)',
-            background: view.boundLastPair ? '#216E4E' : '#FAF9F5',
-            color: view.boundLastPair ? '#FFFFFF' : '#141413',
+            borderRadius: 6,
+            border: '1px solid rgba(33,27,24,0.24)',
+            background: view.boundLastPair ? '#157347' : '#FFFFFF',
+            color: view.boundLastPair ? '#FFFFFF' : '#211B18',
             fontSize: 12.5,
             fontWeight: 500,
           }}
@@ -155,16 +159,16 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
         </button>
       </div>
 
-      {/* Column Specimen */}
+      {/* Broadsheet Newsprint Column Specimen */}
       <div
         style={{
           position: 'relative',
           width: view.widthPx,
           maxWidth: '100%',
-          padding: '18px 20px',
-          background: '#FAF9F5',
-          borderRadius: 10,
-          borderRight: submitted ? '1px solid rgba(20,20,19,0.14)' : '2px dashed #D94526',
+          padding: '16px 20px',
+          background: '#FDF9F6',
+          borderLeft: '1px solid rgba(33,27,24,0.2)',
+          borderRight: submitted ? '1px solid rgba(33,27,24,0.2)' : '2px dashed #1D4ED8',
         }}
       >
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginBottom: 10 }}>
@@ -295,6 +299,8 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
   return (
     <StudioFrame
       prompt="Eliminate rivers and the stranded closing runt: switch away from forced narrow justification, drag the right rag boundary smoothly, and tap the closing word pair to bind it."
+      styleWorld={styleWorld}
+      styleRef={styleRef}
       availableLenses={availableLenses}
       activeLenses={activeLenses}
       onToggleLens={onToggleLens}

@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { ActiveSnapLine, SnapGuideOverlay } from '../components/StudioShell/SnapGuideOverlay';
+import { snapValue, stepTargets } from '../engine/snapEngine';
 import { ExerciseResult, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { ExerciseComponentProps } from './L01WhiteSpace';
@@ -28,6 +30,12 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
+  const [activeSnaps, setActiveSnaps] = useState<ActiveSnapLine[]>([]);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const rawMeasureRef = useRef(scenario.initialMeasurePx);
+  const rawLeadingRef = useRef(scenario.initialLeading);
 
   React.useEffect(() => {
     setState({
@@ -35,6 +43,9 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
       leading: scenario.initialLeading,
       measurePx: scenario.initialMeasurePx,
     });
+    rawMeasureRef.current = scenario.initialMeasurePx;
+    rawLeadingRef.current = scenario.initialLeading;
+    setActiveSnaps([]);
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -42,22 +53,39 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
 
   const measureDrag = useStudioPointer({
     penPrecisionScale: 0.75,
+    onStart: () => {
+      rawMeasureRef.current = stateRef.current.measurePx;
+    },
     onMove: ({ dx }) => {
       if (submitted) return;
+      rawMeasureRef.current = Math.max(240, Math.min(660, rawMeasureRef.current + dx));
+      const snapM = snapValue(rawMeasureRef.current, stepTargets(240, 660, 20, 'edge', 'px'), 6);
+      const nextM = Math.round(snapM.value);
+      setActiveSnaps(
+        snapM.snapped
+          ? [{ axis: 'x', pos: '100%', label: `${nextM}px`, kind: 'edge' }]
+          : []
+      );
       setState((s) => ({
         ...s,
-        measurePx: Math.max(240, Math.min(660, Math.round(s.measurePx + dx))),
+        measurePx: nextM,
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const leadingDrag = useStudioPointer({
     penPrecisionScale: 0.65,
+    onStart: () => {
+      rawLeadingRef.current = stateRef.current.leading;
+    },
     onMove: ({ dy }) => {
       if (submitted) return;
+      rawLeadingRef.current = Math.max(1.05, Math.min(1.95, rawLeadingRef.current + dy * 0.005));
+      const snapL = snapValue(rawLeadingRef.current, stepTargets(1.05, 1.95, 0.05, 'grid', '×'), 0.018);
       setState((s) => ({
         ...s,
-        leading: Number(Math.max(1.05, Math.min(1.95, s.leading + dy * 0.004)).toFixed(2)),
+        leading: Number(snapL.value.toFixed(2)),
       }));
     },
   });
@@ -102,7 +130,7 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
         color: '#191815',
         borderRadius: 6,
         border: '1px solid rgba(25, 24, 21, 0.14)',
-        padding: '26px 34px 34px 40px',
+        padding: 'clamp(16px, 4vw, 34px)',
         boxShadow: 'var(--shadow-artboard)',
         position: 'relative',
         overflowX: 'auto',
@@ -142,6 +170,27 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
           cursor: submitted ? 'default' : 'ns-resize',
         }}
       >
+        {!submitted && <SnapGuideOverlay lines={activeSnaps} />}
+        {leadingDrag.isDragging && !submitted && (
+          <span
+            className="tabular"
+            style={{
+              position: 'absolute',
+              right: 8,
+              top: -12,
+              fontSize: 10.5,
+              fontWeight: 600,
+              padding: '2px 7px',
+              borderRadius: 4,
+              background: '#0EA5E9',
+              color: '#FFFFFF',
+              pointerEvents: 'none',
+              zIndex: 20,
+            }}
+          >
+            Leading {view.leading.toFixed(2)}×
+          </span>
+        )}
         {showGuides && (
           <div
             style={{
@@ -196,15 +245,15 @@ export const L04MacroType: React.FC<ExerciseComponentProps> = ({
               position: 'absolute',
               top: 0,
               bottom: 0,
-              right: -16,
-              width: 30,
+              right: -19,
+              width: 38,
               cursor: 'ew-resize',
               display: 'grid',
               placeItems: 'center',
               zIndex: 10,
             }}
           >
-            <div style={{ width: 5, height: 48, borderRadius: 3, background: '#1D4ED8' }} />
+            <div style={{ width: 5, height: 48, borderRadius: 3, background: measureDrag.isDragging ? '#0EA5E9' : '#1D4ED8' }} />
           </div>
         )}
       </div>

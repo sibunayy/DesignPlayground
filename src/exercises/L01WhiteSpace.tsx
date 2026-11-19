@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { ActiveSnapLine, SnapGuideOverlay } from '../components/StudioShell/SnapGuideOverlay';
+import { snapValue, stepTargets } from '../engine/snapEngine';
 import { ExerciseResult, EyeLens, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { generateL01, L01State, scoreL01 } from './scoring/foundationScoring';
@@ -42,6 +44,12 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
+  const [activeSnaps, setActiveSnaps] = useState<ActiveSnapLine[]>([]);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const rawBlockRef = useRef({ x: scenario.initialBlockX, y: scenario.initialBlockY });
+  const rawMarginRef = useRef(scenario.initialMargin);
 
   React.useEffect(() => {
     setState({
@@ -50,6 +58,9 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
       blockY: scenario.initialBlockY,
       hasBox: scenario.hasRedundantBox,
     });
+    rawBlockRef.current = { x: scenario.initialBlockX, y: scenario.initialBlockY };
+    rawMarginRef.current = scenario.initialMargin;
+    setActiveSnaps([]);
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -57,25 +68,74 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
 
   const blockDrag = useStudioPointer({
     penPrecisionScale: 0.75,
+    onStart: () => {
+      rawBlockRef.current = { x: stateRef.current.blockX, y: stateRef.current.blockY };
+    },
     onMove: ({ dx, dy }) => {
       if (submitted) return;
+      rawBlockRef.current.x = Math.max(0, Math.min(72, rawBlockRef.current.x + dx * 0.55));
+      rawBlockRef.current.y = Math.max(0, Math.min(36, rawBlockRef.current.y + dy * 0.55));
+      const snapX = snapValue(
+        rawBlockRef.current.x,
+        [{ value: 0, label: 'flush 0px', kind: 'zero' }, ...stepTargets(8, 72, 8, 'grid', 'px')],
+        3.5
+      );
+      const snapY = snapValue(
+        rawBlockRef.current.y,
+        [{ value: 0, label: 'top 0px', kind: 'zero' }, ...stepTargets(8, 36, 8, 'grid', 'px')],
+        3
+      );
+      const lines: ActiveSnapLine[] = [];
+      const padOffset = stateRef.current.margin + (stateRef.current.hasBox ? 14 : 0);
+      if (snapX.snapped) {
+        lines.push({
+          axis: 'x',
+          pos: `${padOffset + snapX.value}px`,
+          label: snapX.target?.label,
+          kind: snapX.target?.kind,
+        });
+      }
+      if (snapY.snapped) {
+        lines.push({
+          axis: 'y',
+          pos: `${padOffset + 96 + snapY.value}px`,
+          label: snapY.target?.label,
+          kind: snapY.target?.kind,
+        });
+      }
+      setActiveSnaps(lines);
       setState((prev) => ({
         ...prev,
-        blockX: Math.max(0, Math.min(72, prev.blockX + dx * 0.4)),
-        blockY: Math.max(0, Math.min(36, prev.blockY + dy * 0.4)),
+        blockX: Number(snapX.value.toFixed(1)),
+        blockY: Number(snapY.value.toFixed(1)),
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const marginDrag = useStudioPointer({
-    penPrecisionScale: 0.6,
+    penPrecisionScale: 0.65,
+    onStart: () => {
+      rawMarginRef.current = stateRef.current.margin;
+    },
     onMove: ({ dx }) => {
       if (submitted) return;
+      rawMarginRef.current = Math.max(6, Math.min(48, rawMarginRef.current + dx * 0.45));
+      const snapM = snapValue(rawMarginRef.current, stepTargets(8, 48, 4, 'edge', 'px'), 1.8);
+      setActiveSnaps(
+        snapM.snapped
+          ? [
+              { axis: 'x', pos: `${snapM.value}px`, label: `${Math.round(snapM.value)}px`, kind: 'edge' },
+              { axis: 'y', pos: `${snapM.value}px`, kind: 'edge' },
+            ]
+          : []
+      );
       setState((prev) => ({
         ...prev,
-        margin: Math.max(6, Math.min(48, Math.round(prev.margin + dx * 0.35))),
+        margin: Math.round(snapM.value),
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const handleSubmit = () => {
@@ -137,8 +197,8 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
             position: 'absolute',
             top: 0,
             bottom: 0,
-            left: Math.max(2, displayState.margin - 10),
-            width: 24,
+            left: Math.max(0, displayState.margin - 18),
+            width: 36,
             cursor: 'ew-resize',
             zIndex: 12,
             display: 'flex',
@@ -148,14 +208,17 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
         >
           <div
             style={{
-              width: 3,
-              height: 44,
+              width: 4,
+              height: 48,
               borderRadius: 999,
-              background: 'rgba(25, 24, 21, 0.28)',
+              background: marginDrag.isDragging ? '#0EA5E9' : 'rgba(25, 24, 21, 0.32)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.55)',
             }}
           />
         </div>
       )}
+
+      {!submitted && <SnapGuideOverlay lines={activeSnaps} />}
 
       {/* Inner Kinfolk Editorial Composition */}
       <div
@@ -165,7 +228,7 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
           borderRadius: 2,
           padding: displayState.hasBox ? 14 : 0,
           display: 'grid',
-          gridTemplateColumns: '1.15fr 0.85fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
           gap: 20,
           alignItems: 'stretch',
         }}

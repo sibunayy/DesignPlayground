@@ -144,18 +144,12 @@ export const TopBar: React.FC<TopBarProps> = ({
         )}
       </div>
 
-      {/* Center: Learn / Practice Hardware Switch */}
+      {/* Center: Learn / Practice Hardware Switch (full-width row 2 on <640px mobile) */}
       {mode && onChangeMode && (
         <div
           role="tablist"
           aria-label="Studio mode"
-          style={{
-            display: 'inline-flex',
-            padding: 3,
-            borderRadius: 9,
-            background: 'var(--bg-subtle)',
-            border: '1px solid var(--rule)',
-          }}
+          className="topbar-mode-tabs"
         >
           <button
             type="button"

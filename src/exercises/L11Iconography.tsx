@@ -29,6 +29,8 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const selectedPtRef = useRef(selectedPt);
+  selectedPtRef.current = selectedPt;
 
   React.useEffect(() => {
     setState({
@@ -36,6 +38,7 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
       stroke: scenario.initialStroke,
     });
     setSelectedPt(0);
+    selectedPtRef.current = 0;
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -47,12 +50,13 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
     const rect = svg.getBoundingClientRect();
     const gx = ((clientX - rect.left) / rect.width) * 24;
     const gy = ((clientY - rect.top) / rect.height) * 24;
-    // Soft integer snapping when within 0.28px of whole pixel grid
-    const sx = Math.abs(gx - Math.round(gx)) < 0.28 ? Math.round(gx) : Number(gx.toFixed(1));
-    const sy = Math.abs(gy - Math.round(gy)) < 0.28 ? Math.round(gy) : Number(gy.toFixed(1));
+    // Soft integer snapping when within 0.3px of whole pixel grid
+    const sx = Math.abs(gx - Math.round(gx)) < 0.3 ? Math.round(gx) : Number(gx.toFixed(1));
+    const sy = Math.abs(gy - Math.round(gy)) < 0.3 ? Math.round(gy) : Number(gy.toFixed(1));
+    const activeIdx = selectedPtRef.current;
     setState((prev) => {
       const next = prev.points.map((p, i) =>
-        i === selectedPt
+        i === activeIdx
           ? {
               x: Math.max(1, Math.min(23, sx)),
               y: Math.max(1, Math.min(23, sy)),
@@ -116,6 +120,7 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
         </div>
         <svg
           ref={svgRef}
+          data-studio-drag="true"
           viewBox="0 0 24 24"
           width="100%"
           style={{
@@ -177,29 +182,53 @@ export const L11Iconography: React.FC<ExerciseComponentProps> = ({
             strokeLinecap="round"
           />
 
-          {/* Interactive Anchor Handles */}
+          {/* Live Vertex CAD Alignment Crosshair While Dragging */}
+          {!submitted && vertexDrag.isDragging && state.points[selectedPt] && (
+            <g pointerEvents="none">
+              <line
+                x1={state.points[selectedPt].x}
+                y1={0}
+                x2={state.points[selectedPt].x}
+                y2={24}
+                stroke={Number.isInteger(state.points[selectedPt].x) ? '#D946EF' : '#0EA5E9'}
+                strokeWidth={0.14}
+                strokeDasharray="0.45 0.3"
+              />
+              <line
+                x1={0}
+                y1={state.points[selectedPt].y}
+                x2={24}
+                y2={state.points[selectedPt].y}
+                stroke={Number.isInteger(state.points[selectedPt].y) ? '#D946EF' : '#0EA5E9'}
+                strokeWidth={0.14}
+                strokeDasharray="0.45 0.3"
+              />
+            </g>
+          )}
+
+          {/* Interactive Anchor Handles with Generous Finger Hit Target */}
           {!submitted &&
             state.points.map((pt, idx) => (
-              <circle
+              <g
                 key={idx}
-                cx={pt.x}
-                cy={pt.y}
-                r={0.85}
-                fill={selectedPt === idx ? '#60A5FA' : '#0D1119'}
-                stroke="#F8FAFC"
-                strokeWidth={0.22}
+                data-studio-drag="true"
                 style={{ cursor: 'grab' }}
                 onPointerDown={(e) => {
+                  selectedPtRef.current = idx;
                   setSelectedPt(idx);
                   vertexDrag.bind.onPointerDown(e as unknown as React.PointerEvent<HTMLElement>);
                 }}
-                onPointerMove={(e) =>
-                  vertexDrag.bind.onPointerMove(e as unknown as React.PointerEvent<HTMLElement>)
-                }
-                onPointerUp={(e) =>
-                  vertexDrag.bind.onPointerUp(e as unknown as React.PointerEvent<HTMLElement>)
-                }
-              />
+              >
+                <circle cx={pt.x} cy={pt.y} r={1.85} fill="transparent" />
+                <circle
+                  cx={pt.x}
+                  cy={pt.y}
+                  r={0.85}
+                  fill={selectedPt === idx ? '#60A5FA' : '#0D1119'}
+                  stroke="#F8FAFC"
+                  strokeWidth={0.22}
+                />
+              </g>
             ))}
         </svg>
       </div>

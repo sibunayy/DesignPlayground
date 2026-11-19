@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { ActiveSnapLine, SnapGuideOverlay } from '../components/StudioShell/SnapGuideOverlay';
+import { snapValue } from '../engine/snapEngine';
 import { ExerciseResult, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { ExerciseComponentProps } from './L01WhiteSpace';
@@ -30,15 +32,26 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
+  const [activeSnaps, setActiveSnaps] = useState<ActiveSnapLine[]>([]);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const selectedIdxRef = useRef(selectedIdx);
+  selectedIdxRef.current = selectedIdx;
+  const rawOffsetRef = useRef(0);
+  const rawHangRef = useRef(scenario.mode === 'tracking-margin' ? scenario.initialHangPct : 0);
 
   React.useEffect(() => {
     setSelectedIdx(1);
+    selectedIdxRef.current = 1;
     setState({
       offsets: scenario.mode === 'kern' ? [...scenario.initialOffsets] : [0],
       capsTracking: scenario.mode === 'tracking-margin' ? scenario.initialCapsTracking : 0,
       bodyTracking: scenario.mode === 'tracking-margin' ? scenario.initialBodyTracking : 0,
       hangPct: scenario.mode === 'tracking-margin' ? scenario.initialHangPct : 0,
     });
+    rawHangRef.current = scenario.mode === 'tracking-margin' ? scenario.initialHangPct : 0;
+    setActiveSnaps([]);
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -46,28 +59,52 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
 
   const glyphDrag = useStudioPointer({
     penPrecisionScale: 0.5,
+    onStart: () => {
+      const idx = selectedIdxRef.current;
+      rawOffsetRef.current = stateRef.current.offsets[idx] ?? 0;
+    },
     onMove: ({ dx }) => {
       if (submitted || scenario.mode !== 'kern') return;
+      const idx = selectedIdxRef.current;
+      rawOffsetRef.current = Math.max(-45, Math.min(25, rawOffsetRef.current + dx * 0.65));
+      const snap0 = snapValue(rawOffsetRef.current, [{ value: 0, label: '0px', kind: 'zero' }], 2.2);
+      const val = snap0.snapped ? 0 : Number(rawOffsetRef.current.toFixed(1));
       setState((prev) => {
         const nextOffsets = [...prev.offsets];
-        // Dragging glyph i shifts it and subsequent glyphs visually or individually
-        nextOffsets[selectedIdx] = Number(
-          Math.max(-45, Math.min(25, nextOffsets[selectedIdx] + dx * 0.65)).toFixed(1)
-        );
+        nextOffsets[idx] = val;
         return { ...prev, offsets: nextOffsets };
       });
     },
   });
 
   const quoteDrag = useStudioPointer({
-    penPrecisionScale: 0.5,
+    penPrecisionScale: 0.55,
+    onStart: () => {
+      rawHangRef.current = stateRef.current.hangPct;
+    },
     onMove: ({ dx }) => {
       if (submitted || scenario.mode !== 'tracking-margin') return;
+      rawHangRef.current = Math.max(0, Math.min(120, rawHangRef.current - dx * 1.4));
+      const snapH = snapValue(
+        rawHangRef.current,
+        [
+          { value: 0, label: '0% flush', kind: 'edge' },
+          { value: 50, label: '50%', kind: 'third' },
+          { value: 100, label: '100% hang', kind: 'center' },
+        ],
+        6
+      );
+      setActiveSnaps(
+        snapH.snapped
+          ? [{ axis: 'x', pos: '0px', label: snapH.target?.label, kind: snapH.target?.kind }]
+          : []
+      );
       setState((prev) => ({
         ...prev,
-        hangPct: Math.max(0, Math.min(120, Math.round(prev.hangPct - dx * 1.4))),
+        hangPct: Math.round(snapH.value),
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const handleSubmit = () => {
@@ -140,6 +177,7 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
                 {...(locked || submitted ? {} : glyphDrag.bind)}
                 onPointerDown={(e) => {
                   if (!locked && !submitted) {
+                    selectedIdxRef.current = idx;
                     setSelectedIdx(idx);
                     glyphDrag.bind.onPointerDown(e);
                   }
@@ -147,7 +185,7 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
                 style={{
                   position: 'relative',
                   fontFamily: "'EB Garamond', Georgia, serif",
-                  fontSize: 'clamp(64px, 10vw, 108px)',
+                  fontSize: 'clamp(52px, 11vw, 108px)',
                   fontWeight: 500,
                   lineHeight: 1,
                   transform: `translateX(${cumulativeShift}px)`,
@@ -227,6 +265,7 @@ export const L07MicroType: React.FC<ExerciseComponentProps> = ({
             paddingLeft: 0,
           }}
         >
+          {!submitted && <SnapGuideOverlay lines={activeSnaps} />}
           <div
             style={{
               fontSize: 11.5,

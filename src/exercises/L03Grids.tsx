@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { ActiveSnapLine, SnapGuideOverlay } from '../components/StudioShell/SnapGuideOverlay';
+import { SnapTarget, snapValue } from '../engine/snapEngine';
 import { ExerciseResult, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { ExerciseComponentProps } from './L01WhiteSpace';
@@ -30,6 +32,32 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
+  const [activeSnaps, setActiveSnaps] = useState<ActiveSnapLine[]>([]);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const rawC1WRef = useRef(scenario.initialCard1.w);
+  const rawC2XRef = useRef(scenario.initialCard2.x);
+
+  const colRightTargets = useMemo<SnapTarget[]>(
+    () =>
+      Array.from({ length: scenario.columns }, (_, col) => ({
+        value: (col + 1) * scenario.colWidth + col * scenario.gutter,
+        label: `C${col + 1} edge`,
+        kind: 'column',
+      })),
+    [scenario.colWidth, scenario.columns, scenario.gutter]
+  );
+
+  const colLeftTargets = useMemo<SnapTarget[]>(
+    () =>
+      Array.from({ length: scenario.columns }, (_, col) => ({
+        value: col * (scenario.colWidth + scenario.gutter),
+        label: `C${col + 1} start`,
+        kind: 'column',
+      })),
+    [scenario.colWidth, scenario.columns, scenario.gutter]
+  );
 
   React.useEffect(() => {
     setState({
@@ -39,6 +67,9 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
       card2W: scenario.initialCard2.w,
       cardPad: scenario.initialPad,
     });
+    rawC1WRef.current = scenario.initialCard1.w;
+    rawC2XRef.current = scenario.initialCard2.x;
+    setActiveSnaps([]);
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -46,21 +77,58 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
 
   const c1RightDrag = useStudioPointer({
     penPrecisionScale: 0.7,
+    onStart: () => {
+      rawC1WRef.current = stateRef.current.card1W;
+    },
     onMove: ({ dx }) => {
       if (submitted) return;
+      rawC1WRef.current = Math.max(140, Math.min(340, rawC1WRef.current + dx * 0.85));
+      const rawRightEdge = stateRef.current.card1X + rawC1WRef.current;
+      const snapEdge = snapValue(rawRightEdge, colRightTargets, 11);
+      const nextW = Math.max(140, Math.min(340, Math.round(snapEdge.value - stateRef.current.card1X)));
+      setActiveSnaps(
+        snapEdge.snapped
+          ? [
+              {
+                axis: 'x',
+                pos: `${((stateRef.current.card1X + nextW) / 560) * 100}%`,
+                label: snapEdge.target?.label,
+                kind: 'column',
+              },
+            ]
+          : []
+      );
       setState((s) => ({
         ...s,
-        card1W: Math.max(140, Math.min(340, Math.round(s.card1W + dx * 0.7))),
+        card1W: nextW,
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const c2LeftDrag = useStudioPointer({
     penPrecisionScale: 0.7,
+    onStart: () => {
+      rawC2XRef.current = stateRef.current.card2X;
+    },
     onMove: ({ dx }) => {
       if (submitted) return;
+      rawC2XRef.current = Math.max(200, Math.min(420, rawC2XRef.current + dx * 0.85));
+      const snapX = snapValue(rawC2XRef.current, colLeftTargets, 11);
+      const nextX = Math.max(200, Math.min(420, Math.round(snapX.value)));
+      setActiveSnaps(
+        snapX.snapped
+          ? [
+              {
+                axis: 'x',
+                pos: `${(nextX / 560) * 100}%`,
+                label: snapX.target?.label,
+                kind: 'column',
+              },
+            ]
+          : []
+      );
       setState((s) => {
-        const nextX = Math.max(200, Math.min(420, Math.round(s.card2X + dx * 0.7)));
         const delta = nextX - s.card2X;
         return {
           ...s,
@@ -69,6 +137,7 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
         };
       });
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const handleSubmit = () => {
@@ -149,7 +218,8 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
       </div>
 
       {/* 8-Column Proportional Stage */}
-      <div style={{ position: 'relative', width: '100%', height: 290 }}>
+      <div style={{ position: 'relative', width: '100%', minHeight: 280, height: 290 }}>
+        {!submitted && <SnapGuideOverlay lines={activeSnaps} />}
         {/* Underlying Column + Gutter Overlay */}
         {Array.from({ length: scenario.columns }).map((_, col) => {
           const left = col * (scenario.colWidth + scenario.gutter);
@@ -195,7 +265,7 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
             <h3
               style={{
                 fontFamily: 'var(--font-grotesk)',
-                fontSize: 22,
+                fontSize: 'clamp(14px, 3.6vw, 22px)',
                 lineHeight: 1.12,
                 marginTop: 6,
                 fontWeight: 700,
@@ -205,7 +275,7 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
               {scenario.brief.headline}
             </h3>
           </div>
-          <p style={{ fontSize: 12.5, lineHeight: 1.45, color: '#444444' }}>
+          <p style={{ fontSize: 'clamp(10.5px, 2.5vw, 12.5px)', lineHeight: 1.45, color: '#444444' }}>
             {scenario.brief.subhead}
           </p>
 
@@ -217,15 +287,15 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                right: -14,
-                width: 28,
+                right: -19,
+                width: 38,
                 cursor: 'ew-resize',
                 display: 'grid',
                 placeItems: 'center',
                 zIndex: 10,
               }}
             >
-              <div style={{ width: 5, height: 42, borderRadius: 2, background: '#111111' }} />
+              <div style={{ width: 5, height: 46, borderRadius: 2, background: c1RightDrag.isDragging ? '#0EA5E9' : '#111111' }} />
             </div>
           )}
         </div>
@@ -251,14 +321,14 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
             <div className="tabular" style={{ fontSize: 11, opacity: 0.78 }}>
               {scenario.brief.metaTag}
             </div>
-            <h4 style={{ fontFamily: 'var(--font-grotesk)', fontSize: 19, lineHeight: 1.18, marginTop: 8, fontWeight: 600 }}>
+            <h4 style={{ fontFamily: 'var(--font-grotesk)', fontSize: 'clamp(13px, 3.2vw, 19px)', lineHeight: 1.18, marginTop: 8, fontWeight: 600 }}>
               Exhibition Notes
             </h4>
-            <p style={{ fontSize: 12.5, lineHeight: 1.48, opacity: 0.88, marginTop: 8 }}>
+            <p style={{ fontSize: 'clamp(10.5px, 2.5vw, 12.5px)', lineHeight: 1.48, opacity: 0.88, marginTop: 8 }}>
               {scenario.brief.body}
             </p>
           </div>
-          <span style={{ fontSize: 12.5, fontWeight: 600, textDecoration: 'underline' }}>{scenario.brief.ctaLabel}</span>
+          <span style={{ fontSize: 'clamp(11px, 2.5vw, 12.5px)', fontWeight: 600, textDecoration: 'underline' }}>{scenario.brief.ctaLabel}</span>
 
           {!submitted && (
             <div
@@ -268,15 +338,15 @@ export const L03Grids: React.FC<ExerciseComponentProps> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                left: -14,
-                width: 28,
+                left: -19,
+                width: 38,
                 cursor: 'ew-resize',
                 display: 'grid',
                 placeItems: 'center',
                 zIndex: 10,
               }}
             >
-              <div style={{ width: 5, height: 42, borderRadius: 2, background: '#C83226' }} />
+              <div style={{ width: 5, height: 46, borderRadius: 2, background: c2LeftDrag.isDragging ? '#0EA5E9' : '#C83226' }} />
             </div>
           )}
         </div>

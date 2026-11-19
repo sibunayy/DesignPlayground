@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { ActiveSnapLine, SnapGuideOverlay } from '../components/StudioShell/SnapGuideOverlay';
+import { snapPoint2D, snapValue, stepTargets } from '../engine/snapEngine';
 import { ExerciseResult, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { ExerciseComponentProps } from './L01WhiteSpace';
@@ -28,6 +30,15 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
+  const [activeSnaps, setActiveSnaps] = useState<ActiveSnapLine[]>([]);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const rawShapeRef = useRef({
+    x: scenario.mode === 'optical-center' ? scenario.initialX : 0,
+    y: scenario.mode === 'optical-center' ? scenario.initialY : 0,
+  });
+  const rawRadiusRef = useRef(scenario.mode === 'concentric-radii' ? scenario.initialInnerRadius : 0);
 
   React.useEffect(() => {
     setState({
@@ -35,6 +46,12 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
       offsetY: scenario.mode === 'optical-center' ? scenario.initialY : 0,
       innerRadius: scenario.mode === 'concentric-radii' ? scenario.initialInnerRadius : 0,
     });
+    rawShapeRef.current = {
+      x: scenario.mode === 'optical-center' ? scenario.initialX : 0,
+      y: scenario.mode === 'optical-center' ? scenario.initialY : 0,
+    };
+    rawRadiusRef.current = scenario.mode === 'concentric-radii' ? scenario.initialInnerRadius : 0;
+    setActiveSnaps([]);
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -42,24 +59,51 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
 
   const shapeDrag = useStudioPointer({
     penPrecisionScale: 0.5,
+    onStart: () => {
+      rawShapeRef.current = { x: stateRef.current.offsetX, y: stateRef.current.offsetY };
+    },
     onMove: ({ dx, dy }) => {
       if (submitted || scenario.mode !== 'optical-center') return;
+      rawShapeRef.current.x = Math.max(-24, Math.min(24, rawShapeRef.current.x + dx * 0.65));
+      rawShapeRef.current.y = Math.max(-24, Math.min(24, rawShapeRef.current.y + dy * 0.65));
+      const snap2D = snapPoint2D(
+        rawShapeRef.current.x,
+        rawShapeRef.current.y,
+        [{ value: 0, label: 'center X=0', kind: 'center' }],
+        [{ value: 0, label: 'center Y=0', kind: 'center' }],
+        2.0,
+        2.0
+      );
+      const lines: ActiveSnapLine[] = [];
+      if (snap2D.guideX) {
+        lines.push({ axis: 'x', pos: '50%', label: 'center X', kind: 'center' });
+      }
+      if (snap2D.guideY) {
+        lines.push({ axis: 'y', pos: '50%', label: 'center Y', kind: 'center' });
+      }
+      setActiveSnaps(lines);
       setState((s) => ({
         ...s,
-        offsetX: Number(Math.max(-24, Math.min(24, s.offsetX + dx * 0.65)).toFixed(1)),
-        offsetY: Number(Math.max(-24, Math.min(24, s.offsetY + dy * 0.65)).toFixed(1)),
+        offsetX: Number(snap2D.x.toFixed(1)),
+        offsetY: Number(snap2D.y.toFixed(1)),
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const radiusDrag = useStudioPointer({
     penPrecisionScale: 0.6,
+    onStart: () => {
+      rawRadiusRef.current = stateRef.current.innerRadius;
+    },
     onMove: ({ dx, dy }) => {
       if (submitted || scenario.mode !== 'concentric-radii') return;
-      const delta = (dx + dy) * 0.35;
+      const delta = (dx + dy) * 0.4;
+      rawRadiusRef.current = Math.max(0, Math.min(40, rawRadiusRef.current + delta));
+      const snapR = snapValue(rawRadiusRef.current, stepTargets(0, 40, 2, 'grid', 'px'), 1.1);
       setState((s) => ({
         ...s,
-        innerRadius: Math.max(0, Math.min(40, Math.round(s.innerRadius + delta))),
+        innerRadius: Math.round(snapR.value),
       }));
     },
   });
@@ -115,6 +159,7 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
             cursor: submitted ? 'default' : 'move',
           }}
         >
+          {!submitted && <SnapGuideOverlay lines={activeSnaps} />}
           {/* Container Shape */}
           <svg viewBox="0 0 220 220" width="220" height="220" style={{ overflow: 'visible' }}>
             {scenario.shape === 'avatar-dot' ? (
@@ -233,7 +278,8 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
         {/* Outer Container */}
         <div
           style={{
-            width: 310,
+            width: '100%',
+            maxWidth: 310,
             height: 210,
             borderRadius: scenario.outerRadius,
             padding: scenario.padding,
@@ -265,12 +311,12 @@ export const L09OpticalGeometry: React.FC<ExerciseComponentProps> = ({
                 aria-label="Drag inner corner radius"
                 style={{
                   position: 'absolute',
-                  top: 8,
-                  left: 8,
-                  width: 32,
-                  height: 32,
+                  top: 6,
+                  left: 6,
+                  width: 40,
+                  height: 40,
                   borderRadius: 999,
-                  background: '#D94526',
+                  background: radiusDrag.isDragging ? '#0EA5E9' : '#D94526',
                   border: '2px solid #FFFFFF',
                   cursor: 'nwse-resize',
                 }}

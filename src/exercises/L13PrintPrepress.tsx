@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { ActiveSnapLine, SnapGuideOverlay } from '../components/StudioShell/SnapGuideOverlay';
+import { snapValue, stepTargets } from '../engine/snapEngine';
 import { ExerciseResult, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { ExerciseComponentProps } from './L01WhiteSpace';
@@ -31,6 +33,12 @@ export const L13PrintPrepress: React.FC<ExerciseComponentProps> = ({
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
   // Post-submit interactive guillotine cut drift simulator (-0.5 .. +0.5 mm)
   const [cutDriftMm, setCutDriftMm] = useState(0.5);
+  const [activeSnaps, setActiveSnaps] = useState<ActiveSnapLine[]>([]);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const rawBleedRef = useRef(scenario.initialBleedMm);
+  const rawSafeRef = useRef(scenario.initialSafeMm);
 
   React.useEffect(() => {
     setState({
@@ -39,6 +47,9 @@ export const L13PrintPrepress: React.FC<ExerciseComponentProps> = ({
       richBlackSmallText: scenario.initialRichBlackSmallText,
       lowResLogo: scenario.initialLowResLogo,
     });
+    rawBleedRef.current = scenario.initialBleedMm;
+    rawSafeRef.current = scenario.initialSafeMm;
+    setActiveSnaps([]);
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -47,24 +58,48 @@ export const L13PrintPrepress: React.FC<ExerciseComponentProps> = ({
 
   const bleedDrag = useStudioPointer({
     penPrecisionScale: 0.7,
+    onStart: () => {
+      rawBleedRef.current = stateRef.current.bleedMm;
+    },
     onMove: ({ dx }) => {
       if (submitted) return;
+      rawBleedRef.current = Math.max(0, Math.min(4, rawBleedRef.current - dx * 0.06));
+      const snapB = snapValue(rawBleedRef.current, stepTargets(0, 4, 0.5, 'edge', 'mm'), 0.16);
+      const val = Number(snapB.value.toFixed(1));
+      setActiveSnaps(
+        snapB.snapped
+          ? [{ axis: 'x', pos: `${24 - val * 8}px`, label: `${val.toFixed(1)}mm bleed`, kind: 'edge' }]
+          : []
+      );
       setState((s) => ({
         ...s,
-        bleedMm: Number(Math.max(0, Math.min(4, s.bleedMm - dx * 0.05)).toFixed(1)),
+        bleedMm: val,
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const safeDrag = useStudioPointer({
     penPrecisionScale: 0.7,
+    onStart: () => {
+      rawSafeRef.current = stateRef.current.safeMm;
+    },
     onMove: ({ dx }) => {
       if (submitted) return;
+      rawSafeRef.current = Math.max(0, Math.min(6, rawSafeRef.current + dx * 0.07));
+      const snapS = snapValue(rawSafeRef.current, stepTargets(0, 6, 0.5, 'grid', 'mm'), 0.16);
+      const val = Number(snapS.value.toFixed(1));
+      setActiveSnaps(
+        snapS.snapped
+          ? [{ axis: 'x', pos: `calc(100% - ${24 + val * 8}px)`, label: `${val.toFixed(1)}mm safe`, kind: 'grid' }]
+          : []
+      );
       setState((s) => ({
         ...s,
-        safeMm: Number(Math.max(0, Math.min(6, s.safeMm + dx * 0.06)).toFixed(1)),
+        safeMm: val,
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const handleSubmit = () => {
@@ -169,6 +204,7 @@ export const L13PrintPrepress: React.FC<ExerciseComponentProps> = ({
             BLEED: {view.bleedMm.toFixed(1)} MM
           </span>
 
+          {!submitted && <SnapGuideOverlay lines={activeSnaps} />}
           {!submitted && (
             <div
               {...bleedDrag.bind}
@@ -177,14 +213,15 @@ export const L13PrintPrepress: React.FC<ExerciseComponentProps> = ({
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
-                left: -12,
-                width: 24,
+                left: -20,
+                width: 40,
                 cursor: 'ew-resize',
                 display: 'grid',
                 placeItems: 'center',
+                zIndex: 10,
               }}
             >
-              <div style={{ width: 5, height: 42, borderRadius: 999, background: '#D94526' }} />
+              <div style={{ width: 5, height: 46, borderRadius: 999, background: bleedDrag.isDragging ? '#0EA5E9' : '#D94526' }} />
             </div>
           )}
         </div>

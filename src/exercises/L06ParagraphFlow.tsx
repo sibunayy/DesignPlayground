@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Timer } from 'lucide-react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { ActiveSnapLine, SnapGuideOverlay } from '../components/StudioShell/SnapGuideOverlay';
+import { snapValue, stepTargets } from '../engine/snapEngine';
 import { ExerciseResult, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { ExerciseComponentProps } from './L01WhiteSpace';
@@ -32,6 +34,11 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
   const [timedMode, setTimedMode] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(60);
+  const [activeSnaps, setActiveSnaps] = useState<ActiveSnapLine[]>([]);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const rawWidthRef = useRef(scenario.initialWidthPx);
 
   useEffect(() => {
     setState({
@@ -40,6 +47,8 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
       hyphenate: scenario.initialHyphenate,
       boundLastPair: false,
     });
+    rawWidthRef.current = scenario.initialWidthPx;
+    setActiveSnaps([]);
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -62,13 +71,25 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
 
   const widthDrag = useStudioPointer({
     penPrecisionScale: 0.7,
+    onStart: () => {
+      rawWidthRef.current = stateRef.current.widthPx;
+    },
     onMove: ({ dx }) => {
       if (submitted) return;
+      rawWidthRef.current = Math.max(210, Math.min(440, rawWidthRef.current + dx * 0.9));
+      const snapW = snapValue(rawWidthRef.current, stepTargets(210, 440, 16, 'grid', 'px'), 5);
+      const nextW = Math.round(snapW.value);
+      setActiveSnaps(
+        snapW.snapped
+          ? [{ axis: 'x', pos: '100%', label: `${nextW}px`, kind: 'edge' }]
+          : []
+      );
       setState((s) => ({
         ...s,
-        widthPx: Math.max(210, Math.min(440, Math.round(s.widthPx + dx * 0.8))),
+        widthPx: nextW,
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const handleSubmit = () => {
@@ -171,6 +192,7 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
           borderRight: submitted ? '1px solid rgba(33,27,24,0.2)' : '2px dashed #1D4ED8',
         }}
       >
+        {!submitted && <SnapGuideOverlay lines={activeSnaps} />}
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginBottom: 10 }}>
           {scenario.title}
         </h3>
@@ -227,14 +249,15 @@ export const L06ParagraphFlow: React.FC<ExerciseComponentProps> = ({
               position: 'absolute',
               top: 0,
               bottom: 0,
-              right: -16,
-              width: 30,
+              right: -19,
+              width: 38,
               cursor: 'ew-resize',
               display: 'grid',
               placeItems: 'center',
+              zIndex: 10,
             }}
           >
-            <div style={{ width: 5, height: 42, borderRadius: 999, background: '#D94526' }} />
+            <div style={{ width: 5, height: 46, borderRadius: 999, background: widthDrag.isDragging ? '#0EA5E9' : '#D94526' }} />
           </div>
         )}
       </div>

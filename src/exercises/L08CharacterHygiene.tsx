@@ -146,15 +146,12 @@ export const L08CharacterHygiene: React.FC<ExerciseComponentProps> = ({
 
               {isOpen && (
                 <span
+                  className="hygiene-choice-popover"
                   style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: '105%',
-                    zIndex: 30,
+                    zIndex: 60,
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 4,
-                    minWidth: 230,
                     padding: 8,
                     borderRadius: 10,
                     background: '#141413',

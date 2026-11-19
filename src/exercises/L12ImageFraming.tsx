@@ -1,6 +1,8 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { ActiveSnapLine, SnapGuideOverlay } from '../components/StudioShell/SnapGuideOverlay';
+import { snapValue } from '../engine/snapEngine';
 import { ExerciseResult, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { ExerciseComponentProps } from './L01WhiteSpace';
@@ -27,10 +29,16 @@ export const L12ImageFraming: React.FC<ExerciseComponentProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
+  const [activeSnaps, setActiveSnaps] = useState<ActiveSnapLine[]>([]);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const rawCropRef = useRef<CropRect>({ ...scenario.initialCrop });
 
   React.useEffect(() => {
     setState({ crop: { ...scenario.initialCrop }, rotationDeg: 0 });
+    rawCropRef.current = { ...scenario.initialCrop };
+    setActiveSnaps([]);
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -51,36 +59,83 @@ export const L12ImageFraming: React.FC<ExerciseComponentProps> = ({
 
   const panDrag = useStudioPointer({
     penPrecisionScale: 0.75,
+    onStart: () => {
+      rawCropRef.current = { ...stateRef.current.crop };
+    },
     onMove: ({ dx, dy }) => {
       if (submitted || !stageRef.current) return;
       const rect = stageRef.current.getBoundingClientRect();
-      const nx = dx / rect.width;
-      const ny = dy / rect.height;
+      const nx = dx / Math.max(120, rect.width);
+      const ny = dy / Math.max(120, rect.height);
+      const cur = rawCropRef.current;
+      const h = normHeightForWidth(cur.w);
+      rawCropRef.current = clampCrop({ ...cur, x: cur.x + nx, y: cur.y + ny });
+
+      const cx = rawCropRef.current.x + rawCropRef.current.w / 2;
+      const cy = rawCropRef.current.y + h / 2;
+      const snapXCenter = snapValue(cx, [{ value: 0.5, label: 'center', kind: 'center' }], 0.024);
+      const snapXLeft = snapValue(rawCropRef.current.x, [{ value: 0, label: '0%', kind: 'edge' }, { value: 0.3333, label: '1/3', kind: 'third' }], 0.02);
+      const snapYCenter = snapValue(cy, [{ value: 0.5, label: 'center', kind: 'center' }], 0.024);
+      const snapYTop = snapValue(rawCropRef.current.y, [{ value: 0, label: '0%', kind: 'edge' }, { value: 0.3333, label: '1/3', kind: 'third' }], 0.02);
+
+      const lines: ActiveSnapLine[] = [];
+      let finalX = rawCropRef.current.x;
+      let finalY = rawCropRef.current.y;
+      if (snapXCenter.snapped) {
+        finalX = 0.5 - rawCropRef.current.w / 2;
+        lines.push({ axis: 'x', pos: '50%', label: 'center', kind: 'center' });
+      } else if (snapXLeft.snapped) {
+        finalX = snapXLeft.value;
+        lines.push({ axis: 'x', pos: `${snapXLeft.value * 100}%`, label: snapXLeft.target?.label, kind: snapXLeft.target?.kind });
+      }
+      if (snapYCenter.snapped) {
+        finalY = 0.5 - h / 2;
+        lines.push({ axis: 'y', pos: '50%', label: 'center', kind: 'center' });
+      } else if (snapYTop.snapped) {
+        finalY = snapYTop.value;
+        lines.push({ axis: 'y', pos: `${snapYTop.value * 100}%`, label: snapYTop.target?.label, kind: snapYTop.target?.kind });
+      }
+      setActiveSnaps(lines);
+
       setState((s) => ({
         ...s,
-        crop: clampCrop({
-          ...s.crop,
-          x: s.crop.x + nx,
-          y: s.crop.y + ny,
-        }),
+        crop: clampCrop({ ...rawCropRef.current, x: finalX, y: finalY }),
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const resizeDrag = useStudioPointer({
     penPrecisionScale: 0.75,
+    onStart: () => {
+      rawCropRef.current = { ...stateRef.current.crop };
+    },
     onMove: ({ dx }) => {
       if (submitted || !stageRef.current) return;
       const rect = stageRef.current.getBoundingClientRect();
-      const nw = dx / rect.width;
+      const nw = dx / Math.max(120, rect.width);
+      rawCropRef.current = clampCrop({ ...rawCropRef.current, w: rawCropRef.current.w + nw });
+      const rightEdge = rawCropRef.current.x + rawCropRef.current.w;
+      const snapRight = snapValue(
+        rightEdge,
+        [
+          { value: 0.6667, label: '2/3', kind: 'third' },
+          { value: 1.0, label: 'edge', kind: 'edge' },
+        ],
+        0.022
+      );
+      const finalW = snapRight.snapped ? snapRight.value - rawCropRef.current.x : rawCropRef.current.w;
+      setActiveSnaps(
+        snapRight.snapped
+          ? [{ axis: 'x', pos: `${snapRight.value * 100}%`, label: snapRight.target?.label, kind: snapRight.target?.kind }]
+          : []
+      );
       setState((s) => ({
         ...s,
-        crop: clampCrop({
-          ...s.crop,
-          w: s.crop.w + nw,
-        }),
+        crop: clampCrop({ ...s.crop, w: finalW }),
       }));
     },
+    onEnd: () => setActiveSnaps([]),
   });
 
   const handleSubmit = () => {
@@ -228,6 +283,7 @@ export const L12ImageFraming: React.FC<ExerciseComponentProps> = ({
         )}
 
         {/* Active Draggable Crop Box */}
+        {!submitted && <SnapGuideOverlay lines={activeSnaps} />}
         <div
           {...panDrag.bind}
           style={{
@@ -249,23 +305,33 @@ export const L12ImageFraming: React.FC<ExerciseComponentProps> = ({
             <div style={{ position: 'absolute', top: '66.66%', left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.32)' }} />
           </div>
 
-          {/* Bottom-right Scale Handle */}
+          {/* Bottom-right Scale Handle with 44x44px Mobile Hit Target */}
           {!submitted && (
             <div
               {...resizeDrag.bind}
               aria-label="Resize crop frame"
               style={{
                 position: 'absolute',
-                right: -12,
-                bottom: -12,
-                width: 30,
-                height: 30,
-                borderRadius: 999,
-                background: '#D94526',
-                border: '2.5px solid #FFFFFF',
+                right: -20,
+                bottom: -20,
+                width: 44,
+                height: 44,
+                display: 'grid',
+                placeItems: 'center',
                 cursor: 'nwse-resize',
               }}
-            />
+            >
+              <div
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 999,
+                  background: resizeDrag.isDragging ? '#0EA5E9' : '#D94526',
+                  border: '2.5px solid #FFFFFF',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                }}
+              />
+            </div>
           )}
         </div>
       </div>

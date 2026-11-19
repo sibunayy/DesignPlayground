@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Eye } from 'lucide-react';
 import { StudioFrame } from '../components/StudioShell/StudioFrame';
 import { SliderControl } from '../components/StudioShell/SliderControl';
+import { snapValue, stepTargets } from '../engine/snapEngine';
 import { ExerciseResult, OverlayMode } from '../engine/types';
 import { useStudioPointer } from '../hooks/useStudioPointer';
 import { ExerciseComponentProps } from './L01WhiteSpace';
@@ -31,12 +32,19 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('overlay');
   const [flashHidden, setFlashHidden] = useState(false);
 
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const rawHeadRef = useRef(scenario.initialHeadGap);
+  const rawSectionRef = useRef(scenario.initialSectionGap);
+
   React.useEffect(() => {
     setState({
       headGap: scenario.initialHeadGap,
       sectionGap: scenario.initialSectionGap,
       badgeAccent: scenario.initialBadgeAccent,
     });
+    rawHeadRef.current = scenario.initialHeadGap;
+    rawSectionRef.current = scenario.initialSectionGap;
     setSubmitted(false);
     setResult(null);
     setOverlayMode('overlay');
@@ -44,23 +52,33 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
   }, [scenario]);
 
   const headDrag = useStudioPointer({
-    penPrecisionScale: 0.6,
+    penPrecisionScale: 0.65,
+    onStart: () => {
+      rawHeadRef.current = stateRef.current.headGap;
+    },
     onMove: ({ dy }) => {
       if (submitted) return;
+      rawHeadRef.current = Math.max(4, Math.min(34, rawHeadRef.current + dy * 0.55));
+      const snapH = snapValue(rawHeadRef.current, stepTargets(4, 34, 4, 'grid', 'px'), 1.8);
       setState((s) => ({
         ...s,
-        headGap: Math.max(4, Math.min(34, Math.round(s.headGap + dy * 0.45))),
+        headGap: Math.round(snapH.value),
       }));
     },
   });
 
   const sectionDrag = useStudioPointer({
-    penPrecisionScale: 0.6,
+    penPrecisionScale: 0.65,
+    onStart: () => {
+      rawSectionRef.current = stateRef.current.sectionGap;
+    },
     onMove: ({ dy }) => {
       if (submitted) return;
+      rawSectionRef.current = Math.max(8, Math.min(48, rawSectionRef.current + dy * 0.55));
+      const snapS = snapValue(rawSectionRef.current, stepTargets(8, 48, 4, 'grid', 'px'), 1.8);
       setState((s) => ({
         ...s,
-        sectionGap: Math.max(8, Math.min(48, Math.round(s.sectionGap + dy * 0.45))),
+        sectionGap: Math.round(snapS.value),
       }));
     },
   });
@@ -112,7 +130,7 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
         color: '#F1F5F9',
         borderRadius: 12,
         border: '1px solid rgba(255, 255, 255, 0.12)',
-        padding: 30,
+        padding: 'clamp(18px, 4vw, 30px)',
         boxShadow: 'var(--shadow-artboard)',
         position: 'relative',
       }}
@@ -202,6 +220,25 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
           <p style={{ fontSize: 14.5, lineHeight: 1.5, color: '#CBD5E1' }}>
             {scenario.brief.subhead}
           </p>
+          {headDrag.isDragging && !submitted && (
+            <span
+              className="tabular"
+              style={{
+                position: 'absolute',
+                right: 6,
+                top: -12,
+                fontSize: 10.5,
+                fontWeight: 600,
+                padding: '1px 7px',
+                borderRadius: 4,
+                background: '#0EA5E9',
+                color: '#FFFFFF',
+                pointerEvents: 'none',
+              }}
+            >
+              {viewState.headGap}px
+            </span>
+          )}
           {showGuides && (
             <span
               className="tabular"
@@ -234,6 +271,25 @@ export const L02Hierarchy: React.FC<ExerciseComponentProps> = ({
           position: 'relative',
         }}
       >
+        {sectionDrag.isDragging && !submitted && (
+          <span
+            className="tabular"
+            style={{
+              position: 'absolute',
+              right: 6,
+              top: -12,
+              fontSize: 10.5,
+              fontWeight: 600,
+              padding: '1px 7px',
+              borderRadius: 4,
+              background: '#0EA5E9',
+              color: '#FFFFFF',
+              pointerEvents: 'none',
+            }}
+          >
+            {viewState.sectionGap}px
+          </span>
+        )}
         {showGuides && (
           <span
             className="tabular"

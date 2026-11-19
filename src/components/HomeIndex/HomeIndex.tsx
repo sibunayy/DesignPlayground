@@ -52,7 +52,8 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
   const ringOffset = ringCirc * (1 - completedCount / LESSONS.length);
 
   return (
-    <div
+    <main
+      id="main-workspace"
       style={{
         flex: 1,
         width: '100%',
@@ -65,6 +66,9 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
         gap: 42,
       }}
     >
+      <a href="#main-workspace" className="skip-link">
+        Skip to curriculum
+      </a>
       {/* Top Studio Bar & Asymmetric Masthead */}
       <header
         style={{
@@ -354,7 +358,9 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
                     height: 5,
                     borderRadius: 2,
                     background:
-                      dailyScore !== undefined ? 'var(--ok)' : 'rgba(255, 255, 255, 0.25)',
+                      dailyScore !== undefined
+                        ? 'var(--ok)'
+                        : 'color-mix(in srgb, var(--bg-surface) 28%, transparent)',
                   }}
                 />
               ))}
@@ -473,7 +479,7 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
                     onClick={() => onOpenLesson(lesson.id, 'learn')}
                     style={{
                       flex: 1,
-                      minHeight: 38,
+                      minHeight: 44,
                       borderRadius: 7,
                       border: '1px solid var(--rule)',
                       display: 'inline-flex',
@@ -492,7 +498,7 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
                     onClick={() => onOpenLesson(lesson.id, 'practice')}
                     style={{
                       flex: 1,
-                      minHeight: 38,
+                      minHeight: 44,
                       borderRadius: 7,
                       background: 'var(--bg-subtle)',
                       border: '1px solid var(--rule-strong)',
@@ -607,8 +613,8 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
                     type="button"
                     onClick={() => onOpenLesson(lesson.id, 'learn')}
                     style={{
-                      minHeight: 38,
-                      padding: '0 12px',
+                      minHeight: 42,
+                      padding: '0 13px',
                       borderRadius: 6,
                       border: '1px solid var(--rule)',
                       background: 'var(--bg-surface)',
@@ -623,7 +629,7 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
                     type="button"
                     onClick={() => onOpenLesson(lesson.id, 'practice')}
                     style={{
-                      minHeight: 38,
+                      minHeight: 42,
                       padding: '0 14px',
                       borderRadius: 6,
                       background: 'var(--ink-primary)',
@@ -739,7 +745,7 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
                     onClick={() => onOpenLesson(lesson.id, 'learn')}
                     style={{
                       flex: 1,
-                      minHeight: 38,
+                      minHeight: 44,
                       borderRadius: 6,
                       border: '1px solid var(--rule)',
                       fontSize: 12.5,
@@ -753,7 +759,7 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
                     onClick={() => onOpenLesson(lesson.id, 'practice')}
                     style={{
                       flex: 1,
-                      minHeight: 38,
+                      minHeight: 44,
                       borderRadius: 6,
                       background: 'var(--bg-subtle)',
                       border: '1px solid var(--rule-strong)',
@@ -769,6 +775,6 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
           })}
         </div>
       </section>
-    </div>
+    </main>
   );
 };

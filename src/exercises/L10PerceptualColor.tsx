@@ -134,42 +134,48 @@ export const L10PerceptualColor: React.FC<ExerciseComponentProps> = ({
         <span className="tabular">OKLCH Hue {scenario.targetHue}°</span>
       </div>
       {/* Specimen Preview Card */}
-      {scenario.mode === 'oklch-match' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <div
-            style={{
-              height: 150,
-              borderRadius: 12,
-              background: scenario.referenceHex,
-              display: 'flex',
-              alignItems: 'flex-end',
-              padding: 14,
-              color: '#141413',
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            Reference Luminance
+      {scenario.mode === 'oklch-match' && (() => {
+        const refRgb = hexToRgb(scenario.referenceHex);
+        const refRelLum = (0.2126 * refRgb.r + 0.7152 * refRgb.g + 0.0722 * refRgb.b) / 255;
+        const refInk = refRelLum < 0.45 ? '#F7F6F2' : '#141413';
+        const userInk = view.l < 0.56 ? '#F7F6F2' : '#141413';
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div
+              style={{
+                height: 150,
+                borderRadius: 12,
+                background: scenario.referenceHex,
+                display: 'flex',
+                alignItems: 'flex-end',
+                padding: 14,
+                color: refInk,
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              Reference Luminance
+            </div>
+            <div
+              style={{
+                height: 150,
+                borderRadius: 12,
+                background: userSwatchHex,
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                padding: 14,
+                color: userInk,
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              <span>Your Matched Swatch</span>
+              {showGuides && <span className="tabular">{userSwatchHex}</span>}
+            </div>
           </div>
-          <div
-            style={{
-              height: 150,
-              borderRadius: 12,
-              background: userSwatchHex,
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-              padding: 14,
-              color: '#141413',
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            <span>Your Matched Swatch</span>
-            {showGuides && <span className="tabular">{userSwatchHex}</span>}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {scenario.mode === 'apca-contrast' && (
         <div
@@ -248,6 +254,8 @@ export const L10PerceptualColor: React.FC<ExerciseComponentProps> = ({
         </div>
         <div
           ref={padRef}
+          role="application"
+          aria-label="OKLCH Lightness and Chroma plane"
           {...padDrag.bind}
           style={{
             position: 'relative',

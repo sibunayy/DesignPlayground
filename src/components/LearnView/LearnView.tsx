@@ -12,6 +12,7 @@ interface LearnViewProps {
 export const LearnView: React.FC<LearnViewProps> = ({ lesson, onStartPractice }) => {
   return (
     <main
+      id="main-workspace"
       style={{
         flex: 1,
         width: '100%',
@@ -83,7 +84,7 @@ export const LearnView: React.FC<LearnViewProps> = ({ lesson, onStartPractice })
       <section
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
           gap: 18,
           alignItems: 'start',
         }}

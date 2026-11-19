@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   BookOpen,
   ChevronLeft,
@@ -47,6 +47,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const [seedOpen, setSeedOpen] = useState(false);
   const [seedDraft, setSeedDraft] = useState(seed ?? '4F9A');
   const [prefsOpen, setPrefsOpen] = useState(false);
+  const actionsWrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -55,9 +56,20 @@ export const TopBar: React.FC<TopBarProps> = ({
         setPrefsOpen(false);
       }
     };
+    const onOutsidePointer = (e: PointerEvent) => {
+      if (!seedOpen && !prefsOpen) return;
+      if (actionsWrapRef.current && !actionsWrapRef.current.contains(e.target as Node)) {
+        setSeedOpen(false);
+        setPrefsOpen(false);
+      }
+    };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    window.addEventListener('pointerdown', onOutsidePointer);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onOutsidePointer);
+    };
+  }, [seedOpen, prefsOpen]);
 
   const commitSeed = (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +211,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       )}
 
       {/* Right: Seed Pill + Studio Preferences */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
+      <div ref={actionsWrapRef} style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
         {seed && (
           <button
             type="button"
@@ -210,11 +222,12 @@ export const TopBar: React.FC<TopBarProps> = ({
             }}
             aria-label={`Brief seed ${seed}`}
             aria-expanded={seedOpen}
+            translate="no"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 4,
-              minHeight: 38,
+              minHeight: 40,
               padding: '0 10px',
               borderRadius: 8,
               border: '1px solid var(--rule-strong)',
@@ -241,8 +254,8 @@ export const TopBar: React.FC<TopBarProps> = ({
           style={{
             display: 'grid',
             placeItems: 'center',
-            width: 38,
-            height: 38,
+            width: 40,
+            height: 40,
             borderRadius: 8,
             border: '1px solid var(--rule-strong)',
             background: 'var(--bg-surface)',
@@ -260,8 +273,10 @@ export const TopBar: React.FC<TopBarProps> = ({
             style={{
               position: 'absolute',
               top: 48,
-              right: 44,
-              width: 244,
+              right: 0,
+              width: 248,
+              maxWidth: 'calc(100vw - 24px)',
+              overscrollBehavior: 'contain',
               padding: 14,
               borderRadius: 10,
               background: 'var(--bg-surface)',
@@ -279,8 +294,13 @@ export const TopBar: React.FC<TopBarProps> = ({
             <form onSubmit={commitSeed} style={{ display: 'flex', gap: 6 }}>
               <input
                 id="seed-code-input"
+                name="seedCode"
                 type="text"
                 maxLength={4}
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                placeholder="4F9A…"
                 value={seedDraft}
                 onChange={(e) => setSeedDraft(e.target.value.toUpperCase())}
                 className="tabular"

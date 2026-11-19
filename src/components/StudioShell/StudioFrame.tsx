@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Check, EyeOff, Hand, Maximize2, Palette, PenTool, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { ExerciseResult, EyeLens, OverlayMode } from '../../engine/types';
 import { useStudioPointer } from '../../hooks/useStudioPointer';
@@ -59,6 +59,16 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [mobileLensesOpen, setMobileLensesOpen] = useState(false);
+  const railRef = useRef<HTMLElement | null>(null);
+  const prevSubmittedRef = useRef(submitted);
+
+  useEffect(() => {
+    // On narrow phones/portrait screens, scroll smoothly to the revealed critique drawer upon submit
+    if (!prevSubmittedRef.current && submitted && typeof window !== 'undefined' && window.innerWidth < 1024) {
+      railRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+    }
+    prevSubmittedRef.current = submitted;
+  }, [submitted]);
 
   // Canvas Hand-Panning (works on empty canvas backdrop OR anywhere when Hand Mode is active)
   const canvasPanDrag = useStudioPointer({
@@ -98,7 +108,7 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
       style={{ position: 'relative' }}
     >
       {/* Main Artboard Stage — touch-pannable around the canvas or anywhere in Hand mode */}
-      <div className="studio-stage">
+      <main id="main-workspace" className="studio-stage">
         {/* Design World Context + Task Prompt */}
         <div
           style={{
@@ -227,9 +237,52 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
                   fontWeight: 600,
                 }}
               >
-                Hand Pan Active — Drag anywhere to move canvas
+                Hand Pan Active: drag anywhere to move canvas
               </span>
             </div>
+          )}
+        </div>
+
+        {/* Mobile Canvas Zoom & Reset Strip (< 768px) */}
+        <div className="mobile-canvas-zoom" role="group" aria-label="Mobile canvas zoom controls">
+          <button
+            type="button"
+            aria-label="Zoom out canvas"
+            onClick={() => setZoom((z) => Math.max(0.75, Number((z - 0.15).toFixed(2))))}
+            style={{ width: 38, height: 36, display: 'grid', placeItems: 'center', color: 'var(--ink-secondary)' }}
+          >
+            <ZoomOut size={15} aria-hidden="true" />
+          </button>
+          <span className="tabular" style={{ fontSize: 12, minWidth: 42, textAlign: 'center', color: 'var(--ink-muted)' }}>
+            {Math.round(zoom * 100)}%
+          </span>
+          <button
+            type="button"
+            aria-label="Zoom in canvas"
+            onClick={() => setZoom((z) => Math.min(1.6, Number((z + 0.15).toFixed(2))))}
+            style={{ width: 38, height: 36, display: 'grid', placeItems: 'center', color: 'var(--ink-secondary)' }}
+          >
+            <ZoomIn size={15} aria-hidden="true" />
+          </button>
+          {isViewModified && (
+            <button
+              type="button"
+              aria-label="Reset canvas pan and zoom"
+              onClick={resetCanvasView}
+              style={{
+                height: 36,
+                padding: '0 8px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: 11.5,
+                fontWeight: 600,
+                color: 'var(--accent)',
+              }}
+            >
+              <Maximize2 size={13} aria-hidden="true" />
+              <span>Reset</span>
+            </button>
           )}
         </div>
 
@@ -335,10 +388,11 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
             </button>
           )}
         </div>
-      </div>
+      </main>
 
       {/* Collapsible Side Rail (Landscape Tablet/Desktop) / Critique Drawer (Portrait & Mobile Post-Submit) */}
       <aside
+        ref={railRef}
         className={`studio-rail ${!submitted ? 'is-attempting' : ''}`}
         aria-label="Studio controls and critique"
       >
@@ -456,10 +510,13 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
         <div className="mobile-sticky-bar">
           {popoutOpen && fineControls && (
             <div
+              role="region"
+              aria-label="Fine slider adjustments"
               style={{
-                maxHeight: '34dvh',
+                maxHeight: '36dvh',
                 overflowY: 'auto',
-                padding: '12px 12px',
+                overscrollBehavior: 'contain',
+                padding: '10px 12px 12px',
                 borderRadius: 10,
                 background: 'var(--bg-paper)',
                 border: '1px solid var(--rule)',
@@ -468,6 +525,19 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
                 gap: 12,
               }}
             >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--ink-secondary)' }}>
+                  Fine Adjustments
+                </span>
+                <button
+                  type="button"
+                  aria-label="Close fine adjustments"
+                  onClick={() => setPopoutOpen(false)}
+                  style={{ width: 32, height: 32, display: 'grid', placeItems: 'center', color: 'var(--ink-muted)' }}
+                >
+                  <X size={15} aria-hidden="true" />
+                </button>
+              </div>
               {fineControls}
             </div>
           )}
@@ -482,7 +552,7 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
             </div>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <button
               type="button"
               aria-pressed={handMode}
@@ -499,12 +569,13 @@ export const StudioFrame: React.FC<StudioFrameProps> = ({
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 4,
+                gap: 5,
                 fontSize: 12,
                 fontWeight: 600,
               }}
             >
-              <Hand size={16} aria-hidden="true" />
+              <Hand size={15} aria-hidden="true" />
+              <span>Pan</span>
             </button>
 
             {availableLenses.length > 0 && (

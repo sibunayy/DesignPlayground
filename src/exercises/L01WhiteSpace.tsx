@@ -191,8 +191,20 @@ export const L01WhiteSpace: React.FC<ExerciseComponentProps> = ({
         <div
           {...marginDrag.bind}
           role="slider"
+          tabIndex={0}
           aria-label="Drag left margin inward"
+          aria-valuemin={6}
+          aria-valuemax={48}
           aria-valuenow={displayState.margin}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+              e.preventDefault();
+              setState((s) => ({ ...s, margin: Math.max(6, s.margin - 2) }));
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+              e.preventDefault();
+              setState((s) => ({ ...s, margin: Math.min(48, s.margin + 2) }));
+            }
+          }}
           style={{
             position: 'absolute',
             top: 0,

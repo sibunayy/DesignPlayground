@@ -128,66 +128,109 @@ export const ExplainerPlayer: React.FC<ExplainerPlayerProps> = ({ lesson }) => {
         )}
       </div>
 
-      {/* Scrub & Playback Controls */}
+      {/* Scrub, Playback & Quick Phase Step Controls */}
       {!lesson.videoSrc && (
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: '10px 14px',
+            flexDirection: 'column',
             borderTop: '1px solid var(--rule)',
             background: 'var(--bg-surface)',
           }}
         >
-          <button
-            type="button"
-            aria-label={playing ? 'Pause explainer' : 'Play explainer'}
-            onClick={handleTogglePlay}
+          <div
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 999,
-              border: '1px solid var(--rule-strong)',
-              display: 'grid',
-              placeItems: 'center',
-              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '8px 14px',
             }}
           >
-            {playing ? <Pause size={15} /> : <Play size={15} />}
-          </button>
+            <button
+              type="button"
+              aria-label={playing ? 'Pause explainer' : 'Play explainer'}
+              onClick={handleTogglePlay}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 999,
+                border: '1px solid var(--rule-strong)',
+                display: 'grid',
+                placeItems: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+            </button>
 
-          <input
-            type="range"
-            aria-label="Scrub explainer timeline"
-            className="studio-slider"
-            min={0}
-            max={1}
-            step={0.005}
-            value={progress}
-            onChange={(e) => {
-              setPlaying(false);
-              setProgress(parseFloat(e.target.value));
-            }}
-          />
+            <input
+              type="range"
+              aria-label="Scrub explainer timeline"
+              className="studio-slider"
+              min={0}
+              max={1}
+              step={0.005}
+              value={progress}
+              onChange={(e) => {
+                setPlaying(false);
+                setProgress(parseFloat(e.target.value));
+              }}
+            />
 
-          <button
-            type="button"
-            aria-label="Replay explainer"
-            onClick={handleReplay}
+            <button
+              type="button"
+              aria-label="Replay explainer"
+              onClick={handleReplay}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 999,
+                border: '1px solid var(--rule)',
+                display: 'grid',
+                placeItems: 'center',
+                flexShrink: 0,
+                color: 'var(--ink-secondary)',
+              }}
+            >
+              <RotateCcw size={15} aria-hidden="true" />
+            </button>
+          </div>
+
+          <div
+            role="group"
+            aria-label="Jump to explainer phase"
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 999,
-              border: '1px solid var(--rule)',
               display: 'grid',
-              placeItems: 'center',
-              flexShrink: 0,
-              color: 'var(--ink-secondary)',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              borderTop: '1px solid var(--rule)',
             }}
           >
-            <RotateCcw size={14} />
-          </button>
+            {[
+              { label: '01 Flaw', active: progress < 0.34, jump: 0.14 },
+              { label: '02 Diagnosis', active: progress >= 0.34 && progress < 0.66, jump: 0.5 },
+              { label: '03 Fix', active: progress >= 0.66, jump: 0.85 },
+            ].map((step, idx) => (
+              <button
+                key={step.label}
+                type="button"
+                aria-pressed={step.active}
+                onClick={() => {
+                  setPlaying(false);
+                  setProgress(step.jump);
+                }}
+                style={{
+                  minHeight: 38,
+                  fontSize: 12,
+                  fontWeight: step.active ? 600 : 500,
+                  color: step.active ? 'var(--accent)' : 'var(--ink-secondary)',
+                  background: step.active ? 'var(--accent-tint)' : 'transparent',
+                  borderLeft: idx === 0 ? 'none' : '1px solid var(--rule)',
+                }}
+              >
+                {step.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

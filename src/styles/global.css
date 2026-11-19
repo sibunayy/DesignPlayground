@@ -17,9 +17,33 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overscroll-behavior: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+@media (pointer: fine) {
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--ink-primary);
+  color: var(--bg-surface);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  left: 12px;
 }
 
 #root {
@@ -29,11 +53,21 @@ body {
 }
 
 h1,
-h2,
+h2 {
+  margin: 0;
+  text-wrap: balance;
+  scroll-margin-top: 76px;
+}
+
 h3,
 h4,
 p {
   margin: 0;
+  scroll-margin-top: 76px;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 button,
@@ -225,6 +259,10 @@ input:focus-visible,
   flex-wrap: wrap;
 }
 
+.mobile-canvas-zoom {
+  display: none;
+}
+
 .mobile-sticky-bar {
   display: none;
 }
@@ -287,6 +325,18 @@ input:focus-visible,
     display: none;
   }
 
+  .mobile-canvas-zoom {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 9px;
+    background: var(--bg-surface);
+    border: 1px solid var(--rule-strong);
+    box-shadow: var(--shadow-tactile);
+    align-self: flex-end;
+  }
+
   .studio-rail.is-attempting {
     display: none;
   }
@@ -300,6 +350,7 @@ input:focus-visible,
     display: flex;
     flex-direction: column;
     gap: 8px;
+    overscroll-behavior: contain;
     padding: 10px max(12px, var(--safe-right)) calc(10px + var(--safe-bottom)) max(12px, var(--safe-left));
     background: color-mix(in srgb, var(--bg-surface) 95%, transparent);
     backdrop-filter: blur(14px);
@@ -349,14 +400,17 @@ input:focus-visible,
     bottom: calc(82px + var(--safe-bottom));
     min-width: 0;
     max-width: none;
+    overscroll-behavior: contain;
   }
 }
 
-.interactive-row:hover {
-  background: color-mix(in srgb, var(--bg-surface) 75%, var(--bg-subtle));
-}
+@media (hover: hover) {
+  .interactive-row:hover {
+    background: color-mix(in srgb, var(--bg-surface) 75%, var(--bg-subtle));
+  }
 
-.interactive-card:hover {
-  border-color: var(--rule-strong);
-  transform: translateY(-2px);
+  .interactive-card:hover {
+    border-color: var(--rule-strong);
+    transform: translateY(-2px);
+  }
 }

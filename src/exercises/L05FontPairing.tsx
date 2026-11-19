@@ -97,13 +97,14 @@ export const L05FontPairing: React.FC<ExerciseComponentProps> = ({
         <div style={{ fontSize: 11.5, fontWeight: 600, color: '#A3C4B5' }}>
           Select Headline Partner (Body locked to {scenario.bodyFontName})
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 135px), 1fr))', gap: 8 }}>
           {scenario.candidates.map((cand) => {
             const active = activeState.selectedId === cand.id;
             return (
               <button
                 key={cand.id}
                 type="button"
+                aria-pressed={active}
                 disabled={submitted}
                 onClick={() => setState((s) => ({ ...s, selectedId: cand.id }))}
                 style={{

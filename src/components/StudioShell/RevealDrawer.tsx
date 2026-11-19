@@ -47,7 +47,12 @@ export const RevealDrawer: React.FC<RevealDrawerProps> = ({
   const dashOffset = circ * (1 - Math.max(0, Math.min(100, result.score)) / 100);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div
+      role="region"
+      aria-label="Evaluation results"
+      aria-live="polite"
+      style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+    >
       {/* Score Header with SVG Precision Gauge */}
       <div
         style={{

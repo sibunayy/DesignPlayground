@@ -27,3 +27,12 @@ Imported on 2026-11-19 from three claude.ai artifacts. The artifacts stay the so
 - The `.dc.html` boards use the claude.ai Design Component format. They load `./support.js` from the canvas runtime, so they do not render when opened directly from this folder. Open the canvas link to see them run.
 - Each board's `<script type="text/x-dc">` block holds the exercise data, pass ranges and lesson copy. The handoff says to move this content to typed data files word for word.
 - The component previews read CSS custom properties (for example `var(--accent)`). Generate these from `tokens.json` before you render the previews outside the design system page.
+
+## App
+
+The playground runs inside Sightline at `#/playground` (hub) and `#/playground/<mode>`.
+The code is in `src/playground/`. The modes are `kerning`, `tracking`, `leading`, `wordspace` and `measure`.
+
+- Word spacing and Line length are new modes. They extend the boards with new accents (`mode-wordspace`, `mode-measure`) and new lesson copy.
+- `src/playground/__tests__/tokens.test.ts` compares `src/playground/styles/tokens.css` with `design-system/tokens.json`.
+- Progress is stored in `localStorage` under `design-playground:v1`.

@@ -1,0 +1,223 @@
+import { Exercise, ModeId } from '../types';
+
+/**
+ * Exercise data. Kerning, Tracking and Leading copy and ranges come word for word
+ * from the Design Playground design boards. Ranges are prototype values.
+ */
+export const EXERCISES: Exercise[] = [
+  // Kerning: 40 units = 1 square of gap.
+  {
+    id: 'kerning-type',
+    modeId: 'kerning',
+    text: 'T|ype',
+    size: 290,
+    lo: 5,
+    hi: 35,
+    start: 100,
+    kind: 'Letter pair',
+    prompt: 'Make the space between T and y look even.',
+    label: 'The word Type with an adjustable space after the first letter',
+  },
+  {
+    id: 'kerning-home',
+    modeId: 'kerning',
+    text: 'H|ome',
+    size: 290,
+    lo: 40,
+    hi: 70,
+    start: 100,
+    kind: 'Letter pair',
+    prompt: 'Make the space between H and o look even.',
+    label: 'The word Home with an adjustable space after the first letter',
+  },
+  {
+    id: 'kerning-avoid',
+    modeId: 'kerning',
+    text: 'A|void',
+    size: 290,
+    lo: 0,
+    hi: 14,
+    start: 100,
+    kind: 'Letter pair',
+    prompt: 'Make the space between A and v look even.',
+    label: 'The word Avoid with an adjustable space after the first letter',
+  },
+  {
+    id: 'kerning-light',
+    modeId: 'kerning',
+    text: 'L|ight',
+    size: 290,
+    lo: 20,
+    hi: 50,
+    start: 100,
+    kind: 'Letter pair',
+    prompt: 'Make the space between L and i look even.',
+    label: 'The word Light with an adjustable space after the first letter',
+  },
+
+  // Tracking: 1 unit = 1/1000 em.
+  {
+    id: 'tracking-poster',
+    modeId: 'tracking',
+    text: 'Poster',
+    size: 150,
+    lo: -40,
+    hi: 10,
+    start: 180,
+    kind: 'Large headline',
+    prompt: 'Large headline: set the tracking so the letters look evenly open.',
+    label: 'Poster with adjustable tracking',
+  },
+  {
+    id: 'tracking-caps',
+    modeId: 'tracking',
+    text: 'SMALL CAPS LABEL',
+    size: 40,
+    lo: 60,
+    hi: 140,
+    start: -20,
+    kind: 'Capital label',
+    prompt: 'Capital label: set the tracking so the letters look evenly open.',
+    label: 'SMALL CAPS LABEL with adjustable tracking',
+  },
+  {
+    id: 'tracking-lowercase',
+    modeId: 'tracking',
+    text: 'Quiet reading text',
+    size: 44,
+    lo: -5,
+    hi: 25,
+    start: 150,
+    kind: 'Lowercase text',
+    prompt: 'Lowercase text: set the tracking so the letters look evenly open.',
+    label: 'Quiet reading text with adjustable tracking',
+  },
+
+  // Leading: percent of the font size.
+  {
+    id: 'leading-paragraph',
+    modeId: 'leading',
+    text: 'Good type needs room to breathe between the lines. Move the lines until the paragraph reads evenly.',
+    size: 36,
+    width: 760,
+    lo: 125,
+    hi: 145,
+    start: 200,
+    kind: 'Paragraph',
+    prompt: 'Paragraph: set the leading so the lines look evenly spaced.',
+    label: 'Paragraph with adjustable leading',
+  },
+  {
+    id: 'leading-headline',
+    modeId: 'leading',
+    text: 'Big headlines sit tight against each other.',
+    size: 64,
+    width: 1000,
+    lo: 95,
+    hi: 110,
+    start: 180,
+    kind: 'Large headline',
+    prompt: 'Large headline: set the leading so the lines look evenly spaced.',
+    label: 'Headline with adjustable leading',
+  },
+  {
+    id: 'leading-small',
+    modeId: 'leading',
+    text: 'Small text on a long line needs more space between the lines so the eye can find the next line without effort.',
+    size: 22,
+    width: 640,
+    lo: 150,
+    hi: 175,
+    start: 100,
+    kind: 'Small text',
+    prompt: 'Small text: set the leading so the lines look evenly spaced.',
+    label: 'Small text with adjustable leading',
+  },
+
+  // Word spacing: units of 1/1000 em added to the normal word space.
+  {
+    id: 'wordspace-reading',
+    modeId: 'wordspace',
+    text: 'Words need even space between them',
+    size: 44,
+    lo: -20,
+    hi: 40,
+    start: 300,
+    kind: 'Reading line',
+    prompt: 'Reading line: set the word space so the line reads as one unit.',
+    label: 'Reading line with adjustable word spacing',
+  },
+  {
+    id: 'wordspace-caps',
+    modeId: 'wordspace',
+    text: 'SPRING TERM STARTS IN MAY',
+    size: 40,
+    caps: true,
+    lo: 80,
+    hi: 180,
+    start: -40,
+    kind: 'Tracked capitals',
+    prompt: 'Tracked capitals: open the word space to match the wide letter space.',
+    label: 'Tracked capital label with adjustable word spacing',
+  },
+  {
+    id: 'wordspace-headline',
+    modeId: 'wordspace',
+    text: 'Big words sit close',
+    size: 72,
+    lo: -80,
+    hi: -10,
+    start: 200,
+    kind: 'Large headline',
+    prompt: 'Large headline: close the word space so the headline holds together.',
+    label: 'Headline with adjustable word spacing',
+  },
+
+  // Line length: characters per line.
+  {
+    id: 'measure-book',
+    modeId: 'measure',
+    text: 'A comfortable line lets the eye travel across and return to the start of the next line without effort. When a line is too long, the eye loses its place. When a line is too short, the rhythm breaks and the reader jumps from line to line.',
+    size: 20,
+    lo: 55,
+    hi: 75,
+    start: 100,
+    kind: 'Long reading',
+    prompt: 'Long reading: set the line length for a book or an article.',
+    label: 'Paragraph with adjustable line length',
+  },
+  {
+    id: 'measure-columns',
+    modeId: 'measure',
+    text: 'News pages and magazines set text in columns. Each column is narrower than a book line, so the reader can scan short blocks of text. Keep each column wide enough to hold a few words per line.',
+    size: 20,
+    lo: 40,
+    hi: 55,
+    start: 95,
+    kind: 'Text column',
+    prompt: 'Text column: set the line length for one column of a multi-column page.',
+    label: 'Column of text with adjustable line length',
+  },
+  {
+    id: 'measure-phone',
+    modeId: 'measure',
+    text: 'A phone screen holds fewer characters per line. Set the text so each line holds a short phrase and the reader does not scroll sideways.',
+    size: 20,
+    lo: 30,
+    hi: 45,
+    start: 80,
+    kind: 'Phone screen',
+    prompt: 'Phone screen: set the line length for body text on a phone.',
+    label: 'Phone body text with adjustable line length',
+  },
+];
+
+export function exercisesFor(modeId: ModeId): Exercise[] {
+  return EXERCISES.filter((e) => e.modeId === modeId);
+}
+
+/** Splits kerning text "T|ype" into the left letter and the rest. */
+export function splitPair(text: string): { left: string; rest: string } {
+  const [left, rest = ''] = text.split('|');
+  return { left, rest };
+}

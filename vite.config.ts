@@ -48,5 +48,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: [],
+    // Lets the playground token test read tokens.css with ?raw. Vitest empties other CSS.
+    css: { include: [/playground\/styles\/tokens\.css/] },
   },
 });

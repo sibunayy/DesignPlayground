@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { DailyMixRunner } from './components/DailyMix/DailyMixRunner';
 import { HomeIndex } from './components/HomeIndex/HomeIndex';
 import { LearnView } from './components/LearnView/LearnView';
@@ -15,15 +15,25 @@ import {
 } from './engine/storage';
 import { EyeLens } from './engine/types';
 import { ExerciseViewport } from './exercises/ExerciseRegistry';
+import { isModeId } from './playground/content/modes';
+import type { ModeId } from './playground/types';
+
+// The playground loads on demand so the Sightline start bundle stays small.
+const PlaygroundApp = lazy(() =>
+  import('./playground/PlaygroundApp').then((m) => ({ default: m.PlaygroundApp }))
+);
 
 type Route =
   | { view: 'home' }
   | { view: 'daily' }
+  | { view: 'playground'; modeId: ModeId | null }
   | { view: 'lesson'; lessonId: string; mode: 'learn' | 'practice' };
 
 function parseHashRoute(): Route {
   const hash = window.location.hash.replace(/^#/, '');
   if (hash === '/daily') return { view: 'daily' };
+  const pg = hash.match(/^\/playground(?:\/([^/]+))?\/?$/);
+  if (pg) return { view: 'playground', modeId: pg[1] && isModeId(pg[1]) ? pg[1] : null };
   const match = hash.match(/^\/lesson\/([^/]+)(?:\/(learn|practice))?$/);
   if (match) {
     const lesson = getLessonById(match[1]);
@@ -61,6 +71,8 @@ export const App: React.FC = () => {
       window.location.hash = '#/';
     } else if (next.view === 'daily') {
       window.location.hash = '#/daily';
+    } else if (next.view === 'playground') {
+      window.location.hash = next.modeId ? `#/playground/${next.modeId}` : '#/playground';
     } else {
       window.location.hash = `#/lesson/${next.lessonId}/${next.mode}`;
     }
@@ -109,8 +121,21 @@ export const App: React.FC = () => {
           navigate({ view: 'lesson', lessonId, mode });
         }}
         onOpenDailyMix={() => navigate({ view: 'daily' })}
+        onOpenPlayground={() => navigate({ view: 'playground', modeId: null })}
         onToggleTheme={toggleTheme}
       />
+    );
+  }
+
+  if (route.view === 'playground') {
+    return (
+      <Suspense fallback={<div style={{ minHeight: '100dvh' }} />}>
+        <PlaygroundApp
+          modeId={route.modeId}
+          onNavigate={(modeId) => navigate({ view: 'playground', modeId })}
+          onExit={() => navigate({ view: 'home' })}
+        />
+      </Suspense>
     );
   }
 

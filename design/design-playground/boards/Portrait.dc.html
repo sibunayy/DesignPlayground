@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Design Playground, iPad portrait</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Bricolage Grotesque',system-ui,sans-serif}
+[data-theme="dark"]{color-scheme:dark;--bg:#121418;--stage:#1B1E23;--panel:#1F2328;--tile:#2A2E35;--ink:#ECE9E2;--ink2:#D2CFC8;--muted:#A8A59D;--accent:#8FB8FF;--on-accent:#121418;--tint:rgba(143,184,255,0.3);--tint2:rgba(143,184,255,0.4);--bar:#5A616B;--grid:rgba(236,233,226,0.05);--chip:#23272D;--btn2:#2A2E35}
+[data-theme="light"]{color-scheme:light;--bg:#ECEBE7;--stage:#FFFFFF;--panel:#FFFFFF;--tile:#F1EFEA;--ink:#1B1B1A;--ink2:#3A3935;--muted:#55544F;--accent:#1F5FBF;--on-accent:#FFFFFF;--tint:rgba(31,95,191,0.22);--tint2:rgba(31,95,191,0.3);--bar:#BDBBB4;--grid:rgba(27,27,26,0.06);--chip:#FFFFFF;--btn2:#E4E2DC}
+button{font-family:inherit;cursor:pointer;transition:transform .08s ease-out}
+button:hover:not(:disabled){filter:brightness(1.08)}
+button:active:not(:disabled){transform:scale(0.98)}
+button:disabled{cursor:not-allowed}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+input[type=range]{width:100%;height:44px;cursor:pointer}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width:820px;height:1180px;box-sizing:border-box;background:var(--bg);color:var(--ink);padding:32px 40px 36px;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:center;justify-content:space-between;min-height:52px">
+    <div style="display:flex;align-items:baseline;gap:20px">
+      <div style="font-size:22px;font-weight:800">Design Playground</div>
+      <div style="font-size:18px;color:var(--muted)">{{pairText}}</div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <button onClick="{{toggleTheme}}" style="border:0;background:var(--chip);color:var(--ink);min-height:52px;padding:0 22px;border-radius:18px;font-size:18px;font-weight:600">{{themeLabel}}</button>
+      <button onClick="{{toggleSheet}}" aria-expanded="{{sheetOpen}}" style="border:0;background:var(--chip);color:var(--ink);min-height:52px;padding:0 26px;border-radius:18px;font-size:18px;font-weight:600">{{sheetLabel}}</button>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;gap:20px;min-height:0">
+    <div style="flex:1;display:flex;flex-direction:column;gap:20px;min-width:0">
+      <div style="{{stageStyle}}">
+        <div role="group" aria-label="Assistive tools" style="display:flex;justify-content:center;gap:0">
+          <button onClick="{{toggleAnswer}}" aria-pressed="{{answerOn}}" aria-label="Answer zone" title="Answer zone" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{answerBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span></button>
+          <button onClick="{{toggleGuides}}" aria-pressed="{{guidesOn}}" aria-label="Guides and ruler" title="Guides and ruler" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{guidesBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></svg></span></button>
+          <button onClick="{{toggleBlur}}" aria-pressed="{{blurOn}}" aria-label="Squint blur" title="Squint blur" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{blurBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span></button>
+          <button onClick="{{toggleGrid}}" aria-pressed="{{gridOn}}" aria-label="Grid" title="Grid" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{gridBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM4 12h16M12 4v16"/></svg></span></button>
+        </div>
+        <div role="img" aria-label="{{wordLabel}}" style="{{wordStyle}}">
+          <span>{{left}}</span>
+          <span aria-hidden="true" style="{{gapStyle}}">
+            <sc-if value="{{guidesOn}}" hint-placeholder-val="{{ false }}">
+              <span style="position:absolute;left:-1px;top:-30%;bottom:-30%;width:2px;background:var(--accent)"></span>
+              <span style="position:absolute;right:-1px;top:-30%;bottom:-30%;width:2px;background:var(--accent)"></span>
+              <span style="position:absolute;left:0;right:0;top:calc(100% + 26px);height:2px;background:var(--accent)"></span>
+              <span style="position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 34px);white-space:nowrap;font-size:16px;font-weight:600;line-height:1.2;color:var(--ink)">{{gapText}}</span>
+            </sc-if>
+          </span>
+          <span>{{rest}}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <sc-if value="{{answerOn}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:6px">
+              <div style="{{trackStyle}}"><span style="{{zoneStyle}}"></span><span style="{{markStyle}}"></span></div>
+              <div style="font-size:16px;color:var(--ink2)">{{zoneText}}</div>
+            </div>
+          </sc-if>
+          <div style="font-size:16px;color:var(--muted)">{{readout}}</div>
+          <div aria-live="polite" style="min-height:28px;font-size:20px;font-weight:600">{{message}}</div>
+        </div>
+      </div>
+      <div style="background:var(--panel);border-radius:28px;padding:16px 24px;display:flex;align-items:center;gap:24px">
+        <div style="flex:1">
+          <label for="gap" style="font-size:16px;font-weight:600;color:var(--muted)">{{prompt}}</label>
+          <input id="gap" type="range" min="0" max="140" step="2" value="{{val}}" onInput="{{onSlide}}" style="accent-color:var(--accent)">
+        </div>
+        <sc-if value="{{showCheck}}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{check}}" style="border:0;background:var(--accent);color:var(--on-accent);min-height:56px;padding:0 36px;border-radius:16px;font-size:20px;font-weight:800">Check spacing</button>
+        </sc-if>
+        <sc-if value="{{showNext}}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{nextPair}}" style="border:0;background:var(--accent);color:var(--on-accent);min-height:56px;padding:0 36px;border-radius:16px;font-size:20px;font-weight:800">{{pairBtn}}</button>
+        </sc-if>
+      </div>
+    </div>
+
+    <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{ true }}">
+      <div style="flex:0 0 auto;background:var(--panel);border-radius:32px;padding:26px 26px 24px;display:flex;flex-direction:column;gap:16px;min-height:0">
+        <div style="display:flex;align-items:baseline;justify-content:space-between">
+          <div style="font-size:20px;font-weight:800">Kerning lesson</div>
+          <div style="font-size:16px;color:var(--muted)">{{stepText}}</div>
+        </div>
+        <div aria-hidden="true" style="display:flex;gap:6px">
+          <sc-for list="{{bars}}" as="b" hint-placeholder-count="6">
+            <span style="{{b.style}}"></span>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;gap:24px;align-items:stretch">
+        <div style="flex:0 0 308px;height:200px;background:var(--tile);border-radius:22px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <sc-if value="{{p0}}" hint-placeholder-val="{{ true }}">
+            <div aria-hidden="true" style="display:flex;align-items:center;font-size:120px;font-weight:800;font-kerning:none;line-height:1">
+              <span>A</span><span style="display:inline-block;width:34px;height:80px;background:var(--tint2);border-radius:5px"></span><span>V</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{p1}}" hint-placeholder-val="{{ false }}">
+            <div aria-hidden="true" style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+              <div style="display:flex;align-items:center;font-size:56px;font-weight:800;font-kerning:none;line-height:1"><span>A</span><span style="display:inline-block;width:14px;height:40px;background:var(--tint2);border-radius:3px"></span><span>V</span><span style="font-size:16px;font-weight:600;margin-left:16px;color:var(--muted)">One pair</span></div>
+              <div style="font-size:56px;font-weight:800;letter-spacing:0.18em;line-height:1">SPACE<span style="font-size:16px;font-weight:600;letter-spacing:0;margin-left:16px;color:var(--muted)">Whole word</span></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{p2}}" hint-placeholder-val="{{ false }}">
+            <div aria-hidden="true" style="display:flex;flex-direction:column;align-items:center;gap:12px">
+              <div style="display:flex;align-items:center;gap:36px;font-size:76px;font-weight:800;font-kerning:none;line-height:1">
+                <div style="display:flex;align-items:center"><span>H</span><span style="display:inline-block;width:20px;height:56px;background:var(--tint2);border-radius:3px"></span><span>H</span></div>
+                <div style="display:flex;align-items:center"><span>A</span><span style="display:inline-block;width:20px;height:56px;background:var(--tint2);border-radius:3px"></span><span>V</span></div>
+              </div>
+              <div style="font-size:16px;font-weight:600;color:var(--muted)">Same distance, different look</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{p3}}" hint-placeholder-val="{{ false }}">
+            <div aria-hidden="true" style="font-size:96px;font-weight:800;line-height:1;filter:blur(5px)">Type</div>
+          </sc-if>
+          <sc-if value="{{p4}}" hint-placeholder-val="{{ false }}">
+            <div aria-hidden="true" style="display:flex;gap:30px;font-size:48px;font-weight:800;line-height:1">
+              <span>AV</span><span>To</span><span>Ty</span><span>LT</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{p5}}" hint-placeholder-val="{{ false }}">
+            <div aria-hidden="true" style="display:flex;gap:18px;align-items:flex-end;font-size:46px;font-weight:800;font-kerning:none;line-height:1">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="letter-spacing:-0.12em">Type</span><span style="font-size:16px;font-weight:600;letter-spacing:0;color:var(--muted)">Tight</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="letter-spacing:0.02em">Type</span><span style="font-size:16px;font-weight:600;color:var(--muted)">Even</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="letter-spacing:0.3em">Type</span><span style="font-size:16px;font-weight:600;letter-spacing:0;color:var(--muted)">Loose</span></div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:24px;font-weight:800;line-height:1.15;text-wrap:balance">{{title}}</div>
+          <div style="font-size:17px;line-height:1.45;color:var(--ink2);text-wrap:pretty">{{body}}</div>
+          <div style="font-size:16px;line-height:1.4;color:var(--muted);margin-top:auto;text-wrap:pretty">{{tip}}</div>
+        </div>
+
+        </div>
+        <div style="display:flex;gap:12px">
+          <button onClick="{{prev}}" disabled="{{prevOff}}" style="{{prevStyle}}">Previous</button>
+          <button onClick="{{next}}" style="flex:1;border:0;background:var(--accent);color:var(--on-accent);min-height:56px;border-radius:16px;font-size:19px;font-weight:800">{{nextLabel}}</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"dark","section":"Theme"},"$preview":{"width":820,"height":1180}}'>
+class Component extends DCLogic {
+  state = { val: 100, result: '', sheet: true, page: 0, theme: '', pair: 0, answer: false, guides: false, blur: false, grid: true };
+  renderVals() {
+    const theme = this.state.theme || this.props.theme || 'dark';
+    const v = this.state.val;
+    const open = this.state.sheet;
+    const pg = this.state.page;
+    const k = open ? 0.8 : 1;
+    const size = open ? 220 : 240;
+    const cell = Math.round(40 * k);
+    const sq = v / 40;
+    const pairsList = [
+      { l: 'T', rest: 'ype', lo: 5, hi: 35, label: 'The word Type' },
+      { l: 'H', rest: 'ome', lo: 40, hi: 70, label: 'The word Home' },
+      { l: 'A', rest: 'void', lo: 0, hi: 14, label: 'The word Avoid' },
+      { l: 'L', rest: 'ight', lo: 20, hi: 50, label: 'The word Light' }
+    ];
+    const pi = this.state.pair;
+    const pr = pairsList[pi];
+    const done = this.state.result === 'good';
+    const lastPair = pi === pairsList.length - 1;
+    const st = this.state;
+    const tb = (on) => 'width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:' + (on ? 'var(--accent)' : 'var(--chip)') + ';color:' + (on ? 'var(--on-accent)' : 'var(--ink)');
+    const f1 = (n) => (Math.round(n * 10) / 10).toFixed(1);
+    const msgs = {
+      '': 'Drag the slider to move the T and y.',
+      loose: 'Too open. The tinted space is too wide.',
+      tight: 'Too tight. The letters nearly touch.',
+      good: lastPair ? 'Balanced. All four pairs are done.' : 'Balanced. The space looks even.'
+    };
+    const pages = [
+      { title: 'Kerning sets one pair', body: 'Move two letters closer or further apart until the space around them looks even.', tip: 'Pairs like A and V leave an open wedge, so they usually need less space.' },
+      { title: 'Tracking sets the whole word', body: 'Tracking changes the space between all letters in a word or line at once. Kerning then fixes single pairs.', tip: 'Set tracking first, then kern.' },
+      { title: 'Space is a shape', body: 'Two gaps with the same distance can look different. Straight sides leave a tall, square gap. Diagonals leave a wedge.', tip: 'Give straight sides more space and diagonals less.' },
+      { title: 'Blur the word to see gaps', body: 'Squint or blur the word. Even spacing reads as an even grey. A light or dark patch marks a gap to fix.', tip: 'Try it on the word in the stage.' },
+      { title: 'Diagonals and overhangs need less', body: 'Pairs with a diagonal or an overhang open a large gap. Check these pairs first when you set a word.', tip: 'Also check Yo, Ta and a P next to a comma.' },
+      { title: 'Tight, loose or uneven', body: 'Tight: letters touch or merge. Loose: the word breaks into single letters. Uneven: one gap looks different from the rest.', tip: 'Aim for even, then run the squint test.' }
+    ];
+    const cur = pages[pg];
+    const last = pg === pages.length - 1;
+    const bars = pages.map((p, i) => ({ style: 'flex:1;height:6px;border-radius:3px;background:' + (i <= pg ? 'var(--accent)' : 'var(--bar)') }));
+    return {
+      theme: theme,
+      answerOn: st.answer, guidesOn: st.guides, blurOn: st.blur, gridOn: st.grid,
+      answerBtn: tb(st.answer), guidesBtn: tb(st.guides), blurBtn: tb(st.blur), gridBtn: tb(st.grid),
+      toggleAnswer: () => this.setState({ answer: !st.answer }),
+      toggleGuides: () => this.setState({ guides: !st.guides }),
+      toggleBlur: () => this.setState({ blur: !st.blur }),
+      toggleGrid: () => this.setState({ grid: !st.grid }),
+      gapText: f1(sq) + ' squares',
+      zoneText: 'Correct zone: ' + f1(pr.lo / 40) + ' to ' + f1(pr.hi / 40) + ' squares',
+      trackStyle: 'position:relative;width:280px;height:12px;border-radius:6px;background:var(--tile)',
+      zoneStyle: 'position:absolute;top:0;height:12px;border-radius:6px;background:var(--tint2);left:' + (pr.lo * 2) + 'px;width:' + Math.max(8, (pr.hi - pr.lo) * 2) + 'px',
+      markStyle: 'position:absolute;top:-4px;height:20px;width:4px;border-radius:2px;background:var(--ink);left:' + (Math.min(v, 138) * 2) + 'px',
+      pairText: 'Kerning, pair ' + (pi + 1) + ' of ' + pairsList.length,
+      prompt: 'Make the space between ' + pr.l + ' and ' + pr.rest.charAt(0) + ' look even.',
+      wordLabel: pr.label + ' with an adjustable space after the first letter',
+      left: pr.l, rest: pr.rest,
+      showCheck: !done, showNext: done,
+      pairBtn: lastPair ? 'Start over' : 'Next pair',
+      nextPair: () => this.setState({ pair: lastPair ? 0 : pi + 1, val: 100, result: '' }),
+      themeLabel: theme === 'dark' ? 'Light mode' : 'Dark mode',
+      val: v,
+      message: msgs[this.state.result],
+      readout: 'Gap: ' + (Math.round(sq * 10) / 10) + (sq === 1 ? ' square' : ' squares'),
+      sheetOpen: open,
+      sheetLabel: open ? 'Hide resources' : 'Show resources',
+      stageStyle: 'flex:1;background-color:var(--stage);position:relative;' + (st.grid ? 'background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);' : '') + 'background-size:' + cell + 'px ' + cell + 'px;background-position:center;border-radius:32px;padding:28px 40px;display:flex;flex-direction:column;align-items:center;justify-content:space-between',
+      wordStyle: 'display:flex;align-items:center;line-height:1;font-weight:800;font-kerning:none;font-size:' + size + 'px' + (st.blur ? ';filter:blur(' + Math.round(size * 0.03) + 'px)' : ''),
+      gapStyle: 'display:inline-block;border-radius:8px;background:var(--tint);height:' + Math.round(size * 0.52) + 'px;position:relative;width:' + Math.round(v * k) + 'px',
+      onSlide: (e) => this.setState({ val: Number(e.target.value), result: '' }),
+      toggleSheet: () => this.setState({ sheet: !this.state.sheet }),
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      check: () => {
+        const x = this.state.val;
+        this.setState({ result: x > pr.hi ? 'loose' : (x < pr.lo ? 'tight' : 'good') });
+      },
+      stepText: 'Step ' + (pg + 1) + ' of ' + pages.length,
+      bars: bars,
+      title: cur.title,
+      body: cur.body,
+      tip: cur.tip,
+      p0: pg === 0, p1: pg === 1, p2: pg === 2, p3: pg === 3, p4: pg === 4, p5: pg === 5,
+      prevOff: pg === 0,
+      prevStyle: 'border:0;background:var(--btn2);color:var(--ink);min-height:56px;padding:0 24px;border-radius:16px;font-size:19px;font-weight:600;opacity:' + (pg === 0 ? 0.4 : 1),
+      nextLabel: last ? 'Review again' : 'Next',
+      prev: () => this.setState({ page: Math.max(0, this.state.page - 1) }),
+      next: () => this.setState({ page: last ? 0 : this.state.page + 1 })
+    };
+  }
+}
+</script>
+</body>
+</html>

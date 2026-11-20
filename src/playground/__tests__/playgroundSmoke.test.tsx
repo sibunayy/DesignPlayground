@@ -41,7 +41,7 @@ describe('Design Playground', () => {
     expect(screen.getByText(/Exact answer|In the zone/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: mode.nextLabel }));
-    expect(screen.getByText(/Exercise 2 of/)).toBeTruthy();
+    expect(screen.getByText(/^2 of \d+$/)).toBeTruthy();
     expect(Number((screen.getByRole('slider') as HTMLInputElement).value)).toBe(exercisesFor('kerning')[1].start);
   });
 

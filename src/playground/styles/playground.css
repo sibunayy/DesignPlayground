@@ -459,9 +459,7 @@
 /* Dock */
 
 .dp-dock {
-  background: var(--panel);
-  border-radius: var(--radius-xl);
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-2) var(--space-2) 0;
   display: flex;
   align-items: center;
   gap: var(--space-6);
@@ -505,12 +503,35 @@
   color: var(--muted);
 }
 
+.dp-dock-prompt {
+  display: block;
+  margin-bottom: var(--space-3);
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.dp-dock-count {
+  margin-left: var(--space-2);
+  font-size: 16px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.dp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .dp-body--panel-below .dp-dock {
   flex-direction: column;
   align-items: stretch;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-2);
 }
 
 /* Lesson panel */
@@ -563,12 +584,10 @@
 .dp-visual {
   flex: 0 0 auto;
   min-height: 176px;
-  background: var(--tile);
-  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
+  padding: var(--space-2) 0;
   overflow: hidden;
 }
 
@@ -708,7 +727,10 @@
     grid-template-rows: auto;
     grid-template-areas: 'head head' 'visual text' 'controls controls';
     gap: var(--space-4) var(--space-6);
-    padding: var(--space-6);
+    padding: var(--space-6) var(--space-2) 0;
+    background: transparent;
+    border-radius: 0;
+    border-top: 1px solid var(--bar);
     overflow: visible;
   }
 
@@ -735,14 +757,27 @@
   .dp-body--panel-below .dp-dock {
     flex-direction: column;
     align-items: stretch;
-    padding: var(--space-4);
+    padding: 0;
   }
 
   .dp-panel,
   .dp-body--panel-below .dp-panel {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: 'head' 'visual' 'text' 'controls';
-    padding: var(--space-5);
+    padding: var(--space-5) 0 0;
+  }
+
+  /* One header row: back, lesson and theme. The tabs scroll on their own row. */
+  .dp-header-actions {
+    display: contents;
+  }
+
+  .dp-title-group {
+    margin-right: auto;
+  }
+
+  .dp-mode-tabs {
+    order: 3;
   }
 
   .dp-stage {
@@ -750,7 +785,6 @@
     min-height: 320px;
   }
 
-  .dp-header-actions,
   .dp-mode-tabs {
     flex: 1 1 100%;
   }
@@ -800,26 +834,21 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  background: var(--panel);
-  border-radius: var(--radius-2xl);
-  overflow: hidden;
+  border-top: 1px solid var(--bar);
 }
 
 .dp-hub-item {
   display: grid;
-  grid-template-columns: 12px minmax(0, 1fr) auto;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-5);
-  padding: var(--space-5) var(--space-6);
-}
-
-.dp-hub-item + .dp-hub-item {
-  border-top: 1px solid var(--tile);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--bar);
 }
 
 .dp-hub-swatch {
-  width: 12px;
-  height: 44px;
+  width: 8px;
+  height: 40px;
   border-radius: var(--radius-xs);
 }
 
@@ -837,15 +866,24 @@
 
 @media (max-width: 640px) {
   .dp-hub-item {
-    grid-template-columns: 12px minmax(0, 1fr);
+    grid-template-columns: 8px minmax(0, 1fr);
   }
 
   .dp-hub-actions {
     grid-column: 1 / -1;
   }
 
-  .dp-hub-actions > * {
-    flex: 1 1 0;
+  .dp-hub-actions {
+    justify-content: flex-start;
+  }
+
+  .dp-hub-actions .dp-btn-primary {
+    flex: 0 0 auto;
+    min-width: 132px;
+  }
+
+  .dp-app-name {
+    font-size: 18px;
   }
 }
 
@@ -890,6 +928,13 @@
 .dp-hub-actions {
   display: flex;
   gap: var(--space-3);
+}
+
+/* Quiz is the quiet action. Start is the one filled button on the row. */
+.dp-hub-actions .dp-btn-secondary {
+  background: transparent;
+  color: var(--ink-2);
+  padding: 0 16px;
 }
 
 .dp-hub-pick {
@@ -1002,9 +1047,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-7);
-  border-radius: var(--radius-2xl);
-  background: var(--panel);
+  padding: var(--space-5) 0;
   max-width: 720px;
 }
 
@@ -1049,6 +1092,6 @@
   }
 
   .dp-quiz-result {
-    padding: var(--space-5);
+    padding: var(--space-4) 0;
   }
 }

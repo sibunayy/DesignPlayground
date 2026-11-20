@@ -71,6 +71,8 @@ export const EXERCISES: Exercise[] = [
     modeId: 'kerning',
     text: 'O|range',
     size: 290,
+    // Six letters plus the widest gap need more room than the 1040 default.
+    width: 1240,
     lo: 26,
     hi: 54,
     start: 0,

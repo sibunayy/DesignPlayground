@@ -131,7 +131,8 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     const stepIndex = Math.min(progress.lessonStep, steps.length - 1);
     const layout = store.panelOpen ? mode.layout : 'closed';
     body = (
-      <div className={`dp-body dp-body--${layout}`}>
+      <main className={`dp-body dp-body--${layout}`}>
+        <h1 className="dp-sr">{mode.name}</h1>
         <Stage
           mode={mode}
           exercise={exercise}
@@ -163,7 +164,7 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
             onNext={() => setModeField({ lessonStep: stepIndex >= steps.length - 1 ? 0 : stepIndex + 1 })}
           />
         )}
-      </div>
+      </main>
     );
   }
 

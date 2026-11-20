@@ -20,6 +20,16 @@ describe('Design Playground', () => {
     expect(window.location.hash).toBe('#/playground');
   });
 
+  it('gives each practice screen one main landmark and one heading', async () => {
+    window.location.hash = '#/playground/leading';
+    render(<App />);
+    await screen.findByRole('slider');
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    const headings = screen.getAllByRole('heading', { level: 1 });
+    expect(headings).toHaveLength(1);
+    expect(headings[0].textContent).toBe(getMode('leading')!.name);
+  });
+
   it('runs the kerning loop: slide, check, next', async () => {
     window.location.hash = '#/playground/kerning';
     render(<App />);

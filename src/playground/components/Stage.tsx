@@ -28,7 +28,8 @@ const DESIGN_WIDTH: Record<Mode['id'], number> = {
   margins: 900,
 };
 
-const STAGE_PADDING = 64;
+/** Breathing room kept inside the canvas on each side of the stage content. */
+const CANVAS_MARGIN = 16;
 
 export const Stage: React.FC<StageProps> = ({
   mode,
@@ -40,10 +41,14 @@ export const Stage: React.FC<StageProps> = ({
   message,
   gradeText,
 }) => {
+  // Measure the canvas, not the stage: the lesson drawer takes padding from the stage,
+  // so the stage width overstates the room the text really has.
   const ref = useRef<HTMLDivElement>(null);
   const width = useElementWidth(ref, 800);
-  const inner = Math.max(200, width - STAGE_PADDING);
-  const designWidth = mode.id === 'leading' || mode.id === 'paragraph' ? exercise.width ?? 1000 : DESIGN_WIDTH[mode.id];
+  const inner = Math.max(200, width - CANVAS_MARGIN * 2);
+  // A long word can need more than the mode default, so these modes read the exercise width first.
+  const ownWidth = mode.id === 'leading' || mode.id === 'paragraph' || mode.id === 'kerning';
+  const designWidth = ownWidth ? exercise.width ?? DESIGN_WIDTH[mode.id] : DESIGN_WIDTH[mode.id];
   const scale = Math.min(1, inner / designWidth);
   // Stage text never drops below 16px. Wrapping text wraps more instead.
   const wraps = mode.id === 'leading' || mode.id === 'paragraph' || mode.id === 'margins';
@@ -248,7 +253,6 @@ export const Stage: React.FC<StageProps> = ({
 
   return (
     <section
-      ref={ref}
       aria-label="Stage"
       className={`dp-stage${showGrid ? ' dp-stage--grid' : ''}`}
       style={{ backgroundSize: `${cell}px ${cell}px` }}
@@ -272,6 +276,7 @@ export const Stage: React.FC<StageProps> = ({
       </div>
 
       <div
+        ref={ref}
         className={`dp-stage-canvas${mode.id === 'measure' ? ' dp-stage-canvas--scroll' : ''}${
           wraps ? ' dp-stage-canvas--tall' : ''
         }`}

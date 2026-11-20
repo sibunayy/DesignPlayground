@@ -468,6 +468,80 @@ export const LESSONS: LessonStep[] = [
       },
     },
   ]),
+  ...steps('margins', [
+    {
+      title: 'Margins frame the content',
+      body: 'A margin is the space between the content and the edge of its box. It lets the reader see the text and the box as one unit.',
+      tip: 'The edge of a box is a line. Text that touches a line is hard to read.',
+      visual: {
+        kind: 'padBoxes',
+        cols: [
+          { pad: 0.15, label: 'None' },
+          { pad: 1, label: 'Framed' },
+        ],
+      },
+    },
+    {
+      title: 'Too little space crowds the edge',
+      body: 'When the margin is smaller than the line space, the text seems to push against the box.',
+      tip: 'Make the margin at least as large as the space between lines.',
+      visual: {
+        kind: 'padBoxes',
+        cols: [
+          { pad: 0.3, label: 'Crowded' },
+          { pad: 1, label: 'Framed' },
+        ],
+      },
+    },
+    {
+      title: 'Too much space loses the link',
+      body: 'A very large margin makes the box look empty. The text floats and no longer belongs to its box.',
+      tip: 'For cards, one to one and a half times the text size is a good start.',
+      visual: {
+        kind: 'padBoxes',
+        cols: [
+          { pad: 1, label: 'Framed' },
+          { pad: 2.6, label: 'Empty' },
+        ],
+      },
+    },
+    {
+      title: 'Scale the margin with the text',
+      body: 'Set the margin in relation to the text size. Large text needs a larger margin. Small text needs a smaller one.',
+      tip: 'Measure margins in em: 1 em is the text size.',
+      visual: {
+        kind: 'padBoxes',
+        cols: [
+          { pad: 1, label: '1 em' },
+          { pad: 1.5, label: '1.5 em' },
+        ],
+      },
+    },
+    {
+      title: 'Buttons use less space top and bottom',
+      body: 'A button needs more space at the sides than at the top and bottom. Equal space on all sides makes it look swollen.',
+      tip: 'Start with 1 em at the sides and 0.5 em at the top and bottom.',
+      visual: {
+        kind: 'padBoxes',
+        cols: [
+          { pad: 1, padY: 1, label: 'Swollen' },
+          { pad: 1, padY: 0.5, label: 'Firm' },
+        ],
+      },
+    },
+    {
+      title: 'Inner space is smaller than outer space',
+      body: 'The space inside a box must be smaller than the space between two boxes. Then each box reads as one group.',
+      tip: 'If the gap between boxes is smaller than the margin, the groups mix.',
+      visual: {
+        kind: 'padBoxes',
+        cols: [
+          { pad: 0.5, gap: 1.2, label: 'Grouped' },
+          { pad: 1.2, gap: 0.4, label: 'Mixed' },
+        ],
+      },
+    },
+  ]),
 ];
 
 export function lessonsFor(modeId: ModeId): LessonStep[] {

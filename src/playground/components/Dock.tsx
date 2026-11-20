@@ -33,10 +33,12 @@ export const Dock: React.FC<DockProps> = ({
   return (
     <section aria-label="Controls" className="dp-dock">
       <div className="dp-dock-field">
-        <label htmlFor={sliderId} className="dp-dock-label">
-          Exercise {exerciseNumber} of {exerciseCount}: {exercise.kind}
+        <label htmlFor={sliderId} className="dp-dock-prompt">
+          {exercise.prompt}{' '}
+          <span className="dp-dock-count">
+            {exerciseNumber} of {exerciseCount}
+          </span>
         </label>
-        <p style={{ fontSize: 17, margin: '4px 0 8px' }}>{exercise.prompt}</p>
         <div className="dp-slider-row">
           <button
             type="button"
@@ -70,7 +72,7 @@ export const Dock: React.FC<DockProps> = ({
       </div>
       {passed ? (
         <button type="button" className="dp-btn-primary" onClick={onNext}>
-          {isLast ? 'Start over' : mode.nextLabel}
+          {isLast ? 'See summary' : mode.nextLabel}
         </button>
       ) : (
         <button type="button" className="dp-btn-primary" onClick={onCheck}>

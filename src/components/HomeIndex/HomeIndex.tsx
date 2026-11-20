@@ -5,6 +5,10 @@ import { STILL_LIFE_PHOTOS } from '../../data/photoCatalog';
 import { dailySeedCode } from '../../engine/prng';
 import { lessonMasteryAverage, SightlineStorageV1 } from '../../engine/storage';
 import { LessonDefinition } from '../../engine/types';
+import { dailyPickMode, getMode } from '../../playground/content/modes';
+import { playgroundTotals } from '../../playground/logic/totals';
+import { loadPlaygroundStore } from '../../playground/state/storage';
+import type { ModeId } from '../../playground/types';
 import {
   DailyMixCalibratorIcon,
   LessonCraftIcon,
@@ -15,8 +19,8 @@ interface HomeIndexProps {
   storage: SightlineStorageV1;
   onOpenLesson: (lessonId: string, mode: 'learn' | 'practice') => void;
   onOpenDailyMix: () => void;
-  /** Opens the Design Playground. Optional so older callers still work. */
-  onOpenPlayground?: () => void;
+  /** Opens the Design Playground hub, or one mode when a mode is given. Optional so older callers still work. */
+  onOpenPlayground?: (modeId?: ModeId) => void;
   onToggleTheme: () => void;
 }
 
@@ -49,6 +53,9 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
   const foundationLessons = LESSONS.filter((l) => l.tier === 'foundation');
   const buildingLessons = LESSONS.filter((l) => l.tier === 'building');
   const challengeLessons = LESSONS.filter((l) => l.tier === 'challenge');
+
+  const pgTotals = playgroundTotals(loadPlaygroundStore());
+  const pgPick = getMode(dailyPickMode(todayStr));
 
   const ringRadius = 15;
   const ringCirc = 2 * Math.PI * ringRadius;
@@ -422,29 +429,55 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
                 Train Your Eye for Space
               </h2>
               <p style={{ fontSize: 13.5, color: 'var(--ink-secondary)', marginTop: 6, lineHeight: 1.45 }}>
-                Kerning, tracking, leading, word spacing and line length. Each mode has a slider, a check and a
-                six-step lesson.
+                Kerning, tracking, leading, word spacing, line length, paragraphs and margins. Each mode has a
+                slider, a check, a six-step lesson and a quiz.
+              </p>
+              <p className="tabular" style={{ fontSize: 13.5, fontWeight: 600, marginTop: 8 }}>
+                {pgTotals.done > 0
+                  ? `${pgTotals.done} of ${pgTotals.total} exercises done, ${pgTotals.exact} exact.`
+                  : `${pgTotals.total} exercises in ${pgTotals.modes} modes.`}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onOpenPlayground}
-              className="touch-target"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 7,
-                padding: '0 16px',
-                borderRadius: 8,
-                background: 'var(--ink-primary)',
-                color: 'var(--bg-surface)',
-                fontSize: 13.5,
-                fontWeight: 600,
-              }}
-            >
-              <Play size={14} aria-hidden="true" />
-              <span>Open Playground</span>
-            </button>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {pgPick && (
+                <button
+                  type="button"
+                  onClick={() => onOpenPlayground(pgPick.id)}
+                  className="touch-target"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '0 16px',
+                    borderRadius: 8,
+                    border: '1px solid var(--rule-strong)',
+                    color: 'var(--ink-primary)',
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                  }}
+                >
+                  Today's pick: {pgPick.name}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onOpenPlayground()}
+                className="touch-target"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  padding: '0 16px',
+                  borderRadius: 8,
+                  background: 'var(--ink-primary)',
+                  color: 'var(--bg-surface)',
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                }}
+              >
+                <Play size={14} aria-hidden="true" />
+                <span>Open Playground</span>
+              </button>
+            </div>
           </div>
         </section>
       )}

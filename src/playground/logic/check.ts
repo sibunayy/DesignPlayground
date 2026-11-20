@@ -64,6 +64,8 @@ export function readout(mode: Mode, value: number, exercise: Exercise): string {
       const lines = value / 100;
       return `Paragraph space: ${value}% (${lines} ${lines === 1 ? 'line' : 'lines'})`;
     }
+    case 'margins':
+      return `Margin: ${value}% (${Math.round((exercise.size * value) / 100)} px)`;
   }
 }
 
@@ -75,6 +77,7 @@ export function zoneText(mode: Mode, exercise: Exercise): string {
       )} squares`;
     case 'leading':
     case 'paragraph':
+    case 'margins':
       return `Correct zone: ${exercise.lo}% to ${exercise.hi}%`;
     case 'measure':
       return `Correct zone: ${exercise.lo} to ${exercise.hi} characters`;

@@ -18,7 +18,7 @@ export const LessonPanel: React.FC<LessonPanelProps> = ({ mode, steps, index, on
   return (
     <aside aria-label={mode.lessonName} className="dp-panel">
       <div className="dp-panel-head">
-        <h2 className="dp-panel-name">{mode.lessonName}</h2>
+        <h2 className="dp-sr">{mode.lessonName}</h2>
         <div className="dp-caption">
           Step {index + 1} of {steps.length}
         </div>

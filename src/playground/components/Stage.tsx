@@ -25,6 +25,7 @@ const DESIGN_WIDTH: Record<Mode['id'], number> = {
   wordspace: 1000,
   measure: 1000,
   paragraph: 1000,
+  margins: 900,
 };
 
 const STAGE_PADDING = 64;
@@ -44,9 +45,9 @@ export const Stage: React.FC<StageProps> = ({
   const inner = Math.max(200, width - STAGE_PADDING);
   const designWidth = mode.id === 'leading' || mode.id === 'paragraph' ? exercise.width ?? 1000 : DESIGN_WIDTH[mode.id];
   const scale = Math.min(1, inner / designWidth);
-  // Wrapping text (leading, paragraphs) never drops below 16px. It wraps more instead.
-  const wraps = mode.id === 'leading' || mode.id === 'paragraph';
-  const fontSize = wraps ? Math.max(16, exercise.size * scale) : exercise.size * scale;
+  // Stage text never drops below 16px. Wrapping text wraps more instead.
+  const wraps = mode.id === 'leading' || mode.id === 'paragraph' || mode.id === 'margins';
+  const fontSize = Math.max(16, exercise.size * scale);
   const blur = assists.blur && mode.assists.includes('blur') ? `blur(${Math.max(1.5, fontSize * 0.03)}px)` : undefined;
 
   // Kerning: one grid cell is one square of gap at the current word size.
@@ -168,6 +169,40 @@ export const Stage: React.FC<StageProps> = ({
               </p>
             </React.Fragment>
           ))}
+        </div>
+      );
+      break;
+    }
+    case 'margins': {
+      const pad = (fontSize * value) / 100;
+      const half = exercise.box === 'button';
+      const isPoster = exercise.box === 'poster';
+      canvas = (
+        <div
+          role="img"
+          aria-label={exercise.label}
+          className={`dp-margin-box dp-margin-box--${exercise.box ?? 'card'}${assists.guides ? ' dp-margin-box--guides' : ''}`}
+          style={{
+            padding: half ? `${pad / 2}px ${pad}px` : pad,
+            maxWidth: '100%',
+            filter: blur,
+          }}
+        >
+          <div
+            aria-hidden="true"
+            className="dp-margin-content"
+            style={{
+              width: exercise.width ? exercise.width * scale : undefined,
+              maxWidth: '100%',
+              fontSize,
+              fontWeight: isPoster || half ? 800 : 500,
+              lineHeight: isPoster ? 1.05 : 1.4,
+              letterSpacing: exercise.caps ? '0.08em' : undefined,
+              whiteSpace: half ? 'nowrap' : undefined,
+            }}
+          >
+            {exercise.text}
+          </div>
         </div>
       );
       break;

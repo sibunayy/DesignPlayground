@@ -6,22 +6,27 @@ import { Dock } from './components/Dock';
 import { Header } from './components/Header';
 import { Hub } from './components/Hub';
 import { LessonPanel } from './components/LessonPanel';
+import { Quiz } from './components/Quiz';
 import { Stage } from './components/Stage';
+import { Summary } from './components/Summary';
 import { exercisesFor } from './content/exercises';
 import { lessonsFor } from './content/lessons';
 import { getMode } from './content/modes';
 import { betterGrade, checkValue, feedbackMessage, gradeMessage, gradeValue, readout } from './logic/check';
+import { buildQuiz } from './logic/quiz';
 import { loadPlaygroundStore, savePlaygroundStore } from './state/storage';
-import { AssistId, CheckResult, ModeId, PlaygroundStore } from './types';
+import { Activity, AssistId, CheckResult, ModeId, PlaygroundStore } from './types';
 
 interface PlaygroundAppProps {
   /** Mode to open, or null for the hub. */
   modeId: ModeId | null;
-  onNavigate: (modeId: ModeId | null) => void;
+  /** Slider practice or the A/B quiz. Practice when not given. */
+  activity?: Activity;
+  onNavigate: (modeId: ModeId | null, activity?: Activity) => void;
   onExit: () => void;
 }
 
-export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, onNavigate, onExit }) => {
+export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity = 'practice', onNavigate, onExit }) => {
   const [store, setStore] = useState<PlaygroundStore>(() => loadPlaygroundStore());
   const mode = modeId ? getMode(modeId) : undefined;
   const exercises = modeId ? exercisesFor(modeId) : [];
@@ -31,12 +36,15 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, onNavigate
 
   const [value, setValue] = useState<number>(exercise?.start ?? 0);
   const [result, setResult] = useState<CheckResult>('');
+  const [showSummary, setShowSummary] = useState(false);
 
   // A new mode or exercise resets the slider and the feedback.
   useEffect(() => {
     if (exercise) setValue(exercise.start);
     setResult('');
   }, [exercise]);
+
+  useEffect(() => setShowSummary(false), [modeId, activity]);
 
   useEffect(() => savePlaygroundStore(store), [store]);
 
@@ -68,16 +76,56 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, onNavigate
     }
   };
 
-  const onNext = () => setModeField({ exerciseIndex: isLast ? 0 : exIndex + 1 });
+  const onNext = () => {
+    if (isLast) {
+      setResult('');
+      setShowSummary(true);
+    } else {
+      setModeField({ exerciseIndex: exIndex + 1 });
+    }
+  };
+
+  const practiceAgain = () => {
+    setShowSummary(false);
+    setResult('');
+    if (exercise) setValue(exercise.start);
+    setModeField({ exerciseIndex: 0 });
+    if (activity !== 'practice') onNavigate(modeId, 'practice');
+  };
 
   const onChange = (v: number) => {
     setValue(v);
     if (result) setResult('');
   };
 
+  const working = Boolean(mode && exercise && progress) && activity !== 'quiz' && !showSummary;
+
   let body: React.ReactNode;
   if (!mode || !exercise || !progress) {
-    body = <Hub store={store} onOpen={(id) => onNavigate(id)} />;
+    body = <Hub store={store} onOpen={(id, act) => onNavigate(id, act)} />;
+  } else if (activity === 'quiz') {
+    body = (
+      <Quiz
+        key={mode.id}
+        mode={mode}
+        questions={buildQuiz(mode.id)}
+        best={progress.quizBest}
+        onFinish={(score) => setModeField({ quizBest: Math.max(progress.quizBest, score) })}
+        onPractice={() => onNavigate(mode.id, 'practice')}
+        onHub={() => onNavigate(null)}
+      />
+    );
+  } else if (showSummary) {
+    body = (
+      <Summary
+        mode={mode}
+        exercises={exercises}
+        progress={progress}
+        onPracticeAgain={practiceAgain}
+        onQuiz={() => onNavigate(mode.id, 'quiz')}
+        onHub={() => onNavigate(null)}
+      />
+    );
   } else {
     const steps = lessonsFor(mode.id);
     const stepIndex = Math.min(progress.lessonStep, steps.length - 1);
@@ -120,13 +168,16 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, onNavigate
   }
 
   return (
-    <div className={`dp${mode ? ' dp--mode' : ''}`} data-theme={theme} data-mode={mode?.id}>
+    <div
+      className={`dp${mode ? ' dp--mode dp--flat' : ''}${working ? ' dp--work' : ''}${working && store.panelOpen ? ' dp--lesson' : ''}`}
+      data-theme={theme} data-mode={mode?.id}
+    >
       <Header
         modeId={mode ? mode.id : null}
         theme={theme}
         panelOpen={store.panelOpen}
         onBack={() => (mode ? onNavigate(null) : onExit())}
-        onSelectMode={(id) => onNavigate(id)}
+        onSelectMode={(id) => onNavigate(id, activity)}
         onToggleTheme={toggleTheme}
         onTogglePanel={togglePanel}
       />

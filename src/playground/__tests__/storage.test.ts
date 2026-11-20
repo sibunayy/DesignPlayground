@@ -28,7 +28,7 @@ describe('sanitizeStore', () => {
       },
     });
     expect(s.theme).toBe('light');
-    expect(s.panelOpen).toBe(true);
+    expect(s.panelOpen).toBe(false);
     expect(s.assists.blur).toBe(true);
     expect(s.assists.grid).toBe(true);
     expect(s.modes.kerning).toMatchObject({ exerciseIndex: 2, lessonStep: 0, completed: ['type'] });
@@ -38,6 +38,18 @@ describe('sanitizeStore', () => {
     const s = sanitizeStore({ version: 1, modes: { leading: { exerciseIndex: 1, completed: ['x'] } } });
     expect(s.modes.leading.best).toEqual({});
     expect(s.modes.paragraph.completed).toEqual([]);
+  });
+});
+
+describe('quiz scores', () => {
+  it('keeps a valid quiz best and drops a bad one', () => {
+    const store = sanitizeStore({
+      version: 1,
+      modes: { kerning: { quizBest: 4 }, tracking: { quizBest: -1 }, leading: { quizBest: 'x' } },
+    });
+    expect(store.modes.kerning.quizBest).toBe(4);
+    expect(store.modes.tracking.quizBest).toBe(0);
+    expect(store.modes.leading.quizBest).toBe(0);
   });
 });
 

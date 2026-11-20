@@ -29,9 +29,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => (
   <header className="dp-header">
     <div className="dp-title-group">
-      <button type="button" className="dp-chip-btn" onClick={onBack} aria-label={modeId ? 'All modes' : 'Back to Sightline'}>
-        <DpIcon name="back" />
-      </button>
+      {modeId && (
+        <button type="button" className="dp-chip-btn" onClick={onBack} aria-label="All modes">
+          <DpIcon name="back" />
+        </button>
+      )}
       <span className="dp-app-name">Design Playground</span>
     </div>
     <div className="dp-header-actions">

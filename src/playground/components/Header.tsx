@@ -13,6 +13,11 @@ interface HeaderProps {
   onTogglePanel: () => void;
 }
 
+/** On a narrow screen the tabs scroll. Keep the current tab in view. */
+const scrollIntoTabs = (el: HTMLButtonElement | null) => {
+  el?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+};
+
 export const Header: React.FC<HeaderProps> = ({
   modeId,
   theme,
@@ -38,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               className="dp-mode-tab"
               aria-current={m.id === modeId ? 'page' : undefined}
+              ref={m.id === modeId ? scrollIntoTabs : undefined}
               onClick={() => onSelectMode(m.id)}
             >
               {m.name}

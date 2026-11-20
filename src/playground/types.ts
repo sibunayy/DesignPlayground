@@ -1,4 +1,7 @@
-export type ModeId = 'kerning' | 'tracking' | 'leading' | 'wordspace' | 'measure' | 'paragraph';
+export type ModeId = 'kerning' | 'tracking' | 'leading' | 'wordspace' | 'measure' | 'paragraph' | 'margins';
+
+/** What the learner does in a mode: slider practice or the A/B quiz. */
+export type Activity = 'practice' | 'quiz';
 
 export type ThemeId = 'dark' | 'light';
 
@@ -41,6 +44,8 @@ export interface Mode {
   assists: AssistId[];
   checkLabel: string;
   nextLabel: string;
+  /** Question at the top of the A/B quiz. */
+  quizQuestion: string;
   feedback: ModeFeedback;
   lessonName: string;
 }
@@ -69,6 +74,8 @@ export interface Exercise {
   caps?: boolean;
   /** First-line indent on every paragraph after the first (paragraph spacing). */
   indent?: boolean;
+  /** Margins only: the box shape. Buttons and tags use half the space top and bottom. */
+  box?: 'card' | 'button' | 'poster';
 }
 
 export type LessonVisual =
@@ -100,6 +107,11 @@ export type LessonVisual =
       /** Each column draws three short paragraphs. Gaps are in lines, one per break. */
       cols: Array<{ gaps: [number, number]; indent?: boolean; label: string }>;
     }
+  | {
+      kind: 'padBoxes';
+      /** Each box shows two short text lines. Padding is in em of the text size. */
+      cols: Array<{ pad: number; padY?: number; label: string; /** Two stacked boxes with this gap, in em. */ gap?: number }>;
+    }
   | { kind: 'blurWord'; text: string; size: number }
   | { kind: 'pairList'; size: number; items: string[] };
 
@@ -129,6 +141,8 @@ export interface ModeProgress {
   /** Best grade for each passed exercise id. */
   best: Record<string, Grade>;
   lessonStep: number;
+  /** Best quiz score: correct answers out of the quiz length. */
+  quizBest: number;
 }
 
 export interface PlaygroundStore {

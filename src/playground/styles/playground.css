@@ -244,8 +244,25 @@
   }
 
   /* Keep the header on one row so the stage keeps its height. */
-  .dp--mode .dp-header {
+  .dp--mode .dp-header,
+  .dp--mode .dp-header-actions {
     flex-wrap: nowrap;
+  }
+
+  .dp--mode .dp-mode-tabs {
+    min-width: 0;
+  }
+}
+
+/* With seven mode tabs, the tabs name the place. The app name stays for screen readers. */
+@media (max-width: 1399px) {
+  .dp--mode .dp-app-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 
@@ -823,8 +840,12 @@
     grid-template-columns: 12px minmax(0, 1fr);
   }
 
-  .dp-hub-item .dp-btn-primary {
+  .dp-hub-actions {
     grid-column: 1 / -1;
+  }
+
+  .dp-hub-actions > * {
+    flex: 1 1 0;
   }
 }
 
@@ -837,5 +858,197 @@
 
   .dp button:active:not(:disabled) {
     transform: none;
+  }
+}
+
+/* Margins mode: a box whose inner space the learner sets. */
+.dp-margin-box {
+  background: var(--tile);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 2px var(--bar);
+  color: var(--ink);
+}
+
+.dp-margin-box--button {
+  border-radius: var(--radius-sm);
+}
+
+.dp-margin-box--poster {
+  border-radius: var(--radius-xs);
+}
+
+.dp-margin-box--guides {
+  background: var(--accent-tint);
+}
+
+.dp-margin-box--guides .dp-margin-content {
+  background: var(--tile);
+  outline: 1px dashed var(--accent);
+}
+
+/* Hub: quiz and practice buttons, and the daily pick badge. */
+.dp-hub-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.dp-hub-pick {
+  display: inline-block;
+  margin-left: var(--space-3);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent-tint);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* Quiz and summary screens. */
+.dp-quiz {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.dp-quiz-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dp-quiz-title {
+  font-size: clamp(26px, 4vw, 40px);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.dp-quiz-text {
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.dp-quiz-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.dp-quiz-card {
+  position: relative;
+  min-height: 240px;
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  border-radius: var(--radius-2xl);
+  background: var(--stage);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 3px transparent;
+}
+
+.dp-quiz-card:disabled {
+  opacity: 0.7;
+}
+
+.dp-quiz-card--right {
+  box-shadow: inset 0 0 0 3px var(--accent);
+}
+
+.dp-quiz-card--wrong {
+  box-shadow: inset 0 0 0 3px var(--muted);
+}
+
+.dp-quiz-letter {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-5);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.dp-quiz-card--right .dp-quiz-letter {
+  color: var(--accent);
+}
+
+.dp-specimen {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.dp-quiz-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  min-height: 56px;
+}
+
+.dp-quiz-foot .dp-message {
+  flex: 1 1 320px;
+}
+
+.dp-quiz-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-7);
+  border-radius: var(--radius-2xl);
+  background: var(--panel);
+  max-width: 720px;
+}
+
+.dp-quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.dp-summary-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dp-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  font-size: 18px;
+  border-top: 1px solid var(--tile);
+}
+
+.dp-summary-grade {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.dp-summary-grade--exact {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .dp-quiz-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dp-quiz-card {
+    min-height: 180px;
+  }
+
+  .dp-quiz-result {
+    padding: var(--space-5);
   }
 }

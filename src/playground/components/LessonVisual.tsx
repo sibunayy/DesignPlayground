@@ -126,6 +126,46 @@ export const LessonVisual: React.FC<{ visual: Visual }> = ({ visual }) => {
       );
     }
 
+    case 'padBoxes': {
+      // One em is 10px. A box holds two text bars, 8px high with a 4px line gap.
+      const EM = 10;
+      const box = (col: (typeof visual.cols)[number], key: number) => (
+        <div
+          key={key}
+          style={{
+            padding: `${(col.padY ?? col.pad) * EM}px ${col.pad * EM}px`,
+            marginTop: key === 0 ? 0 : (col.gap ?? 0) * EM,
+            borderRadius: 6,
+            boxShadow: 'inset 0 0 0 2px var(--bar)',
+          }}
+        >
+          {[56, 38].map((w, line) => (
+            <div
+              key={line}
+              style={{
+                width: w,
+                height: 8,
+                marginTop: line === 0 ? 0 : 4,
+                borderRadius: 2,
+                background: 'var(--accent-tint-strong)',
+              }}
+            />
+          ))}
+        </div>
+      );
+      return (
+        <div className="dp-vis-cols" style={{ alignItems: 'flex-start' }}>
+          {visual.cols.map((col, i) => (
+            <div key={i}>
+              {box(col, 0)}
+              {col.gap !== undefined && box(col, 1)}
+              <div className="dp-vis-label" style={{ marginTop: 6 }}>{col.label}</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     case 'blurWord':
       return (
         <div style={{ fontSize: visual.size, fontWeight: 800, lineHeight: 1, filter: 'blur(5px)' }}>

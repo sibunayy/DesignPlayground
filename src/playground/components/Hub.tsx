@@ -1,48 +1,69 @@
 import React from 'react';
 import { exercisesFor } from '../content/exercises';
-import { MODES } from '../content/modes';
-import { ModeId, PlaygroundStore } from '../types';
+import { dailyPickMode, MODES } from '../content/modes';
+import { Activity, ModeId, PlaygroundStore } from '../types';
 
 interface HubProps {
   store: PlaygroundStore;
-  onOpen: (id: ModeId) => void;
+  onOpen: (id: ModeId, activity?: Activity) => void;
+  /** Date for the daily pick, as YYYY-MM-DD. Today when not given. */
+  today?: string;
 }
 
-/** List of modes with progress. Each row opens one mode. */
-export const Hub: React.FC<HubProps> = ({ store, onOpen }) => (
-  <main className="dp-hub">
-    <div className="dp-hub-intro">
-      <h1 className="dp-hub-title">Train your eye for space.</h1>
-      <p className="dp-hub-lede">
-        Move a slider until the space looks right. Then check your answer. Each mode has a short lesson.
-      </p>
-    </div>
-    <ul className="dp-hub-list">
-      {MODES.map((m) => {
-        const total = exercisesFor(m.id).length;
-        const done = store.modes[m.id].completed.length;
-        const exact = Object.values(store.modes[m.id].best).filter((g) => g === 'exact').length;
-        const started = done > 0 || store.modes[m.id].exerciseIndex > 0;
-        return (
-          <li key={m.id} className="dp-hub-item">
-            <span className="dp-hub-swatch" style={{ background: `var(--${m.accentToken})` }} aria-hidden="true" />
-            <div>
-              <h2 className="dp-hub-name">{m.name}</h2>
-              <p className="dp-hub-meta">
-                {m.teaches}. {done} of {total} done{exact > 0 ? `, ${exact} exact` : ''}.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="dp-btn-primary"
-              aria-label={`${started ? 'Continue' : 'Start'} ${m.name}`}
-              onClick={() => onOpen(m.id)}
-            >
-              {started ? 'Continue' : 'Start'}
-            </button>
-          </li>
-        );
-      })}
-    </ul>
-  </main>
-);
+/** List of modes with progress. Each row opens practice or the quiz of one mode. */
+export const Hub: React.FC<HubProps> = ({ store, onOpen, today = new Date().toISOString().slice(0, 10) }) => {
+  const pick = dailyPickMode(today);
+  return (
+    <main className="dp-hub">
+      <div className="dp-hub-intro">
+        <h1 className="dp-hub-title">Train your eye for space.</h1>
+        <p className="dp-hub-lede">
+          Move a slider until the space looks right. Then check your answer. Each mode has a short lesson and a
+          quiz.
+        </p>
+      </div>
+      <ul className="dp-hub-list">
+        {MODES.map((m) => {
+          const progress = store.modes[m.id];
+          const total = exercisesFor(m.id).length;
+          const done = progress.completed.length;
+          const exact = Object.values(progress.best).filter((g) => g === 'exact').length;
+          const started = done > 0 || progress.exerciseIndex > 0;
+          return (
+            <li key={m.id} className="dp-hub-item">
+              <span className="dp-hub-swatch" style={{ background: `var(--${m.accentToken})` }} aria-hidden="true" />
+              <div>
+                <h2 className="dp-hub-name">
+                  {m.name}
+                  {m.id === pick && <span className="dp-hub-pick">Today's pick</span>}
+                </h2>
+                <p className="dp-hub-meta">
+                  {m.teaches}. {done} of {total} done{exact > 0 ? `, ${exact} exact` : ''}
+                  {progress.quizBest > 0 ? `. Quiz best: ${progress.quizBest} of ${total}` : ''}.
+                </p>
+              </div>
+              <div className="dp-hub-actions">
+                <button
+                  type="button"
+                  className="dp-btn-secondary"
+                  aria-label={`${m.name} quiz`}
+                  onClick={() => onOpen(m.id, 'quiz')}
+                >
+                  Quiz
+                </button>
+                <button
+                  type="button"
+                  className="dp-btn-primary"
+                  aria-label={`${started ? 'Continue' : 'Start'} ${m.name}`}
+                  onClick={() => onOpen(m.id, 'practice')}
+                >
+                  {started ? 'Continue' : 'Start'}
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </main>
+  );
+};

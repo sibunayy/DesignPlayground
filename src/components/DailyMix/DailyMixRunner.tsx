@@ -6,6 +6,8 @@ import { ExerciseResult, EyeLens } from '../../engine/types';
 import { ExerciseViewport } from '../../exercises/ExerciseRegistry';
 import { LessonCraftIcon } from '../Icons/CraftIcons';
 import { TopBar } from '../StudioShell/TopBar';
+import { dailyPickMode, getMode } from '../../playground/content/modes';
+import type { ModeId } from '../../playground/types';
 
 interface DailyMixRunnerProps {
   theme: 'light' | 'dark';
@@ -15,6 +17,8 @@ interface DailyMixRunnerProps {
   onExit: () => void;
   onRecordDrillScore?: (lessonId: string, score: number) => void;
   onFinishDaily: (dateStr: string, avgScore: number, perLesson: Array<{ lessonId: string; score: number }>) => void;
+  /** Opens a Design Playground mode for the playground round. */
+  onOpenPlayground?: (modeId: ModeId) => void;
 }
 
 export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
@@ -25,9 +29,11 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
   onExit,
   onRecordDrillScore,
   onFinishDaily,
+  onOpenPlayground,
 }) => {
   const todayStr = new Date().toISOString().slice(0, 10);
   const dailySeed = dailySeedCode(todayStr);
+  const pick = getMode(dailyPickMode(todayStr));
 
   const drills = useMemo(() => {
     const rng = new SeededRng(dailySeed);
@@ -155,6 +161,50 @@ export const DailyMixRunner: React.FC<DailyMixRunnerProps> = ({
               </div>
             ))}
           </div>
+
+          {onOpenPlayground && pick && (
+            <section
+              aria-labelledby="daily-playground"
+              style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--rule)',
+                borderRadius: 12,
+                padding: '16px 18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 12,
+              }}
+            >
+              <div style={{ minWidth: 0, flex: '1 1 260px' }}>
+                <h2 id="daily-playground" style={{ fontSize: 15, fontWeight: 600 }}>
+                  Playground round: {pick.name}
+                </h2>
+                <p style={{ fontSize: 13, color: 'var(--ink-secondary)', marginTop: 4, lineHeight: 1.45 }}>
+                  Today's extra round trains {pick.teaches.toLowerCase()}.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onOpenPlayground(pick.id)}
+                className="touch-target"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '0 16px',
+                  borderRadius: 8,
+                  border: '1px solid var(--rule-strong)',
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                }}
+              >
+                <span>Start round</span>
+                <ChevronRight size={14} aria-hidden="true" />
+              </button>
+            </section>
+          )}
 
           <button
             type="button"

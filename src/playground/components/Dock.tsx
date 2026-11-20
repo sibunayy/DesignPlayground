@@ -70,7 +70,7 @@ export const Dock: React.FC<DockProps> = ({
       </div>
       {passed ? (
         <button type="button" className="dp-btn-primary" onClick={onNext}>
-          {isLast ? 'Start over' : mode.nextLabel}
+          {isLast ? 'See summary' : mode.nextLabel}
         </button>
       ) : (
         <button type="button" className="dp-btn-primary" onClick={onCheck}>

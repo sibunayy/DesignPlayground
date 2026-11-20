@@ -41,6 +41,18 @@ describe('sanitizeStore', () => {
   });
 });
 
+describe('quiz scores', () => {
+  it('keeps a valid quiz best and drops a bad one', () => {
+    const store = sanitizeStore({
+      version: 1,
+      modes: { kerning: { quizBest: 4 }, tracking: { quizBest: -1 }, leading: { quizBest: 'x' } },
+    });
+    expect(store.modes.kerning.quizBest).toBe(4);
+    expect(store.modes.tracking.quizBest).toBe(0);
+    expect(store.modes.leading.quizBest).toBe(0);
+  });
+});
+
 describe('load and save', () => {
   it('round-trips through localStorage', () => {
     const s = defaultStore();

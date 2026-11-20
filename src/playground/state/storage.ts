@@ -12,7 +12,7 @@ export const DEFAULT_ASSISTS: Assists = {
 };
 
 function emptyProgress(modeId: ModeId): ModeProgress {
-  return { modeId, exerciseIndex: 0, completed: [], best: {}, lessonStep: 0 };
+  return { modeId, exerciseIndex: 0, completed: [], best: {}, lessonStep: 0, quizBest: 0 };
 }
 
 export function defaultStore(): PlaygroundStore {
@@ -43,6 +43,7 @@ export function sanitizeStore(raw: unknown): PlaygroundStore {
       if (!m) continue;
       if (isNonNegInt(m.exerciseIndex)) base.modes[id].exerciseIndex = m.exerciseIndex;
       if (isNonNegInt(m.lessonStep)) base.modes[id].lessonStep = m.lessonStep;
+      if (isNonNegInt(m.quizBest)) base.modes[id].quizBest = m.quizBest;
       if (Array.isArray(m.completed)) {
         base.modes[id].completed = m.completed.filter((c): c is string => typeof c === 'string');
       }

@@ -16,6 +16,7 @@ export const MODES: Mode[] = [
     unit: 'units',
     slider: { min: 0, max: 140, step: 2 },
     assists: ['answer', 'guides', 'blur', 'grid'],
+    quizQuestion: 'Which pair has the better kerning?',
     checkLabel: 'Check spacing',
     nextLabel: 'Next pair',
     lessonName: 'Kerning lesson',
@@ -37,6 +38,7 @@ export const MODES: Mode[] = [
     unit: 'units',
     slider: { min: -100, max: 240, step: 5 },
     assists: ['answer', 'compare', 'blur', 'grid'],
+    quizQuestion: 'Which word has the better tracking?',
     checkLabel: 'Check tracking',
     nextLabel: 'Next exercise',
     lessonName: 'Tracking lesson',
@@ -58,6 +60,7 @@ export const MODES: Mode[] = [
     unit: '%',
     slider: { min: 80, max: 220, step: 5 },
     assists: ['answer', 'guides', 'blur', 'grid'],
+    quizQuestion: 'Which text has the better leading?',
     checkLabel: 'Check leading',
     nextLabel: 'Next exercise',
     lessonName: 'Leading lesson',
@@ -79,6 +82,7 @@ export const MODES: Mode[] = [
     unit: 'units',
     slider: { min: -100, max: 400, step: 10 },
     assists: ['answer', 'compare', 'blur', 'grid'],
+    quizQuestion: 'Which line has the better word spacing?',
     checkLabel: 'Check word spacing',
     nextLabel: 'Next exercise',
     lessonName: 'Word spacing lesson',
@@ -100,6 +104,7 @@ export const MODES: Mode[] = [
     unit: 'characters',
     slider: { min: 20, max: 100, step: 1 },
     assists: ['answer', 'guides', 'grid'],
+    quizQuestion: 'Which text has the better line length?',
     checkLabel: 'Check line length',
     nextLabel: 'Next exercise',
     lessonName: 'Line length lesson',
@@ -121,6 +126,7 @@ export const MODES: Mode[] = [
     unit: '%',
     slider: { min: 0, max: 200, step: 10 },
     assists: ['answer', 'guides', 'blur', 'grid'],
+    quizQuestion: 'Which text has the better paragraph space?',
     checkLabel: 'Check paragraph space',
     nextLabel: 'Next exercise',
     lessonName: 'Paragraphs lesson',
@@ -132,7 +138,36 @@ export const MODES: Mode[] = [
       goodLast: 'Balanced. Every exercise in this mode is done.',
     },
   },
+  {
+    id: 'margins',
+    name: 'Margins',
+    teaches: 'Space around a text block',
+    accentToken: 'mode-margins',
+    defaultTheme: 'dark',
+    layout: 'panel-right',
+    unit: '%',
+    slider: { min: 0, max: 300, step: 10 },
+    assists: ['answer', 'guides', 'blur', 'grid'],
+    quizQuestion: 'Which box has the better margins?',
+    checkLabel: 'Check margins',
+    nextLabel: 'Next exercise',
+    lessonName: 'Margins lesson',
+    feedback: {
+      idle: 'Drag the slider to change the space inside the box.',
+      loose: 'Too open. The text floats and the box looks empty.',
+      tight: 'Too tight. The text crowds the edge of the box.',
+      good: 'Balanced. The text sits in the box with clear space on each side.',
+      goodLast: 'Balanced. Every exercise in this mode is done.',
+    },
+  },
 ];
+
+/** Daily pick: one mode per date, the same for every learner on that date. */
+export function dailyPickMode(dateStr: string): ModeId {
+  let h = 0;
+  for (const ch of dateStr) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return MODES[h % MODES.length].id;
+}
 
 export const MODE_IDS: ModeId[] = MODES.map((m) => m.id);
 

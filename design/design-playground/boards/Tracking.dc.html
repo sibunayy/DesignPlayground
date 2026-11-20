@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Design Playground, Tracking</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+[data-theme="dark"]{color-scheme:dark;--bg:#121418;--stage:#1B1E23;--panel:#1F2328;--tile:#2A2E35;--ink:#ECE9E2;--ink2:#D2CFC8;--muted:#A8A59D;--bar:#5A616B;--grid:#ECE9E20D;--chip:#23272D;--btn2:#2A2E35;--accent:#F2B66D;--on-accent:#121418;--tint:#F2B66D4D;--tint2:#F2B66D66}
+[data-theme="light"]{color-scheme:light;--bg:#ECEBE7;--stage:#FFFFFF;--panel:#FFFFFF;--tile:#F1EFEA;--ink:#1B1B1A;--ink2:#3A3935;--muted:#55544F;--bar:#BDBBB4;--grid:#1B1B1A0F;--chip:#FFFFFF;--btn2:#E4E2DC;--accent:#9A5B00;--on-accent:#FFFFFF;--tint:#9A5B0038;--tint2:#9A5B004D}
+body{margin:0;font-family:'Bricolage Grotesque',system-ui,sans-serif}
+button{font-family:inherit;cursor:pointer;transition:transform .08s ease-out}
+button:hover:not(:disabled){filter:brightness(1.08)}
+button:active:not(:disabled){transform:scale(0.98)}
+button:disabled{cursor:not-allowed}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+input[type=range]{width:100%;height:44px;cursor:pointer}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width:1180px;height:820px;box-sizing:border-box;background:var(--bg);color:var(--ink);padding:32px 40px 36px;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:center;justify-content:space-between;min-height:52px">
+    <div style="display:flex;align-items:baseline;gap:20px">
+      <div style="font-size:22px;font-weight:800">Design Playground</div>
+      <div style="font-size:18px;color:var(--muted)">{{modeText}}</div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <button onClick="{{toggleTheme}}" style="border:0;background:var(--chip);color:var(--ink);min-height:52px;padding:0 22px;border-radius:18px;font-size:18px;font-weight:600">{{themeLabel}}</button>
+      <button onClick="{{toggleSheet}}" aria-expanded="{{sheetOpen}}" style="border:0;background:var(--chip);color:var(--ink);min-height:52px;padding:0 26px;border-radius:18px;font-size:18px;font-weight:600">{{sheetLabel}}</button>
+    </div>
+  </div>
+  <div style="flex:1;display:flex;gap:20px;min-height:0">
+    <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{ true }}">
+      <div style="flex:0 0 340px;background:var(--panel);border-radius:32px;padding:26px;display:flex;flex-direction:column;gap:16px;min-height:0">
+        <div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:20px;font-weight:800">Tracking lesson</div><div style="font-size:16px;color:var(--muted)">{{stepText}}</div></div>
+        <div aria-hidden="true" style="display:flex;gap:6px"><sc-for list="{{bars}}" as="b" hint-placeholder-count="6"><span style="{{b.style}}"></span></sc-for></div>
+        <div aria-hidden="true" style="height:176px;background:var(--tile);border-radius:22px;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:0 22px;overflow:hidden">
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="3"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="{{r.style}}">{{r.text}}</span><span style="font-size:16px;font-weight:600;color:var(--muted);white-space:nowrap">{{r.label}}</span></div></sc-for>
+        </div>
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:24px;font-weight:800;line-height:1.15;text-wrap:balance">{{title}}</div>
+          <div style="font-size:17px;line-height:1.45;color:var(--ink2);text-wrap:pretty">{{body}}</div>
+          <div style="font-size:16px;line-height:1.4;color:var(--muted);margin-top:auto;text-wrap:pretty">{{tip}}</div>
+        </div>
+        <div style="display:flex;gap:12px">
+          <button onClick="{{prev}}" disabled="{{prevOff}}" style="{{prevStyle}}">Previous</button>
+          <button onClick="{{next}}" style="flex:1;border:0;background:var(--accent);color:var(--on-accent);min-height:56px;border-radius:16px;font-size:19px;font-weight:800">{{nextLabel}}</button>
+        </div>
+      </div>
+    </sc-if>
+    <div style="flex:1;display:flex;flex-direction:column;gap:20px;min-width:0">
+      <div style="{{stageStyle}}">
+        <div role="group" aria-label="Assistive tools" style="display:flex;justify-content:center">
+          <button onClick="{{toggleAnswer}}" aria-pressed="{{answerOn}}" aria-label="Answer zone" title="Answer zone" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{answerBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span></button>
+          <button onClick="{{toggleCompare}}" aria-pressed="{{compareOn}}" aria-label="Compare with default tracking" title="Compare with default tracking" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{compareBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h16"/></svg></span></button>
+          <button onClick="{{toggleBlur}}" aria-pressed="{{blurOn}}" aria-label="Squint blur" title="Squint blur" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{blurBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span></button>
+          <button onClick="{{toggleGrid}}" aria-pressed="{{gridOn}}" aria-label="Grid" title="Grid" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{gridBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM4 12h16M12 4v16"/></svg></span></button>
+        </div>
+        <div role="img" aria-label="{{wordLabel}}" style="display:grid;justify-items:center;align-items:center">
+          <div style="{{ghostStyle}}">{{word}}</div>
+          <div style="{{wordStyle}}">{{word}}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <sc-if value="{{answerOn}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:6px">
+              <div style="{{trackStyle}}"><span style="{{zoneStyle}}"></span><span style="{{markStyle}}"></span></div>
+              <div style="font-size:16px;color:var(--ink2)">{{zoneText}}</div>
+            </div>
+          </sc-if>
+          <div style="font-size:16px;color:var(--muted)">{{readout}}</div>
+          <div aria-live="polite" style="min-height:28px;font-size:20px;font-weight:600">{{message}}</div>
+        </div>
+      </div>
+      <div style="background:var(--panel);border-radius:28px;padding:16px 24px;display:flex;align-items:center;gap:24px">
+        <div style="flex:1">
+          <label for="trk" style="font-size:16px;font-weight:600;color:var(--muted)">{{prompt}}</label>
+          <input id="trk" type="range" min="-100" max="240" step="5" value="{{val}}" onInput="{{onSlide}}" style="accent-color:var(--accent)">
+        </div>
+        <sc-if value="{{showCheck}}" hint-placeholder-val="{{ true }}"><button onClick="{{check}}" style="border:0;background:var(--accent);color:var(--on-accent);min-height:56px;padding:0 36px;border-radius:16px;font-size:20px;font-weight:800">Check tracking</button></sc-if>
+        <sc-if value="{{showNext}}" hint-placeholder-val="{{ false }}"><button onClick="{{nextEx}}" style="border:0;background:var(--accent);color:var(--on-accent);min-height:56px;padding:0 36px;border-radius:16px;font-size:20px;font-weight:800">{{exBtn}}</button></sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"dark","section":"Theme"},"$preview":{"width":1180,"height":820}}'>
+class Component extends DCLogic {
+  state = { val: 180, result: '', sheet: true, page: 0, theme: '', ex: 0, answer: false, compare: false, blur: false, grid: true };
+  renderVals() {
+    const st = this.state;
+    const theme = st.theme || this.props.theme || 'dark';
+    const v = st.val;
+    const open = st.sheet;
+    const pg = st.page;
+    const exs = [
+      { word: 'Poster', size: 150, lo: -40, hi: 10, start: 180, kind: 'Large headline' },
+      { word: 'SMALL CAPS LABEL', size: 40, lo: 60, hi: 140, start: -20, kind: 'Capital label' },
+      { word: 'Quiet reading text', size: 44, lo: -5, hi: 25, start: 150, kind: 'Lowercase text' }
+    ];
+    const ex = exs[st.ex];
+    const lastEx = st.ex === exs.length - 1;
+    const done = st.result === 'good';
+    const msgs = { '': 'Drag the slider to change the tracking.', loose: 'Too open. The letters drift apart.', tight: 'Too tight. The letters crowd each other.', good: lastEx ? 'Balanced. All three exercises are done.' : 'Balanced. The letters look evenly open.' };
+    const pages = [
+      { title: 'Tracking moves every letter at once', body: 'Tracking adds or removes the same space between all letters. Kerning then fixes single pairs.', tip: 'Set tracking first, then kern. One unit is 1/1000 of the font size.', rows: [['Type', -60, 'Tight'], ['Type', 0, 'Default'], ['Type', 150, 'Open']], size: 40 },
+      { title: 'Large type needs less tracking', body: 'Big letters create big gaps. Tighten a headline a little so it reads as one shape.', tip: 'Try -10 to -40 units on large headlines.', rows: [['Poster', 0, 'Default'], ['Poster', -30, 'Tightened']], size: 52 },
+      { title: 'Capital letters need more tracking', body: 'Capitals have no ascenders or descenders. Open the space so each letter can breathe.', tip: 'Try 50 to 150 units on capital labels.', rows: [['LABEL', 0, 'Default'], ['LABEL', 100, 'Opened']], size: 40 },
+      { title: 'Small text needs a little more space', body: 'At small sizes, letters blur together. A small increase keeps them clear.', tip: 'Try 5 to 25 units on small text.', rows: [['Small text', 0, 'Default'], ['Small text', 20, 'Opened']], size: 26 },
+      { title: 'Even tracking gives an even grey', body: 'Blur the line. Tight tracking makes dark patches. Loose tracking makes light patches.', tip: 'Use the squint toggle on the stage.', rows: [['Reading', -50, 'Tight'], ['Reading', 10, 'Even'], ['Reading', 160, 'Loose']], size: 34, blur: true },
+      { title: 'Do not track lowercase text hard', body: 'Wide tracking breaks word shapes in lowercase text. Keep body text near zero.', tip: 'Use wide tracking on capitals only.', rows: [['lowercase words', 0, 'Word shapes hold'], ['lowercase words', 200, 'Word shapes break']], size: 28 }
+    ];
+    const cur = pages[pg];
+    const last = pg === pages.length - 1;
+    const tb = (on) => 'width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:' + (on ? 'var(--accent)' : 'var(--chip)') + ';color:' + (on ? 'var(--on-accent)' : 'var(--ink)');
+    const k = open ? 0.8 : 1;
+    const wordSize = Math.round(ex.size * (open ? 0.88 : 1));
+    const common = 'grid-area:1/1;white-space:nowrap;line-height:1;font-weight:800;font-size:' + wordSize + 'px;';
+    return {
+      theme: theme,
+      themeLabel: theme === 'dark' ? 'Light mode' : 'Dark mode',
+      modeText: 'Tracking, exercise ' + (st.ex + 1) + ' of ' + exs.length,
+      prompt: ex.kind + ': set the tracking so the letters look evenly open.',
+      word: ex.word,
+      wordLabel: ex.word + ' with adjustable tracking',
+      val: v,
+      sheetOpen: open,
+      sheetLabel: open ? 'Hide resources' : 'Show resources',
+      stageStyle: 'flex:1;position:relative;background-color:var(--stage);' + (st.grid ? 'background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);' : '') + 'background-size:40px 40px;background-position:center;border-radius:32px;padding:24px 32px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-width:0;overflow:hidden',
+      wordStyle: common + 'letter-spacing:' + (v / 1000) + 'em;color:var(--ink);' + (st.blur ? 'filter:blur(' + Math.max(2, Math.round(wordSize * 0.03)) + 'px);' : ''),
+      ghostStyle: common + 'letter-spacing:0;color:var(--muted);opacity:' + (st.compare ? 0.35 : 0),
+      answerOn: st.answer, compareOn: st.compare, blurOn: st.blur, gridOn: st.grid,
+      answerBtn: tb(st.answer), compareBtn: tb(st.compare), blurBtn: tb(st.blur), gridBtn: tb(st.grid),
+      toggleAnswer: () => this.setState({ answer: !st.answer }),
+      toggleCompare: () => this.setState({ compare: !st.compare }),
+      toggleBlur: () => this.setState({ blur: !st.blur }),
+      toggleGrid: () => this.setState({ grid: !st.grid }),
+      trackStyle: 'position:relative;width:340px;height:12px;border-radius:6px;background:var(--tile)',
+      zoneStyle: 'position:absolute;top:0;height:12px;border-radius:6px;background:var(--tint2);left:' + (ex.lo + 100) + 'px;width:' + Math.max(8, ex.hi - ex.lo) + 'px',
+      markStyle: 'position:absolute;top:-4px;height:20px;width:4px;border-radius:2px;background:var(--ink);left:' + (Math.min(Math.max(v + 100, 0), 336)) + 'px',
+      zoneText: 'Correct zone: ' + ex.lo + ' to ' + ex.hi + ' units',
+      readout: 'Tracking: ' + v + ' units',
+      message: msgs[st.result],
+      onSlide: (e) => this.setState({ val: Number(e.target.value), result: '' }),
+      toggleSheet: () => this.setState({ sheet: !st.sheet }),
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      check: () => { const x = st.val; this.setState({ result: x > ex.hi ? 'loose' : (x < ex.lo ? 'tight' : 'good') }); },
+      showCheck: !done, showNext: done,
+      exBtn: lastEx ? 'Start over' : 'Next exercise',
+      nextEx: () => { const n = lastEx ? 0 : st.ex + 1; this.setState({ ex: n, val: exs[n].start, result: '' }); },
+      stepText: 'Step ' + (pg + 1) + ' of ' + pages.length,
+      bars: pages.map((p, i) => ({ style: 'flex:1;height:6px;border-radius:3px;background:' + (i <= pg ? 'var(--accent)' : 'var(--bar)') })),
+      rows: cur.rows.map((r) => ({ text: r[0], label: r[2], style: 'font-weight:800;line-height:1;font-size:' + cur.size + 'px;letter-spacing:' + (r[1] / 1000) + 'em;white-space:nowrap' + (cur.blur ? ';filter:blur(1.6px)' : '') })),
+      title: cur.title, body: cur.body, tip: cur.tip,
+      prevOff: pg === 0,
+      prevStyle: 'border:0;background:var(--btn2);color:var(--ink);min-height:56px;padding:0 24px;border-radius:16px;font-size:19px;font-weight:600;opacity:' + (pg === 0 ? 0.4 : 1),
+      nextLabel: last ? 'Review again' : 'Next',
+      prev: () => this.setState({ page: Math.max(0, st.page - 1) }),
+      next: () => this.setState({ page: last ? 0 : st.page + 1 })
+    };
+  }
+}
+</script>
+</body>
+</html>

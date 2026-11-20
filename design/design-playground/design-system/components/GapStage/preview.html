@@ -1,0 +1,13 @@
+<!-- @dsCard group="Stage" height=420 subtitle="Word, gap block and guides" -->
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>body{margin:0;padding:20px;background:var(--ground);color:var(--ink);font-family:var(--font-sans)}
+.stage{height:340px;border-radius:var(--radius-2xl);background-color:var(--stage);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;background-position:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+.word{display:flex;align-items:center;font-size:200px;font-weight:800;line-height:1;font-kerning:none}
+.gap{position:relative;display:inline-block;height:104px;width:72px;border-radius:8px;background:var(--accent-tint)}
+.edge{position:absolute;top:-30%;bottom:-30%;width:2px;background:var(--accent)}
+.zone{position:relative;width:280px;height:12px;border-radius:6px;background:var(--tile)}
+.zone i{position:absolute;top:0;height:12px;left:10px;width:60px;border-radius:6px;background:var(--accent-tint-strong)}
+.zone b{position:absolute;top:-4px;height:20px;width:4px;left:90px;border-radius:2px;background:var(--ink)}
+</style>
+<div class="stage"><div class="word"><span>T</span><span class="gap"><span class="edge" style="left:-1px"></span><span class="edge" style="right:-1px"></span></span><span>ype</span></div>
+<div class="zone"><i></i><b></b></div></div>

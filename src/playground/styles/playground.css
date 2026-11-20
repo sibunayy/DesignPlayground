@@ -1,0 +1,790 @@
+/* Design Playground layout. Every rule is scoped under .dp so Sightline styles stay as they are. */
+
+.dp {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-dp);
+  padding: var(--space-7) var(--space-8) 36px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  -webkit-text-size-adjust: 100%;
+}
+
+.dp *,
+.dp *::before,
+.dp *::after {
+  box-sizing: border-box;
+}
+
+.dp h1,
+.dp h2,
+.dp h3,
+.dp p {
+  margin: 0;
+}
+
+/* Controls */
+
+.dp button {
+  font-family: inherit;
+  border: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 80ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dp button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.dp button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.dp button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.dp button:focus-visible,
+.dp a:focus-visible,
+.dp input:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.dp-btn-primary {
+  min-height: 56px;
+  padding: 0 36px;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 24px;
+}
+
+.dp-btn-secondary {
+  min-height: 56px;
+  padding: 0 24px;
+  border-radius: var(--radius-md);
+  background: var(--button-2);
+  color: var(--ink);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.dp-chip-btn {
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 18px;
+  background: var(--chip);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+
+.dp-toggle {
+  width: var(--tap-target);
+  height: var(--tap-target);
+  padding: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dp-toggle-chip {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--chip);
+  color: var(--ink);
+}
+
+.dp-toggle[aria-pressed='true'] .dp-toggle-chip {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.dp input[type='range'] {
+  width: 100%;
+  height: var(--tap-target);
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent);
+  touch-action: pan-y;
+}
+
+/* Header */
+
+.dp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  min-height: 52px;
+}
+
+.dp-title-group {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  min-width: 0;
+}
+
+.dp-app-name {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 800;
+}
+
+.dp-mode-text {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.dp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dp-mode-tabs {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: 18px;
+  background: var(--chip);
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+}
+
+.dp-mode-tab {
+  min-height: var(--tap-target);
+  padding: 0 16px;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dp-mode-tab[aria-current='page'] {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 800;
+}
+
+/* Mode body: three regions placed by grid areas */
+
+.dp-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.dp-stage { grid-area: stage; }
+.dp-dock { grid-area: dock; }
+.dp-panel { grid-area: panel; }
+
+.dp-body--panel-right {
+  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: 'stage panel' 'dock panel';
+}
+
+.dp-body--panel-left {
+  grid-template-columns: 340px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: 'panel stage' 'panel dock';
+}
+
+.dp-body--panel-below {
+  grid-template-columns: 400px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: 'stage stage' 'dock panel';
+}
+
+.dp-body--closed {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: 'stage' 'dock';
+}
+
+/* Landscape iPad and wider: the app fills the screen height. */
+@media (min-aspect-ratio: 1/1) and (min-width: 1000px) {
+  .dp--mode {
+    height: 100dvh;
+    overflow: hidden;
+  }
+}
+
+/* Stage */
+
+.dp-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 360px;
+  border-radius: var(--radius-2xl);
+  background-color: var(--stage);
+  background-position: center;
+  padding: var(--space-6) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  overflow: hidden;
+}
+
+.dp-stage--grid {
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+}
+
+.dp-assists {
+  display: flex;
+  justify-content: center;
+}
+
+.dp-stage-canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Line length keeps a true width. A line wider than the stage scrolls inside the stage. */
+.dp-stage-canvas--scroll {
+  justify-content: flex-start;
+  overflow-x: auto;
+}
+
+.dp-stage-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  text-align: center;
+}
+
+.dp-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
+}
+
+.dp-zone-track {
+  position: relative;
+  width: 280px;
+  max-width: 70vw;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--tile);
+}
+
+.dp-zone-range {
+  position: absolute;
+  top: 0;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--accent-tint-strong);
+}
+
+.dp-zone-mark {
+  position: absolute;
+  top: -4px;
+  height: 20px;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.dp-caption {
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.dp-zone-text {
+  font-size: 16px;
+  color: var(--ink-2);
+}
+
+.dp-message {
+  min-height: 28px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Stage word for kerning */
+
+.dp-kern-word {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  font-weight: 800;
+  font-kerning: none;
+  white-space: nowrap;
+}
+
+.dp-gap {
+  position: relative;
+  display: inline-block;
+  border-radius: 8px;
+  background: var(--accent-tint);
+}
+
+.dp-gap-edge {
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  width: 2px;
+  background: var(--accent);
+}
+
+.dp-gap-ruler {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 26px);
+  height: 2px;
+  background: var(--accent);
+}
+
+.dp-gap-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(100% + 34px);
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.dp-overlay {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+}
+
+.dp-overlay > * {
+  grid-area: 1 / 1;
+}
+
+.dp-stage-line {
+  white-space: nowrap;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.dp-ghost {
+  color: var(--muted);
+}
+
+.dp-measure-ruler {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Dock */
+
+.dp-dock {
+  background: var(--panel);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.dp-dock-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.dp-dock-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.dp-body--panel-below .dp-dock {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+}
+
+/* Lesson panel */
+
+.dp-panel {
+  min-height: 0;
+  background: var(--panel);
+  border-radius: var(--radius-2xl);
+  padding: 26px 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow: auto;
+}
+
+.dp-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-3);
+}
+
+.dp-panel-head .dp-bars {
+  order: 3;
+  flex: 1 0 100%;
+}
+
+.dp-panel-name {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.dp-bars {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.dp-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-xs);
+  background: var(--bar);
+}
+
+.dp-bar--on {
+  background: var(--accent);
+}
+
+.dp-visual {
+  flex: 0 0 auto;
+  min-height: 176px;
+  background: var(--tile);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  overflow: hidden;
+}
+
+.dp-lesson-text {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dp-lesson-title {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.dp-lesson-body {
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.dp-lesson-tip {
+  margin-top: auto;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.dp-panel-controls {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.dp-panel-controls .dp-btn-primary {
+  flex: 1;
+  padding: 0 16px;
+  font-size: 19px;
+}
+
+/* Below-stage panel on landscape: visual, text and controls side by side. */
+.dp-body--panel-below .dp-panel {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr) 130px;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: 'head head head' 'visual text controls';
+  gap: var(--space-3) var(--space-6);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-xl);
+}
+
+.dp-body--panel-below .dp-panel-head { grid-area: head; align-items: center; flex-wrap: nowrap; gap: var(--space-4); }
+.dp-body--panel-below .dp-panel-head .dp-bars { order: 2; flex: 1 1 auto; }
+.dp-body--panel-below .dp-panel-head .dp-caption { order: 3; white-space: nowrap; }
+.dp-body--panel-below .dp-visual { grid-area: visual; min-height: 150px; }
+.dp-body--panel-below .dp-lesson-text { grid-area: text; }
+.dp-body--panel-below .dp-panel-controls {
+  grid-area: controls;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+}
+.dp-body--panel-below .dp-panel-controls .dp-btn-primary { flex: 0 0 auto; }
+.dp-body--panel-below .dp-lesson-tip { margin-top: 0; }
+
+/* Lesson visuals */
+
+.dp-vis-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.dp-vis-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  letter-spacing: 0;
+  word-spacing: normal;
+}
+
+.dp-vis-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.dp-vis-cols {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 18px;
+}
+
+.dp-measure-line {
+  height: 10px;
+  border-radius: var(--radius-xs);
+  background: var(--accent-tint-strong);
+}
+
+/* Portrait iPad and narrow windows: stack stage, dock and panel. */
+@media (max-aspect-ratio: 1/1), (max-width: 999px) {
+  .dp {
+    padding: var(--space-6) var(--space-6) var(--space-7);
+  }
+
+  .dp-body,
+  .dp-body--panel-right,
+  .dp-body--panel-left,
+  .dp-body--panel-below,
+  .dp-body--closed {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: 'stage' 'dock' 'panel';
+  }
+
+  .dp-stage {
+    min-height: min(560px, 55dvh);
+  }
+
+  .dp-body--panel-below .dp-dock {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .dp-panel,
+  .dp-body--panel-below .dp-panel {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: 'head head' 'visual text' 'controls controls';
+    gap: var(--space-4) var(--space-6);
+    padding: var(--space-6);
+    overflow: visible;
+  }
+
+  .dp-panel-head,
+  .dp-body--panel-below .dp-panel-head { grid-area: head; flex-wrap: wrap; }
+  .dp-panel-head .dp-bars,
+  .dp-body--panel-below .dp-panel-head .dp-bars { order: 3; flex: 1 0 100%; }
+  .dp-visual,
+  .dp-body--panel-below .dp-visual { grid-area: visual; min-height: 176px; }
+  .dp-lesson-text,
+  .dp-body--panel-below .dp-lesson-text { grid-area: text; }
+  .dp-panel-controls,
+  .dp-body--panel-below .dp-panel-controls { grid-area: controls; flex-direction: row; }
+}
+
+/* Phone width: single column everywhere. */
+@media (max-width: 640px) {
+  .dp {
+    padding: var(--space-4) var(--space-4) var(--space-6);
+    gap: var(--space-4);
+  }
+
+  .dp-dock,
+  .dp-body--panel-below .dp-dock {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-4);
+  }
+
+  .dp-panel,
+  .dp-body--panel-below .dp-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'head' 'visual' 'text' 'controls';
+    padding: var(--space-5);
+  }
+
+  .dp-stage {
+    padding: var(--space-4);
+    min-height: 320px;
+  }
+
+  .dp-header-actions,
+  .dp-mode-tabs {
+    flex: 1 1 100%;
+  }
+
+  .dp-mode-tabs {
+    min-width: 0;
+  }
+
+  .dp-btn-primary {
+    padding: 0 20px;
+  }
+}
+
+/* Hub */
+
+.dp-hub {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.dp-hub-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 640px;
+}
+
+.dp-hub-title {
+  font-size: clamp(40px, 7vw, 72px);
+  line-height: 0.95;
+  font-weight: 800;
+}
+
+.dp-hub-lede {
+  font-size: 19px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.dp-hub-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+}
+
+.dp-hub-item {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6);
+}
+
+.dp-hub-item + .dp-hub-item {
+  border-top: 1px solid var(--tile);
+}
+
+.dp-hub-swatch {
+  width: 12px;
+  height: 44px;
+  border-radius: var(--radius-xs);
+}
+
+.dp-hub-name {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.dp-hub-meta {
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .dp-hub-item {
+    grid-template-columns: 12px minmax(0, 1fr);
+  }
+
+  .dp-hub-item .dp-btn-primary {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp *,
+  .dp *::before,
+  .dp *::after {
+    transition: none !important;
+  }
+
+  .dp button:active:not(:disabled) {
+    transform: none;
+  }
+}

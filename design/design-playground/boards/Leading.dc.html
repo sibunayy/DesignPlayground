@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Design Playground, Leading</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+[data-theme="dark"]{color-scheme:dark;--bg:#121418;--stage:#1B1E23;--panel:#1F2328;--tile:#2A2E35;--ink:#ECE9E2;--ink2:#D2CFC8;--muted:#A8A59D;--bar:#5A616B;--grid:#ECE9E20D;--chip:#23272D;--btn2:#2A2E35;--accent:#7FD6A6;--on-accent:#121418;--tint:#7FD6A64D;--tint2:#7FD6A666}
+[data-theme="light"]{color-scheme:light;--bg:#ECEBE7;--stage:#FFFFFF;--panel:#FFFFFF;--tile:#F1EFEA;--ink:#1B1B1A;--ink2:#3A3935;--muted:#55544F;--bar:#BDBBB4;--grid:#1B1B1A0F;--chip:#FFFFFF;--btn2:#E4E2DC;--accent:#17724A;--on-accent:#FFFFFF;--tint:#17724A38;--tint2:#17724A4D}
+body{margin:0;font-family:'Bricolage Grotesque',system-ui,sans-serif}
+button{font-family:inherit;cursor:pointer;transition:transform .08s ease-out}
+button:hover:not(:disabled){filter:brightness(1.08)}
+button:active:not(:disabled){transform:scale(0.98)}
+button:disabled{cursor:not-allowed}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+input[type=range]{width:100%;height:44px;cursor:pointer}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width:1180px;height:820px;box-sizing:border-box;background:var(--bg);color:var(--ink);padding:32px 40px 36px;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:center;justify-content:space-between;min-height:52px">
+    <div style="display:flex;align-items:baseline;gap:20px">
+      <div style="font-size:22px;font-weight:800">Design Playground</div>
+      <div style="font-size:18px;color:var(--muted)">{{modeText}}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:20px">
+      <div role="group" aria-label="Assistive tools" style="display:flex">
+        <button onClick="{{toggleAnswer}}" aria-pressed="{{answerOn}}" aria-label="Answer zone" title="Answer zone" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{answerBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span></button>
+        <button onClick="{{toggleGuides}}" aria-pressed="{{guidesOn}}" aria-label="Line guides" title="Line guides" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{guidesBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></svg></span></button>
+        <button onClick="{{toggleBlur}}" aria-pressed="{{blurOn}}" aria-label="Squint blur" title="Squint blur" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{blurBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span></button>
+        <button onClick="{{toggleGrid}}" aria-pressed="{{gridOn}}" aria-label="Grid" title="Grid" style="border:0;width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center"><span style="{{gridBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM4 12h16M12 4v16"/></svg></span></button>
+      </div>
+      <button onClick="{{toggleTheme}}" style="border:0;background:var(--chip);color:var(--ink);min-height:52px;padding:0 22px;border-radius:18px;font-size:18px;font-weight:600">{{themeLabel}}</button>
+    </div>
+  </div>
+
+  <div style="{{stageStyle}}">
+    <div style="{{textStyle}}">{{text}}</div>
+  </div>
+
+  <div style="display:flex;gap:20px;height:250px">
+    <div style="flex:0 0 400px;background:var(--panel);border-radius:28px;padding:20px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:8px">
+      <div>
+        <label for="ldg" style="font-size:16px;font-weight:600;color:var(--muted)">{{prompt}}</label>
+        <input id="ldg" type="range" min="80" max="220" step="5" value="{{val}}" onInput="{{onSlide}}" style="accent-color:var(--accent)">
+        <sc-if value="{{answerOn}}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:14px"><div style="{{trackStyle}}"><span style="{{zoneStyle}}"></span><span style="{{markStyle}}"></span></div><div style="font-size:16px;color:var(--ink2);white-space:nowrap">{{zoneText}}</div></div>
+        </sc-if>
+        <div style="font-size:16px;color:var(--muted);margin-top:6px">{{readout}}</div>
+        <div aria-live="polite" style="min-height:28px;font-size:18px;font-weight:600;margin-top:2px">{{message}}</div>
+      </div>
+      <sc-if value="{{showCheck}}" hint-placeholder-val="{{ true }}"><button onClick="{{check}}" style="border:0;background:var(--accent);color:var(--on-accent);min-height:56px;border-radius:16px;font-size:20px;font-weight:800">Check leading</button></sc-if>
+      <sc-if value="{{showNext}}" hint-placeholder-val="{{ false }}"><button onClick="{{nextEx}}" style="border:0;background:var(--accent);color:var(--on-accent);min-height:56px;border-radius:16px;font-size:20px;font-weight:800">{{exBtn}}</button></sc-if>
+    </div>
+
+    <div style="flex:1;background:var(--panel);border-radius:28px;padding:20px 24px;display:flex;flex-direction:column;gap:12px;min-width:0">
+      <div style="display:flex;align-items:center;gap:16px"><div style="font-size:20px;font-weight:800;white-space:nowrap">Leading lesson</div><div aria-hidden="true" style="flex:1;display:flex;gap:6px"><sc-for list="{{bars}}" as="b" hint-placeholder-count="6"><span style="{{b.style}}"></span></sc-for></div><div style="font-size:16px;color:var(--muted);white-space:nowrap">{{stepText}}</div></div>
+      <div style="flex:1;display:flex;gap:24px;min-height:0">
+        <div aria-hidden="true" style="flex:0 0 250px;background:var(--tile);border-radius:22px;display:flex;align-items:flex-start;justify-content:center;gap:18px;padding:14px 12px;overflow:hidden">
+          <sc-for list="{{cols}}" as="c" hint-placeholder-count="3"><div><div style="{{c.style}}">Aa<br>Aa<br>Aa</div><div style="font-size:16px;font-weight:600;color:var(--muted);margin-top:6px;white-space:nowrap">{{c.label}}</div></div></sc-for>
+        </div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:24px;font-weight:800;line-height:1.15;text-wrap:balance">{{title}}</div>
+          <div style="font-size:17px;line-height:1.4;color:var(--ink2);text-wrap:pretty">{{body}}</div>
+          <div style="font-size:16px;line-height:1.4;color:var(--muted);text-wrap:pretty">{{tip}}</div>
+        </div>
+        <div style="flex:0 0 130px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px">
+          <button onClick="{{next}}" style="border:0;background:var(--accent);color:var(--on-accent);min-height:56px;border-radius:16px;font-size:19px;font-weight:800">{{nextLabel}}</button>
+          <button onClick="{{prev}}" disabled="{{prevOff}}" style="{{prevStyle}}">Previous</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"light","section":"Theme"},"$preview":{"width":1180,"height":820}}'>
+class Component extends DCLogic {
+  state = { val: 200, result: '', page: 0, theme: '', ex: 0, answer: false, guides: false, blur: false, grid: true };
+  renderVals() {
+    const st = this.state;
+    const theme = st.theme || this.props.theme || 'light';
+    const v = st.val;
+    const pg = st.page;
+    const exs = [
+      { text: 'Good type needs room to breathe between the lines. Move the lines until the paragraph reads evenly.', size: 36, w: 760, lo: 125, hi: 145, start: 200, kind: 'Paragraph' },
+      { text: 'Big headlines sit tight against each other.', size: 64, w: 1000, lo: 95, hi: 110, start: 180, kind: 'Large headline' },
+      { text: 'Small text on a long line needs more space between the lines so the eye can find the next line without effort.', size: 22, w: 640, lo: 150, hi: 175, start: 100, kind: 'Small text' }
+    ];
+    const ex = exs[st.ex];
+    const lastEx = st.ex === exs.length - 1;
+    const done = st.result === 'good';
+    const lhPx = ex.size * v / 100;
+    const msgs = { '': 'Drag the slider to change the leading.', loose: 'Too open. The lines drift apart.', tight: 'Too tight. The lines crowd each other.', good: lastEx ? 'Balanced. All three exercises are done.' : 'Balanced. The lines look evenly spaced.' };
+    const pages = [
+      { title: 'Leading is the space between lines', body: 'Leading sets the distance from one baseline to the next. Most text looks best near 120% to 145%.', tip: 'Set the size first, then the leading.', cols: [[0.9, 'Tight'], [1.4, 'Even'], [2.0, 'Open']], size: 18 },
+      { title: 'Longer lines need more leading', body: 'A long line makes the eye travel far. Extra space helps it find the next line.', tip: 'Add leading as the line grows.', cols: [[1.2, 'Short, 120%'], [1.6, 'Long, 160%']], size: 20 },
+      { title: 'Large type needs less leading', body: 'Big headlines look loose at 140%. Pull the lines closer, near 100%.', tip: 'Try 95% to 110% on headlines.', cols: [[1.4, 'Loose'], [1.0, 'Tight']], size: 28 },
+      { title: 'Small type needs more leading', body: 'At small sizes, lines blur together. Open them to 150% or more.', tip: 'Try 150% to 175% on small text.', cols: [[1.2, 'Crowded'], [1.6, 'Clear']], size: 15 },
+      { title: 'Even leading gives an even grey', body: 'Blur the paragraph. Tight leading makes dark bands. Loose leading makes light bands.', tip: 'Use the squint toggle in the header.', cols: [[1.0, 'Tight'], [1.5, 'Even'], [2.1, 'Loose']], size: 18, blur: true },
+      { title: 'Leading scales with size', body: 'Double the size and the leading in pixels doubles too. Keep the percent, then adjust by eye.', tip: 'Set leading as a percent of the size.', cols: [[1.4, '14 px, 20 px'], [1.4, '22 px, 31 px']], size: 0, sizes: [14, 22] }
+    ];
+    const cur = pages[pg];
+    const last = pg === pages.length - 1;
+    const tb = (on) => 'width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:' + (on ? 'var(--accent)' : 'var(--chip)') + ';color:' + (on ? 'var(--on-accent)' : 'var(--ink)');
+    const guideBg = st.guides ? 'background-image:repeating-linear-gradient(to bottom,transparent 0,transparent ' + (lhPx - 2) + 'px,var(--accent) ' + (lhPx - 2) + 'px,var(--accent) ' + lhPx + 'px);' : '';
+    return {
+      theme: theme,
+      themeLabel: theme === 'dark' ? 'Light mode' : 'Dark mode',
+      modeText: 'Leading, exercise ' + (st.ex + 1) + ' of ' + exs.length,
+      prompt: ex.kind + ': set the leading so the lines look evenly spaced.',
+      text: ex.text,
+      val: v,
+      stageStyle: 'flex:1;position:relative;background-color:var(--stage);' + (st.grid ? 'background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);' : '') + 'background-size:40px 40px;background-position:center;border-radius:32px;padding:28px 40px;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden',
+      textStyle: 'width:' + ex.w + 'px;max-width:100%;font-weight:800;font-size:' + ex.size + 'px;line-height:' + (v / 100) + ';color:var(--ink);' + guideBg + (st.blur ? 'filter:blur(' + Math.max(1.5, ex.size * 0.03) + 'px);' : ''),
+      answerOn: st.answer, guidesOn: st.guides, blurOn: st.blur, gridOn: st.grid,
+      answerBtn: tb(st.answer), guidesBtn: tb(st.guides), blurBtn: tb(st.blur), gridBtn: tb(st.grid),
+      toggleAnswer: () => this.setState({ answer: !st.answer }),
+      toggleGuides: () => this.setState({ guides: !st.guides }),
+      toggleBlur: () => this.setState({ blur: !st.blur }),
+      toggleGrid: () => this.setState({ grid: !st.grid }),
+      trackStyle: 'position:relative;width:280px;height:12px;border-radius:6px;background:var(--tile);flex:0 0 280px',
+      zoneStyle: 'position:absolute;top:0;height:12px;border-radius:6px;background:var(--tint2);left:' + ((ex.lo - 80) * 2) + 'px;width:' + Math.max(8, (ex.hi - ex.lo) * 2) + 'px',
+      markStyle: 'position:absolute;top:-4px;height:20px;width:4px;border-radius:2px;background:var(--ink);left:' + Math.min((v - 80) * 2, 276) + 'px',
+      zoneText: ex.lo + '% to ' + ex.hi + '%',
+      readout: 'Leading: ' + v + '% (' + Math.round(lhPx) + ' px)',
+      message: msgs[st.result],
+      onSlide: (e) => this.setState({ val: Number(e.target.value), result: '' }),
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      check: () => { const x = st.val; this.setState({ result: x > ex.hi ? 'loose' : (x < ex.lo ? 'tight' : 'good') }); },
+      showCheck: !done, showNext: done,
+      exBtn: lastEx ? 'Start over' : 'Next exercise',
+      nextEx: () => { const n = lastEx ? 0 : st.ex + 1; this.setState({ ex: n, val: exs[n].start, result: '' }); },
+      stepText: 'Step ' + (pg + 1) + ' of ' + pages.length,
+      bars: pages.map((p, i) => ({ style: 'flex:1;height:6px;border-radius:3px;background:' + (i <= pg ? 'var(--accent)' : 'var(--bar)') })),
+      cols: cur.cols.map((c, i) => ({ label: c[1], style: 'font-weight:800;font-size:' + (cur.sizes ? cur.sizes[i] : cur.size) + 'px;line-height:' + c[0] + (cur.blur ? ';filter:blur(1.4px)' : '') })),
+      title: cur.title, body: cur.body, tip: cur.tip,
+      prevOff: pg === 0,
+      prevStyle: 'border:0;background:var(--btn2);color:var(--ink);min-height:56px;border-radius:16px;font-size:19px;font-weight:600;opacity:' + (pg === 0 ? 0.4 : 1),
+      nextLabel: last ? 'Review again' : 'Next',
+      prev: () => this.setState({ page: Math.max(0, st.page - 1) }),
+      next: () => this.setState({ page: last ? 0 : st.page + 1 })
+    };
+  }
+}
+</script>
+</body>
+</html>

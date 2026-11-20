@@ -15,6 +15,8 @@ interface HomeIndexProps {
   storage: SightlineStorageV1;
   onOpenLesson: (lessonId: string, mode: 'learn' | 'practice') => void;
   onOpenDailyMix: () => void;
+  /** Opens the Design Playground. Optional so older callers still work. */
+  onOpenPlayground?: () => void;
   onToggleTheme: () => void;
 }
 
@@ -30,6 +32,7 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
   storage,
   onOpenLesson,
   onOpenDailyMix,
+  onOpenPlayground,
   onToggleTheme,
 }) => {
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -392,6 +395,59 @@ export const HomeIndex: React.FC<HomeIndexProps> = ({
           </div>
         </div>
       </section>
+
+      {onOpenPlayground && (
+        <section aria-labelledby="playground-entry">
+          <div
+            style={{
+              padding: 24,
+              borderRadius: 14,
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--rule)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 18,
+            }}
+          >
+            <div style={{ minWidth: 0, flex: '1 1 320px' }}>
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--ink-secondary)' }}>
+                Design Playground
+              </span>
+              <h2
+                id="playground-entry"
+                style={{ fontFamily: 'var(--font-display)', fontSize: 23, fontWeight: 500, marginTop: 6, lineHeight: 1.18 }}
+              >
+                Train Your Eye for Space
+              </h2>
+              <p style={{ fontSize: 13.5, color: 'var(--ink-secondary)', marginTop: 6, lineHeight: 1.45 }}>
+                Kerning, tracking, leading, word spacing and line length. Each mode has a slider, a check and a
+                six-step lesson.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenPlayground}
+              className="touch-target"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
+                padding: '0 16px',
+                borderRadius: 8,
+                background: 'var(--ink-primary)',
+                color: 'var(--bg-surface)',
+                fontSize: 13.5,
+                fontWeight: 600,
+              }}
+            >
+              <Play size={14} aria-hidden="true" />
+              <span>Open Playground</span>
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* TIER I: FOUNDATION — Architectural Specimen Cards */}
       <section aria-labelledby="tier-foundation">

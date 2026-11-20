@@ -1,0 +1,87 @@
+/*
+ * Design Playground tokens.
+ * Source: design/design-playground/design-system/tokens.json (Design Playground Design System).
+ * The colour test in src/playground/__tests__/tokens.test.ts keeps this file in step with the source.
+ * Extension: mode-wordspace and mode-measure are new mode accents for the two added modes.
+ */
+
+.dp {
+  --font-dp: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', system-ui, sans-serif;
+
+  --space-1: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --tap-target: 44px;
+  --grid-cell: 40px;
+
+  --radius-xs: 3px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-2xl: 32px;
+}
+
+.dp[data-theme='dark'] {
+  color-scheme: dark;
+  --ground: #121418;
+  --stage: #1B1E23;
+  --panel: #1F2328;
+  --tile: #2A2E35;
+  --chip: #23272D;
+  --button-2: #2A2E35;
+  --ink: #ECE9E2;
+  --ink-2: #D2CFC8;
+  --muted: #A8A59D;
+  --mode-kerning: #8FB8FF;
+  --mode-tracking: #F2B66D;
+  --mode-leading: #7FD6A6;
+  --mode-wordspace: #FF9DB8;
+  --mode-measure: #C9A7FF;
+  --on-accent: #121418;
+  --bar: #5A616B;
+  --grid: #ECE9E20D;
+  --tint-strength: 30%;
+  --tint-strong-strength: 40%;
+}
+
+.dp[data-theme='light'] {
+  color-scheme: light;
+  --ground: #ECEBE7;
+  --stage: #FFFFFF;
+  --panel: #FFFFFF;
+  --tile: #F1EFEA;
+  --chip: #FFFFFF;
+  --button-2: #E4E2DC;
+  --ink: #1B1B1A;
+  --ink-2: #3A3935;
+  --muted: #55544F;
+  --mode-kerning: #1F5FBF;
+  --mode-tracking: #9A5B00;
+  --mode-leading: #17724A;
+  --mode-wordspace: #B0305A;
+  --mode-measure: #6B3FB8;
+  --on-accent: #FFFFFF;
+  --bar: #BDBBB4;
+  --grid: #1B1B1A0F;
+  --tint-strength: 22%;
+  --tint-strong-strength: 30%;
+}
+
+/* A mode sets the accent. Components read --accent only. */
+.dp { --accent: var(--mode-kerning); }
+.dp[data-mode='kerning'] { --accent: var(--mode-kerning); }
+.dp[data-mode='tracking'] { --accent: var(--mode-tracking); }
+.dp[data-mode='leading'] { --accent: var(--mode-leading); }
+.dp[data-mode='wordspace'] { --accent: var(--mode-wordspace); }
+.dp[data-mode='measure'] { --accent: var(--mode-measure); }
+
+.dp {
+  --accent-tint: color-mix(in srgb, var(--accent) var(--tint-strength), transparent);
+  --accent-tint-strong: color-mix(in srgb, var(--accent) var(--tint-strong-strength), transparent);
+}

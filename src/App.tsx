@@ -31,6 +31,7 @@ type Route =
 
 function parseHashRoute(): Route {
   const hash = window.location.hash.replace(/^#/, '');
+  if (hash === '/sightline') return { view: 'home' };
   if (hash === '/daily') return { view: 'daily' };
   const pg = hash.match(/^\/playground(?:\/([^/]+)(?:\/(quiz))?)?\/?$/);
   if (pg) {
@@ -46,7 +47,8 @@ function parseHashRoute(): Route {
       mode: match[2] === 'practice' ? 'practice' : 'learn',
     };
   }
-  return { view: 'home' };
+  // The Design Playground hub is the default page. The Sightline lessons live at #/sightline.
+  return { view: 'playground', modeId: null, activity: 'practice' };
 }
 
 export const App: React.FC = () => {
@@ -71,7 +73,7 @@ export const App: React.FC = () => {
   const navigate = (next: Route) => {
     setActiveLenses(new Set());
     if (next.view === 'home') {
-      window.location.hash = '#/';
+      window.location.hash = '#/sightline';
     } else if (next.view === 'daily') {
       window.location.hash = '#/daily';
     } else if (next.view === 'playground') {

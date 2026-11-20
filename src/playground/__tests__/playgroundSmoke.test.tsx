@@ -26,8 +26,17 @@ function setHandle(name: string | RegExp, want: number) {
 }
 
 describe('Design Playground', () => {
+  it('is the default page, and the Sightline home is one step back', async () => {
+    window.location.hash = '';
+    render(<App />);
+    expect(await screen.findByText('Train your eye for space.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Sightline' }));
+    expect(window.location.hash).toBe('#/sightline');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/Sightline/i);
+  });
+
   it('opens from the Sightline home page', async () => {
-    window.location.hash = '#/';
+    window.location.hash = '#/sightline';
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: /open playground/i }));
     expect(await screen.findByText('Train your eye for space.')).toBeTruthy();
@@ -212,7 +221,7 @@ describe('Design Playground', () => {
   });
 
   it("opens today's pick from the Sightline home page", async () => {
-    window.location.hash = '#/';
+    window.location.hash = '#/sightline';
     render(<App />);
     const pick = getMode(dailyPickMode(new Date().toISOString().slice(0, 10)))!;
     fireEvent.click(screen.getByRole('button', { name: `Today's pick: ${pick.name}` }));

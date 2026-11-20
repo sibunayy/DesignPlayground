@@ -26,21 +26,21 @@ function setHandle(name: string | RegExp, want: number) {
 }
 
 describe('Design Playground', () => {
-  it('is the default page, and the Sightline home is one step back', async () => {
+  it('is the default page and has no way back to another app', async () => {
     window.location.hash = '';
     render(<App />);
     expect(await screen.findByText('Train your eye for space.')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Back to Sightline' }));
-    expect(window.location.hash).toBe('#/sightline');
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/Sightline/i);
+    expect(screen.queryByRole('button', { name: /Back to Sightline|All modes/ })).toBeNull();
+    fireEvent.click(screen.getAllByRole('button', { name: /^Start|^Play again/ })[0]);
+    expect(window.location.hash).toBe('#/kerning');
+    fireEvent.click(await screen.findByRole('button', { name: 'All modes' }));
+    expect(window.location.hash).toBe('#/');
   });
 
-  it('opens from the Sightline home page', async () => {
-    window.location.hash = '#/sightline';
+  it('still opens older #/playground links', async () => {
+    window.location.hash = '#/playground/leading';
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /open playground/i }));
-    expect(await screen.findByText('Train your eye for space.')).toBeTruthy();
-    expect(window.location.hash).toBe('#/playground');
+    expect(await screen.findByRole('slider', { name: 'Leading' })).toBeTruthy();
   });
 
   it('gives each practice screen one main landmark and one heading', async () => {
@@ -115,7 +115,7 @@ describe('Design Playground', () => {
     expect(prev.disabled).toBe(false);
 
     fireEvent.click(screen.getByRole('button', { name: 'Leading' }));
-    expect(window.location.hash).toBe('#/playground/leading');
+    expect(window.location.hash).toBe('#/leading');
     expect(await screen.findByRole('complementary', { name: getMode('leading')!.lessonName })).toBeTruthy();
   });
 
@@ -216,16 +216,16 @@ describe('Design Playground', () => {
     await screen.findAllByRole('slider');
     for (let i = 0; i < exercisesFor('margins').length; i++) lockIn();
     fireEvent.click(await screen.findByRole('button', { name: 'Take the Margins quiz' }));
-    expect(window.location.hash).toBe('#/playground/margins/quiz');
+    expect(window.location.hash).toBe('#/margins/quiz');
     expect(await screen.findByText(/Question 1 of/)).toBeTruthy();
   });
 
-  it("opens today's pick from the Sightline home page", async () => {
-    window.location.hash = '#/sightline';
+  it("opens today's pick from the hub", async () => {
+    window.location.hash = '';
     render(<App />);
     const pick = getMode(dailyPickMode(new Date().toISOString().slice(0, 10)))!;
-    fireEvent.click(screen.getByRole('button', { name: `Today's pick: ${pick.name}` }));
-    expect(window.location.hash).toBe(`#/playground/${pick.id}`);
+    fireEvent.click(await screen.findByRole('button', { name: `Start ${pick.name}` }));
+    expect(window.location.hash).toBe(`#/${pick.id}`);
     expect((await screen.findAllByRole('slider')).length).toBeGreaterThan(0);
   });
 });

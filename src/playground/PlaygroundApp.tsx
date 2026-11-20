@@ -23,10 +23,9 @@ interface PlaygroundAppProps {
   /** The drag challenge or the A/B quiz. The challenge when not given. */
   activity?: Activity;
   onNavigate: (modeId: ModeId | null, activity?: Activity) => void;
-  onExit: () => void;
 }
 
-export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity = 'practice', onNavigate, onExit }) => {
+export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity = 'practice', onNavigate }) => {
   const [store, setStore] = useState<PlaygroundStore>(() => loadPlaygroundStore());
   const mode = modeId ? getMode(modeId) : undefined;
   const exercises = modeId ? exercisesFor(modeId) : [];
@@ -179,7 +178,7 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
         modeId={mode ? mode.id : null}
         theme={theme}
         panelOpen={store.panelOpen}
-        onBack={() => (mode ? onNavigate(null) : onExit())}
+        onBack={() => onNavigate(null)}
         onSelectMode={(id) => onNavigate(id, activity)}
         onToggleTheme={toggleTheme}
         onTogglePanel={togglePanel}

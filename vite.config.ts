@@ -25,9 +25,9 @@ export default defineConfig({
         clientsClaim: true,
       },
       manifest: {
-        name: 'Sightline',
-        short_name: 'Sightline',
-        description: 'Editorial graphic design craft & optical perception studio for iPad',
+        name: 'Design Playground',
+        short_name: 'Playground',
+        description: 'Drag-to-fix spacing challenges that train your eye for type',
         start_url: '/sightline/',
         scope: '/sightline/',
         display: 'standalone',

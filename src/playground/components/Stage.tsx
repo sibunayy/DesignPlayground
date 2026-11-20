@@ -1,20 +1,26 @@
 import React, { useRef } from 'react';
-import { splitPair } from '../content/exercises';
-import { trackFraction, UNITS_PER_SQUARE, zoneText } from '../logic/check';
+import { Challenge, UNITS_PER_SQUARE } from '../logic/challenge';
 import { useElementWidth } from '../state/useElementWidth';
-import { AssistId, Assists, Exercise, Mode } from '../types';
+import { AssistId, Assists, Mode } from '../types';
+import { FinePopout } from './FinePopout';
 import { ASSIST_LABELS, DpIcon } from './Icons';
+import { useHandles } from './useHandles';
 
 interface StageProps {
   mode: Mode;
-  exercise: Exercise;
-  value: number;
+  challenge: Challenge;
+  values: number[];
   assists: Assists;
+  /** The handle the fine control acts on. */
+  selected: number;
+  fineOpen: boolean;
+  /** Where the learner is in the run, such as "2 of 6". */
+  counter: string;
+  onSelect: (index: number) => void;
+  onChange: (index: number, value: number) => void;
   onToggleAssist: (id: AssistId) => void;
-  readoutText: string;
-  message: string;
-  /** Second feedback line after a good check, such as "Exact answer." */
-  gradeText?: string;
+  onToggleFine: () => void;
+  onLockIn: () => void;
 }
 
 /** Width each mode needs at full size. The stage scales down below it. */
@@ -28,22 +34,39 @@ const DESIGN_WIDTH: Record<Mode['id'], number> = {
   margins: 900,
 };
 
-const STAGE_PADDING = 64;
+/** Breathing room kept inside the canvas on each side of the stage content. */
+const CANVAS_MARGIN = 16;
 
 export const Stage: React.FC<StageProps> = ({
   mode,
-  exercise,
-  value,
+  challenge,
+  values,
   assists,
+  selected,
+  fineOpen,
+  counter,
+  onSelect,
+  onChange,
   onToggleAssist,
-  readoutText,
-  message,
-  gradeText,
+  onToggleFine,
+  onLockIn,
 }) => {
+  const { exercise, parts } = challenge;
+  // Measure the canvas, not the stage: the lesson drawer takes padding from the stage,
+  // so the stage width overstates the room the text really has.
   const ref = useRef<HTMLDivElement>(null);
+  const blockRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
   const width = useElementWidth(ref, 800);
-  const inner = Math.max(200, width - STAGE_PADDING);
-  const designWidth = mode.id === 'leading' || mode.id === 'paragraph' ? exercise.width ?? 1000 : DESIGN_WIDTH[mode.id];
+  const inner = Math.max(200, width - CANVAS_MARGIN * 2);
+
+  // A word's width depends on its letters, so Kerning works its design width out from the word.
+  const designWidth =
+    mode.id === 'kerning'
+      ? parts.length * 0.62 * exercise.size + (parts.length - 1) * 130
+      : mode.id === 'leading' || mode.id === 'paragraph'
+        ? exercise.width ?? DESIGN_WIDTH[mode.id]
+        : DESIGN_WIDTH[mode.id];
   const scale = Math.min(1, inner / designWidth);
   // Stage text never drops below 16px. Wrapping text wraps more instead.
   const wraps = mode.id === 'leading' || mode.id === 'paragraph' || mode.id === 'margins';
@@ -55,70 +78,128 @@ export const Stage: React.FC<StageProps> = ({
   const cell = mode.id === 'kerning' ? UNITS_PER_SQUARE * kernScale : 40 * Math.max(0.6, scale);
   const showGrid = assists.grid && mode.assists.includes('grid');
 
+  // With one handle there is nothing to choose between, so none is shown as selected.
+  const bind = useHandles(values, challenge.min, challenge.max, onChange, onSelect, values.length > 1 ? selected : -1);
+  const step = challenge.fine.step;
+
   let canvas: React.ReactNode;
   switch (mode.id) {
     case 'kerning': {
-      const { left, rest } = splitPair(exercise.text);
-      const sq = value / UNITS_PER_SQUARE;
+      // Every letter after the first is a handle. Dragging it opens or closes the gap before it.
       canvas = (
-        <div role="img" aria-label={exercise.label} className="dp-kern-word" style={{ fontSize, filter: blur }}>
-          <span>{left}</span>
-          <span
-            aria-hidden="true"
-            className="dp-gap"
-            style={{ width: value * kernScale, height: fontSize * 0.52 }}
-          >
-            {assists.guides && (
-              <>
-                <span className="dp-gap-edge" style={{ left: -1 }} />
-                <span className="dp-gap-edge" style={{ right: -1 }} />
-                <span className="dp-gap-ruler" />
-                <span className="dp-gap-label">{(Math.round(sq * 10) / 10).toFixed(1)} squares</span>
-              </>
-            )}
-          </span>
-          <span>{rest}</span>
+        <div role="group" aria-label={`The word ${exercise.text}`} className="dp-kern-word" style={{ fontSize, filter: blur }}>
+          {parts.map((ch, i) => {
+            const v = values[i - 1] ?? 0;
+            return (
+              <React.Fragment key={i}>
+                {i > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="dp-gap"
+                    style={{ width: Math.max(0, v) * kernScale, height: fontSize * 0.52 }}
+                  >
+                    {assists.guides && (
+                      <>
+                        <span className="dp-gap-edge" style={{ left: -1 }} />
+                        <span className="dp-gap-edge" style={{ right: -1 }} />
+                      </>
+                    )}
+                  </span>
+                )}
+                <span
+                  className={`dp-kern-letter${i > 0 ? ' dp-grab' : ''}`}
+                  style={i > 0 && v < 0 ? { marginLeft: v * kernScale } : undefined}
+                  {...(i > 0
+                    ? bind(i - 1, { axis: 'x', perPx: 2 / kernScale, label: challenge.labels[i - 1], step })
+                    : { 'aria-hidden': true })}
+                >
+                  {ch}
+                </span>
+              </React.Fragment>
+            );
+          })}
         </div>
       );
       break;
     }
-    case 'tracking':
-    case 'wordspace': {
-      const isTracking = mode.id === 'tracking';
-      const lineStyle: React.CSSProperties = {
-        fontSize,
-        letterSpacing: isTracking ? `${value / 1000}em` : exercise.caps ? '0.12em' : undefined,
-        wordSpacing: isTracking ? undefined : `${value / 1000}em`,
-      };
-      const ghostStyle: React.CSSProperties = {
-        ...lineStyle,
-        letterSpacing: isTracking ? 0 : lineStyle.letterSpacing,
-        wordSpacing: isTracking ? undefined : 0,
-        opacity: assists.compare ? 0.35 : 0,
-      };
+    case 'tracking': {
+      const lineStyle: React.CSSProperties = { fontSize, letterSpacing: `${(values[0] ?? 0) / 1000}em` };
+      const ghostStyle: React.CSSProperties = { fontSize, opacity: assists.compare ? 0.35 : 0 };
+      // The line is centred, so its edge moves by half of any change in width.
+      const perPx = 2000 / (fontSize * exercise.text.length);
       canvas = (
-        <div role="img" aria-label={exercise.label} className="dp-overlay">
+        <div className="dp-overlay">
           <div aria-hidden="true" className="dp-stage-line dp-ghost" style={ghostStyle}>
             {exercise.text}
           </div>
-          <div aria-hidden="true" className="dp-stage-line" style={{ ...lineStyle, filter: blur }}>
+          <div
+            className="dp-stage-line dp-grab"
+            style={{ ...lineStyle, filter: blur }}
+            {...bind(0, { axis: 'x', perPx, label: challenge.labels[0], step })}
+          >
             {exercise.text}
+          </div>
+        </div>
+      );
+      break;
+    }
+    case 'wordspace': {
+      const perPx = 2000 / fontSize;
+      const ghostStyle: React.CSSProperties = {
+        fontSize,
+        letterSpacing: exercise.caps ? '0.12em' : undefined,
+        opacity: assists.compare ? 0.35 : 0,
+      };
+      canvas = (
+        <div className="dp-overlay">
+          <div aria-hidden="true" className="dp-stage-line dp-ghost" style={ghostStyle}>
+            {exercise.text}
+          </div>
+          <div
+            role="group"
+            aria-label={exercise.label}
+            className="dp-stage-line"
+            style={{ fontSize, letterSpacing: exercise.caps ? '0.12em' : undefined, filter: blur }}
+          >
+            {parts.map((w, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && (
+                  <span aria-hidden="true" style={{ whiteSpace: 'pre', wordSpacing: `${(values[i - 1] ?? 0) / 1000}em` }}>
+                    {' '}
+                  </span>
+                )}
+                <span
+                  className={`dp-word${i > 0 ? ' dp-grab' : ''}`}
+                  {...(i > 0
+                    ? bind(i - 1, { axis: 'x', perPx, label: challenge.labels[i - 1], step })
+                    : { 'aria-hidden': true })}
+                >
+                  {w}
+                </span>
+              </React.Fragment>
+            ))}
           </div>
         </div>
       );
       break;
     }
     case 'leading': {
+      const value = values[0] ?? 100;
       const lineHeightPx = (fontSize * value) / 100;
       const guides = assists.guides
         ? `repeating-linear-gradient(to bottom, transparent 0, transparent ${lineHeightPx - 2}px, var(--accent) ${
             lineHeightPx - 2
           }px, var(--accent) ${lineHeightPx}px)`
         : undefined;
+      // The block is centred, so its bottom edge moves by half of any change in height.
+      const perPx = () => {
+        const lines = Math.max(1, Math.round((blockRef.current?.getBoundingClientRect().height ?? lineHeightPx) / lineHeightPx));
+        return 200 / (lines * fontSize);
+      };
       canvas = (
         <div
-          role="img"
-          aria-label={exercise.label}
+          ref={blockRef}
+          className="dp-grab dp-grab--block"
           style={{
             width: (exercise.width ?? 1000) * scale,
             maxWidth: '100%',
@@ -128,6 +209,7 @@ export const Stage: React.FC<StageProps> = ({
             backgroundImage: guides,
             filter: blur,
           }}
+          {...bind(0, { axis: 'y', perPx, label: challenge.labels[0], step })}
         >
           {exercise.text}
         </div>
@@ -137,11 +219,10 @@ export const Stage: React.FC<StageProps> = ({
     case 'paragraph': {
       const LINE_HEIGHT = 1.45;
       const lineHeightPx = fontSize * LINE_HEIGHT;
-      const gapPx = (lineHeightPx * value) / 100;
-      const paragraphs = exercise.text.split('\n\n');
+      const perPx = 200 / lineHeightPx;
       canvas = (
         <div
-          role="img"
+          role="group"
           aria-label={exercise.label}
           style={{
             width: (exercise.width ?? 1000) * scale,
@@ -152,19 +233,25 @@ export const Stage: React.FC<StageProps> = ({
             filter: blur,
           }}
         >
-          {paragraphs.map((para, i) => (
+          {parts.map((para, i) => (
             <React.Fragment key={i}>
               {i > 0 && (
                 <div
                   aria-hidden="true"
                   style={{
-                    height: gapPx,
+                    height: (lineHeightPx * (values[i - 1] ?? 0)) / 100,
                     borderRadius: 4,
                     background: assists.guides ? 'var(--accent-tint)' : undefined,
                   }}
                 />
               )}
-              <p aria-hidden="true" style={{ textIndent: exercise.indent && i > 0 ? '2em' : undefined }}>
+              <p
+                className={i > 0 ? 'dp-grab dp-grab--block' : undefined}
+                style={{ textIndent: exercise.indent && i > 0 ? '2em' : undefined }}
+                {...(i > 0
+                  ? bind(i - 1, { axis: 'y', perPx, label: challenge.labels[i - 1], step })
+                  : { 'aria-hidden': true })}
+              >
                 {para}
               </p>
             </React.Fragment>
@@ -174,45 +261,56 @@ export const Stage: React.FC<StageProps> = ({
       break;
     }
     case 'margins': {
-      const pad = (fontSize * value) / 100;
-      const half = exercise.box === 'button';
+      const padX = (fontSize * (values[0] ?? 0)) / 100;
+      const padY = (fontSize * (values[1] ?? 0)) / 100;
       const isPoster = exercise.box === 'poster';
+      const half = exercise.box === 'button';
+      // A box edge moves by exactly the change in its padding, so one pixel is one pixel of padding.
+      const perPx = 100 / fontSize;
       canvas = (
-        <div
-          role="img"
-          aria-label={exercise.label}
-          className={`dp-margin-box dp-margin-box--${exercise.box ?? 'card'}${assists.guides ? ' dp-margin-box--guides' : ''}`}
-          style={{
-            padding: half ? `${pad / 2}px ${pad}px` : pad,
-            maxWidth: '100%',
-            filter: blur,
-          }}
-        >
+        <div className="dp-margin-wrap" role="group" aria-label={exercise.label}>
           <div
             aria-hidden="true"
-            className="dp-margin-content"
-            style={{
-              width: exercise.width ? exercise.width * scale : undefined,
-              maxWidth: '100%',
-              fontSize,
-              fontWeight: isPoster || half ? 800 : 500,
-              lineHeight: isPoster ? 1.05 : 1.4,
-              letterSpacing: exercise.caps ? '0.08em' : undefined,
-              whiteSpace: half ? 'nowrap' : undefined,
-            }}
+            className={`dp-margin-box dp-margin-box--${exercise.box ?? 'card'}${assists.guides ? ' dp-margin-box--guides' : ''}`}
+            style={{ padding: `${padY}px ${padX}px`, maxWidth: '100%', filter: blur }}
           >
-            {exercise.text}
+            <div
+              className="dp-margin-content"
+              style={{
+                width: exercise.width ? exercise.width * scale : undefined,
+                maxWidth: '100%',
+                fontSize,
+                fontWeight: isPoster || half ? 800 : 500,
+                lineHeight: isPoster ? 1.05 : 1.4,
+                letterSpacing: exercise.caps ? '0.08em' : undefined,
+                whiteSpace: half ? 'nowrap' : undefined,
+              }}
+            >
+              {exercise.text}
+            </div>
           </div>
+          <span
+            className="dp-edge dp-edge--x"
+            {...bind(0, { axis: 'x', perPx, label: challenge.labels[0], step })}
+          />
+          <span
+            className="dp-edge dp-edge--y"
+            {...bind(1, { axis: 'y', perPx, label: challenge.labels[1], step })}
+          />
         </div>
       );
       break;
     }
     case 'measure': {
-      // Fit the longest slider line inside the stage where possible. One ch is about 0.6 em.
+      // Fit the longest line inside the stage where possible. One ch is about 0.6 em.
       // Text never goes below 16px. On a narrow stage, long lines scroll inside the stage.
       const measureFont = Math.max(16, Math.min(exercise.size, inner / (mode.slider.max * 0.6)));
+      const perPx = () => {
+        const full = measureRef.current?.getBoundingClientRect().width ?? measureFont * 0.5 * mode.slider.max;
+        return mode.slider.max / full;
+      };
       canvas = (
-        <div style={{ fontSize: measureFont, width: `${mode.slider.max}ch`, flexShrink: 0, margin: '0 auto' }}>
+        <div ref={measureRef} style={{ fontSize: measureFont, width: `${mode.slider.max}ch`, flexShrink: 0, margin: '0 auto' }}>
           {assists.guides && (
             <div
               aria-hidden="true"
@@ -226,13 +324,14 @@ export const Stage: React.FC<StageProps> = ({
             />
           )}
           <p
-            aria-label={exercise.label}
+            className="dp-grab dp-grab--edge"
             style={{
-              width: `${value}ch`,
+              width: `${values[0] ?? 0}ch`,
               fontWeight: 400,
               lineHeight: 1.5,
               borderRight: assists.guides ? '2px solid var(--accent)' : undefined,
             }}
+            {...bind(0, { axis: 'x', perPx, label: challenge.labels[0], step })}
           >
             {exercise.text}
           </p>
@@ -242,36 +341,62 @@ export const Stage: React.FC<StageProps> = ({
     }
   }
 
-  const { min, max } = mode.slider;
-  const zoneLeft = trackFraction(exercise.lo, min, max) * 100;
-  const zoneWidth = Math.max(3, (trackFraction(exercise.hi, min, max) * 100) - zoneLeft);
+  const selectedValue = values[selected] ?? 0;
 
   return (
     <section
-      ref={ref}
       aria-label="Stage"
       className={`dp-stage${showGrid ? ' dp-stage--grid' : ''}`}
       style={{ backgroundSize: `${cell}px ${cell}px` }}
     >
-      <div role="group" aria-label="Assistive tools" className="dp-assists">
-        {mode.assists.map((id) => (
+      <div className="dp-stage-top">
+        <p className="dp-stage-prompt">
+          {challenge.prompt} <span className="dp-count">{counter}</span>
+        </p>
+        <div role="group" aria-label="Tools" className="dp-assists">
+          {mode.assists.map((id) => (
+            <button
+              key={id}
+              type="button"
+              className="dp-toggle"
+              aria-pressed={assists[id]}
+              aria-label={ASSIST_LABELS[id]}
+              title={ASSIST_LABELS[id]}
+              onClick={() => onToggleAssist(id)}
+            >
+              <span className="dp-toggle-chip">
+                <DpIcon name={id} />
+              </span>
+            </button>
+          ))}
           <button
-            key={id}
             type="button"
             className="dp-toggle"
-            aria-pressed={assists[id]}
-            aria-label={ASSIST_LABELS[id]}
-            title={ASSIST_LABELS[id]}
-            onClick={() => onToggleAssist(id)}
+            aria-pressed={fineOpen}
+            aria-label="Fine control"
+            title="Fine control"
+            onClick={onToggleFine}
           >
             <span className="dp-toggle-chip">
-              <DpIcon name={id} />
+              <DpIcon name="fine" />
             </span>
           </button>
-        ))}
+        </div>
+        <button
+          type="button"
+          className="dp-toggle dp-lock"
+          aria-label="Lock in answer"
+          title="Lock in answer"
+          onClick={onLockIn}
+        >
+          <span className="dp-toggle-chip">
+            <DpIcon name="lock" />
+          </span>
+        </button>
       </div>
 
       <div
+        ref={ref}
         className={`dp-stage-canvas${mode.id === 'measure' ? ' dp-stage-canvas--scroll' : ''}${
           wraps ? ' dp-stage-canvas--tall' : ''
         }`}
@@ -280,26 +405,19 @@ export const Stage: React.FC<StageProps> = ({
       </div>
 
       <div className="dp-stage-foot">
-        {assists.answer && (
-          <div className="dp-zone">
-            <div className="dp-zone-track" aria-hidden="true">
-              <span className="dp-zone-range" style={{ left: `${zoneLeft}%`, width: `${zoneWidth}%` }} />
-              <span className="dp-zone-mark" style={{ left: `${trackFraction(value, min, max) * 100}%` }} />
-            </div>
-            <div className="dp-zone-text">{zoneText(mode, exercise)}</div>
-          </div>
-        )}
-        <div className="dp-caption">{readoutText}</div>
-        <div className="dp-message" aria-live="polite">
-          <span>{message}</span>
-          {gradeText && (
-            <>
-              {' '}
-              <span className="dp-grade">{gradeText}</span>
-            </>
-          )}
-        </div>
+        <p className="dp-caption">Seed: #{challenge.seed}</p>
       </div>
+
+      {fineOpen && (
+        <FinePopout
+          label={challenge.labels[selected] ?? challenge.labels[0]}
+          value={selectedValue}
+          min={challenge.min}
+          max={challenge.max}
+          fine={challenge.fine}
+          onChange={(v) => onChange(selected, v)}
+        />
+      )}
     </section>
   );
 };

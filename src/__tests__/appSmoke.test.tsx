@@ -6,11 +6,9 @@ import { LESSONS } from '../data/lessons';
 
 describe('Sightline UI & Anti-Slop Interactive Smoke Suite', () => {
   it('renders Home Index with all 13 lessons and toggles Darkroom theme cleanly', () => {
-    window.location.hash = '#/';
+    window.location.hash = '#/sightline';
     render(<App />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      /Train your eye past software defaults/i
-    );
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Sightline/i);
 
     for (const lesson of LESSONS) {
       expect(screen.getAllByText(lesson.title).length).toBeGreaterThanOrEqual(1);

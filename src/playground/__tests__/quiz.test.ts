@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISES, exercisesFor } from '../content/exercises';
 import { dailyPickMode, MODE_IDS, MODES } from '../content/modes';
-import { checkValue } from '../logic/check';
 import { buildQuiz } from '../logic/quiz';
 import { playgroundTotals } from '../logic/totals';
 import { defaultStore } from '../state/storage';
+
+/** Which side of a zone a value falls on. Ends of the zone are good. */
+const checkValue = (v: number, lo: number, hi: number) => (v > hi ? 'loose' : v < lo ? 'tight' : 'good');
 
 describe('buildQuiz', () => {
   for (const mode of MODES) {

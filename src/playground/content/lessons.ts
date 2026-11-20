@@ -313,7 +313,7 @@ export const LESSONS: LessonStep[] = [
     {
       title: 'Compare with the normal space',
       body: 'Turn on Compare to see the line with the normal word space behind your line. Check the difference by eye.',
-      tip: 'Change the space in small steps, then check again.',
+      tip: 'Change the space in small steps, then step back and look.',
       visual: {
         kind: 'textRows',
         size: 30,

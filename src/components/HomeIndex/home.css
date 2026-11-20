@@ -1,0 +1,260 @@
+/*
+ * Sightline home. It uses the Design Playground language: Bricolage Grotesque, one flat ground,
+ * cards on a stage surface, 44px targets and nothing under 16px. Colour marks the tier.
+ * Tokens come from src/playground/styles/tokens.css.
+ */
+
+.dp--home {
+  --home-max: 1080px;
+  min-height: 100dvh;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-7) max(48px, env(safe-area-inset-bottom, 0px));
+}
+
+.dp--home > *:not(.skip-link) {
+  width: 100%;
+  max-width: var(--home-max);
+  margin-inline: auto;
+}
+
+/* A tier sets the accent for its card and for the next-up card that belongs to it. */
+.dp-home-card[data-tier='foundation'] { --accent: var(--mode-kerning); }
+.dp-home-card[data-tier='building'] { --accent: var(--mode-tracking); }
+.dp-home-card[data-tier='challenge'] { --accent: var(--mode-measure); }
+
+/* Cards that belong to no tier stay neutral: ink buttons, no colour. */
+.dp-home-card[data-neutral] {
+  --accent: var(--ink);
+  --on-accent: var(--stage);
+}
+
+/* Bar */
+
+.dp-home-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.dp-home-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Cards */
+
+.dp-home-card {
+  background: var(--stage);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.dp-home-card-title {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.dp-home-line {
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.dp-home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.dp-home-card > .dp-home-cta {
+  align-self: flex-start;
+}
+
+.dp-home-cta {
+  min-height: 52px;
+  padding: 0 24px;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+/* Top: one large card and two small ones */
+
+.dp-home-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-areas: 'next daily' 'next play';
+  gap: var(--space-5);
+}
+
+.dp-home-next { grid-area: next; justify-content: space-between; gap: var(--space-5); }
+.dp-home-daily { grid-area: daily; }
+.dp-home-play { grid-area: play; }
+
+.dp-home-daily,
+.dp-home-play {
+  justify-content: space-between;
+}
+
+.dp-home-next-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dp-home-bignum {
+  font-size: clamp(56px, 8vw, 88px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.dp-home-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  background: var(--tile);
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+}
+
+.dp-home-next-title {
+  font-size: clamp(30px, 3.6vw, 42px);
+  font-weight: 800;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.dp-home-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Tier cards and their rows */
+
+.dp-home-tier-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.dp-home-count {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.dp-home-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dp-home-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 56px auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--tile);
+}
+
+.dp-home-num {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.dp-home-title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.dp-home-score {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.dp-home-btn {
+  min-height: var(--tap-target);
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  background: var(--button-2);
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.dp-home-btn--fill {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 800;
+}
+
+/* Narrow screens: the buttons drop under the title. */
+
+@media (max-width: 899px) {
+  .dp--home {
+    padding: var(--space-4) var(--space-6) max(40px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .dp-home-top {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'next' 'daily' 'play';
+  }
+
+  .dp-home-card {
+    padding: var(--space-5) var(--space-6);
+  }
+}
+
+@media (max-width: 640px) {
+  .dp--home {
+    padding: var(--space-3) var(--space-4) max(32px, env(safe-area-inset-bottom, 0px));
+    gap: var(--space-4);
+  }
+
+  .dp-home-card {
+    padding: var(--space-5) var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+
+  .dp-home-row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+
+  .dp-home-score:empty {
+    display: none;
+  }
+
+  .dp-home-row .dp-home-actions {
+    grid-column: 2 / -1;
+  }
+
+  .dp-home-cta,
+  .dp-home-card > .dp-home-cta {
+    flex: 1 1 auto;
+    align-self: stretch;
+  }
+}

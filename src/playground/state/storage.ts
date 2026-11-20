@@ -4,7 +4,6 @@ import { Assists, ModeId, ModeProgress, PlaygroundStore } from '../types';
 export const PLAYGROUND_STORAGE_KEY = 'design-playground:v1';
 
 export const DEFAULT_ASSISTS: Assists = {
-  answer: false,
   guides: false,
   blur: false,
   grid: true,
@@ -12,7 +11,7 @@ export const DEFAULT_ASSISTS: Assists = {
 };
 
 function emptyProgress(modeId: ModeId): ModeProgress {
-  return { modeId, exerciseIndex: 0, completed: [], best: {}, lessonStep: 0, quizBest: 0 };
+  return { modeId, completed: [], best: {}, lessonStep: 0, quizBest: 0 };
 }
 
 export function defaultStore(): PlaygroundStore {
@@ -42,7 +41,6 @@ export function sanitizeStore(raw: unknown): PlaygroundStore {
     for (const id of MODE_IDS) {
       const m = (r.modes as Partial<Record<ModeId, Partial<ModeProgress>>>)[id];
       if (!m) continue;
-      if (isNonNegInt(m.exerciseIndex)) base.modes[id].exerciseIndex = m.exerciseIndex;
       if (isNonNegInt(m.lessonStep)) base.modes[id].lessonStep = m.lessonStep;
       if (isNonNegInt(m.quizBest)) base.modes[id].quizBest = m.quizBest;
       if (Array.isArray(m.completed)) {
@@ -50,7 +48,7 @@ export function sanitizeStore(raw: unknown): PlaygroundStore {
       }
       if (m.best && typeof m.best === 'object' && !Array.isArray(m.best)) {
         for (const [key, grade] of Object.entries(m.best)) {
-          if (grade === 'exact' || grade === 'zone') base.modes[id].best[key] = grade;
+          if (grade === 'exact' || grade === 'zone' || grade === 'miss') base.modes[id].best[key] = grade;
         }
       }
     }

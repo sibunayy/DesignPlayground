@@ -33,11 +33,14 @@ body {
   left: -9999px;
   top: 8px;
   z-index: 100;
-  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
   border-radius: 8px;
   background: var(--ink-primary);
   color: var(--bg-surface);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   text-decoration: none;
 }
@@ -361,28 +364,6 @@ input:focus-visible,
 }
 
 /* Home Index Varied Tier Layouts */
-.tier-foundation-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: 16px;
-}
-
-.tier-building-ledger {
-  display: flex;
-  flex-direction: column;
-  border-top: 1.5px solid var(--ink-primary);
-}
-
-.tier-challenge-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-  gap: 1px;
-  background: var(--rule);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-card);
-  overflow: hidden;
-}
-
 .hygiene-choice-popover {
   position: absolute;
   left: 0;
@@ -404,13 +385,3 @@ input:focus-visible,
   }
 }
 
-@media (hover: hover) {
-  .interactive-row:hover {
-    background: color-mix(in srgb, var(--bg-surface) 75%, var(--bg-subtle));
-  }
-
-  .interactive-card:hover {
-    border-color: var(--rule-strong);
-    transform: translateY(-2px);
-  }
-}

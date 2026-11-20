@@ -24,18 +24,18 @@ describe('sanitizeStore', () => {
       panelOpen: 'yes',
       assists: { blur: true, grid: 'no' },
       modes: {
-        kerning: { exerciseIndex: 2, lessonStep: -1, completed: ['type', 4], best: { type: 'exact', home: 'wrong' } },
+        kerning: { lessonStep: -1, completed: ['type', 4], best: { type: 'exact', home: 'wrong', wave: 'miss' } },
       },
     });
     expect(s.theme).toBe('light');
     expect(s.panelOpen).toBe(false);
     expect(s.assists.blur).toBe(true);
     expect(s.assists.grid).toBe(true);
-    expect(s.modes.kerning).toMatchObject({ exerciseIndex: 2, lessonStep: 0, completed: ['type'] });
-    expect(s.modes.kerning.best).toEqual({ type: 'exact' });
+    expect(s.modes.kerning).toMatchObject({ lessonStep: 0, completed: ['type'] });
+    expect(s.modes.kerning.best).toEqual({ type: 'exact', wave: 'miss' });
   });
   it('reads older saves without grades', () => {
-    const s = sanitizeStore({ version: 1, modes: { leading: { exerciseIndex: 1, completed: ['x'] } } });
+    const s = sanitizeStore({ version: 1, modes: { leading: { completed: ['x'] } } });
     expect(s.modes.leading.best).toEqual({});
     expect(s.modes.paragraph.completed).toEqual([]);
   });

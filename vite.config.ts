@@ -3,6 +3,12 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Node 25 and newer ship a built-in localStorage that hides jsdom's own and breaks the storage tests.
+// Turn it off for the test workers. Older Node versions do not need the flag.
+const nodeVersion = (globalThis as { process?: { versions?: { node?: string } } }).process?.versions?.node ?? '0';
+const nodeMajor = Number(nodeVersion.split('.')[0]);
+const testExecArgv = nodeMajor >= 25 ? ['--no-experimental-webstorage'] : [];
+
 export default defineConfig({
   base: '/sightline/',
   plugins: [
@@ -48,6 +54,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: [],
+    poolOptions: { forks: { execArgv: testExecArgv } },
     // Lets the playground token test read tokens.css with ?raw. Vitest empties other CSS.
     css: { include: [/playground\/styles\/tokens\.css/] },
   },

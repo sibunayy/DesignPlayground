@@ -36,6 +36,7 @@ describe('Design Playground', () => {
     fireEvent.change(slider, { target: { value: String(good) } });
     fireEvent.click(screen.getByRole('button', { name: mode.checkLabel }));
     expect(screen.getByText(mode.feedback.good)).toBeTruthy();
+    expect(screen.getByText(/Exact answer|In the zone/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: mode.nextLabel }));
     expect(screen.getByText(/Exercise 2 of/)).toBeTruthy();
@@ -64,5 +65,33 @@ describe('Design Playground', () => {
     expect(toggle.getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(toggle);
     expect(screen.queryByRole('complementary')).toBeNull();
+  });
+
+  it('moves the slider one step with the fine-tune buttons', async () => {
+    window.location.hash = '#/playground/tracking';
+    render(<App />);
+    const mode = getMode('tracking')!;
+    const slider = (await screen.findByRole('slider')) as HTMLInputElement;
+    const start = Number(slider.value);
+    fireEvent.click(screen.getByRole('button', { name: 'Increase by one step' }));
+    expect(Number(slider.value)).toBe(start + mode.slider.step);
+    fireEvent.click(screen.getByRole('button', { name: 'Decrease by one step' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Decrease by one step' }));
+    expect(Number(slider.value)).toBe(start - mode.slider.step);
+  });
+
+  it('runs the Paragraphs mode and shows the grade on the hub', async () => {
+    window.location.hash = '#/playground/paragraph';
+    render(<App />);
+    const mode = getMode('paragraph')!;
+    const [first] = exercisesFor('paragraph');
+    const slider = (await screen.findByRole('slider')) as HTMLInputElement;
+    const centre = Math.round((first.lo + first.hi) / 2 / mode.slider.step) * mode.slider.step;
+    fireEvent.change(slider, { target: { value: String(centre) } });
+    fireEvent.click(screen.getByRole('button', { name: mode.checkLabel }));
+    expect(screen.getByText('Exact answer.')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'All modes' }));
+    expect(await screen.findByText(new RegExp(`1 of ${exercisesFor('paragraph').length} done, 1 exact`))).toBeTruthy();
   });
 });

@@ -394,6 +394,80 @@ export const LESSONS: LessonStep[] = [
       },
     },
   ]),
+  ...steps('paragraph', [
+    {
+      title: 'Paragraph space marks a new idea',
+      body: 'Space between paragraphs shows the reader where a new idea starts. It must be larger than the space between lines.',
+      tip: 'Measure paragraph space in lines. 100% is one empty line.',
+      visual: {
+        kind: 'paraCols',
+        cols: [
+          { gaps: [0, 0], label: 'None' },
+          { gaps: [0.75, 0.75], label: 'Clear' },
+        ],
+      },
+    },
+    {
+      title: 'Too little space hides the break',
+      body: 'When the paragraph space is close to the line space, the reader cannot see where a paragraph ends.',
+      tip: 'A paragraph that ends on a full line has no visible break at all.',
+      visual: {
+        kind: 'paraCols',
+        cols: [
+          { gaps: [0.15, 0.15], label: 'Hidden' },
+          { gaps: [0.75, 0.75], label: 'Clear' },
+        ],
+      },
+    },
+    {
+      title: 'Too much space breaks the text apart',
+      body: 'Large gaps turn paragraphs into separate blocks. The reader stops reading them as one text.',
+      tip: 'If the gap is taller than two lines, the paragraphs look unrelated.',
+      visual: {
+        kind: 'paraCols',
+        cols: [
+          { gaps: [0.75, 0.75], label: 'Clear' },
+          { gaps: [2.5, 2.5], label: 'Apart' },
+        ],
+      },
+    },
+    {
+      title: 'Body text uses half a line to one line',
+      body: 'For body text, set the paragraph space between 50% and 100% of the line height.',
+      tip: 'Large text needs less than one line, because each line is already tall.',
+      visual: {
+        kind: 'paraCols',
+        cols: [
+          { gaps: [0.5, 0.5], label: 'Half' },
+          { gaps: [1, 1], label: 'One line' },
+        ],
+      },
+    },
+    {
+      title: 'Use an indent or space, not both',
+      body: 'An indent on the first line also marks a new paragraph. With an indent, set the paragraph space to zero.',
+      tip: 'Do not indent the first paragraph after a heading.',
+      visual: {
+        kind: 'paraCols',
+        cols: [
+          { gaps: [0, 0], indent: true, label: 'Indent' },
+          { gaps: [1, 1], indent: true, label: 'Both' },
+        ],
+      },
+    },
+    {
+      title: 'Keep the space the same everywhere',
+      body: 'Every paragraph break in a text gets the same space. A different gap tells the reader that something else changed.',
+      tip: 'Use a larger gap only for a new section.',
+      visual: {
+        kind: 'paraCols',
+        cols: [
+          { gaps: [0.75, 0.75], label: 'Even' },
+          { gaps: [0.3, 1.6], label: 'Uneven' },
+        ],
+      },
+    },
+  ]),
 ];
 
 export function lessonsFor(modeId: ModeId): LessonStep[] {

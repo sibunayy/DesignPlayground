@@ -237,6 +237,24 @@
     height: 100dvh;
     overflow: hidden;
   }
+
+  /* The grid row sets the stage height. Tall text scrolls inside the canvas. */
+  .dp--mode .dp-stage {
+    min-height: 0;
+  }
+
+  /* Keep the header on one row so the stage keeps its height. */
+  .dp--mode .dp-header {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Six mode tabs need less padding on a narrow landscape screen. */
+@media (max-width: 1299px) {
+  .dp-mode-tab {
+    padding: 0 12px;
+    font-size: 16px;
+  }
 }
 
 /* Stage */
@@ -274,6 +292,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Tall text scrolls inside the stage instead of overlapping the readout. */
+.dp-stage-canvas--tall {
+  overflow-y: auto;
+  align-items: safe center;
 }
 
 /* Line length keeps a true width. A line wider than the stage scrolls inside the stage. */
@@ -429,6 +453,33 @@
 .dp-dock-field {
   flex: 1;
   min-width: 0;
+}
+
+.dp-slider-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dp-slider-row input[type='range'] {
+  flex: 1;
+  min-width: 0;
+}
+
+.dp-slider-row .dp-chip-btn {
+  flex: 0 0 auto;
+  width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.dp-grade {
+  color: var(--accent);
+  font-weight: 800;
 }
 
 .dp-dock-label {

@@ -2,7 +2,7 @@ import { Mode, ModeId } from '../types';
 
 /**
  * Mode definitions. Kerning, Tracking and Leading come from the Design Playground
- * design boards. Word spacing and Line length extend the same loop.
+ * design boards. Word spacing, Line length and Paragraphs extend the same loop.
  * Pass ranges are prototype values: confirm them with a typographer before release.
  */
 export const MODES: Mode[] = [
@@ -24,7 +24,7 @@ export const MODES: Mode[] = [
       loose: 'Too open. The tinted space is too wide.',
       tight: 'Too tight. The letters nearly touch.',
       good: 'Balanced. The space looks even.',
-      goodLast: 'Balanced. All four pairs are done.',
+      goodLast: 'Balanced. Every pair in this mode is done.',
     },
   },
   {
@@ -45,7 +45,7 @@ export const MODES: Mode[] = [
       loose: 'Too open. The letters drift apart.',
       tight: 'Too tight. The letters crowd each other.',
       good: 'Balanced. The letters look evenly open.',
-      goodLast: 'Balanced. All three exercises are done.',
+      goodLast: 'Balanced. Every exercise in this mode is done.',
     },
   },
   {
@@ -66,7 +66,7 @@ export const MODES: Mode[] = [
       loose: 'Too open. The lines drift apart.',
       tight: 'Too tight. The lines crowd each other.',
       good: 'Balanced. The lines look evenly spaced.',
-      goodLast: 'Balanced. All three exercises are done.',
+      goodLast: 'Balanced. Every exercise in this mode is done.',
     },
   },
   {
@@ -87,7 +87,7 @@ export const MODES: Mode[] = [
       loose: 'Too open. The line breaks into single words.',
       tight: 'Too tight. The words run together.',
       good: 'Balanced. The words read as one line.',
-      goodLast: 'Balanced. All three exercises are done.',
+      goodLast: 'Balanced. Every exercise in this mode is done.',
     },
   },
   {
@@ -108,7 +108,28 @@ export const MODES: Mode[] = [
       loose: 'Too long. The eye loses its place at the line end.',
       tight: 'Too short. The eye jumps to a new line too often.',
       good: 'Balanced. The lines are a comfortable length.',
-      goodLast: 'Balanced. All three exercises are done.',
+      goodLast: 'Balanced. Every exercise in this mode is done.',
+    },
+  },
+  {
+    id: 'paragraph',
+    name: 'Paragraphs',
+    teaches: 'Space between paragraphs',
+    accentToken: 'mode-paragraph',
+    defaultTheme: 'light',
+    layout: 'panel-right',
+    unit: '%',
+    slider: { min: 0, max: 200, step: 10 },
+    assists: ['answer', 'guides', 'blur', 'grid'],
+    checkLabel: 'Check paragraph space',
+    nextLabel: 'Next exercise',
+    lessonName: 'Paragraphs lesson',
+    feedback: {
+      idle: 'Drag the slider to change the space between paragraphs.',
+      loose: 'Too open. The paragraphs look like separate blocks.',
+      tight: 'Too tight. The reader cannot see where a paragraph starts.',
+      good: 'Balanced. Each new paragraph is clear and the text holds together.',
+      goodLast: 'Balanced. Every exercise in this mode is done.',
     },
   },
 ];

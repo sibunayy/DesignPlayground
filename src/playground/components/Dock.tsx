@@ -37,16 +37,36 @@ export const Dock: React.FC<DockProps> = ({
           Exercise {exerciseNumber} of {exerciseCount}: {exercise.kind}
         </label>
         <p style={{ fontSize: 17, margin: '4px 0 8px' }}>{exercise.prompt}</p>
-        <input
-          id={sliderId}
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          aria-valuetext={`${value} ${mode.unit}`}
-          onChange={(e) => onChange(Number(e.target.value))}
-        />
+        <div className="dp-slider-row">
+          <button
+            type="button"
+            className="dp-chip-btn"
+            aria-label="Decrease by one step"
+            disabled={value <= min}
+            onClick={() => onChange(Math.max(min, value - step))}
+          >
+            <span aria-hidden="true">−</span>
+          </button>
+          <input
+            id={sliderId}
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            aria-valuetext={`${value} ${mode.unit}`}
+            onChange={(e) => onChange(Number(e.target.value))}
+          />
+          <button
+            type="button"
+            className="dp-chip-btn"
+            aria-label="Increase by one step"
+            disabled={value >= max}
+            onClick={() => onChange(Math.min(max, value + step))}
+          >
+            <span aria-hidden="true">+</span>
+          </button>
+        </div>
       </div>
       {passed ? (
         <button type="button" className="dp-btn-primary" onClick={onNext}>

@@ -21,6 +21,7 @@ export const Hub: React.FC<HubProps> = ({ store, onOpen }) => (
       {MODES.map((m) => {
         const total = exercisesFor(m.id).length;
         const done = store.modes[m.id].completed.length;
+        const exact = Object.values(store.modes[m.id].best).filter((g) => g === 'exact').length;
         const started = done > 0 || store.modes[m.id].exerciseIndex > 0;
         return (
           <li key={m.id} className="dp-hub-item">
@@ -28,7 +29,7 @@ export const Hub: React.FC<HubProps> = ({ store, onOpen }) => (
             <div>
               <h2 className="dp-hub-name">{m.name}</h2>
               <p className="dp-hub-meta">
-                {m.teaches}. {done} of {total} exercises done.
+                {m.teaches}. {done} of {total} done{exact > 0 ? `, ${exact} exact` : ''}.
               </p>
             </div>
             <button

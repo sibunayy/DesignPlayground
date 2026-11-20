@@ -1,10 +1,32 @@
-import { CheckResult, Exercise, Mode } from '../types';
+import { CheckResult, Exercise, Grade, Mode } from '../types';
 
 /** Compares a slider value with the exercise range. Ends of the range pass. */
 export function checkValue(value: number, lo: number, hi: number): Exclude<CheckResult, ''> {
   if (value > hi) return 'loose';
   if (value < lo) return 'tight';
   return 'good';
+}
+
+/** Exact when the value sits in the centre third of the zone. Returns null outside the zone. */
+export function gradeValue(value: number, lo: number, hi: number): Grade | null {
+  if (value < lo || value > hi) return null;
+  const centre = (lo + hi) / 2;
+  return Math.abs(value - centre) <= (hi - lo) / 6 ? 'exact' : 'zone';
+}
+
+/** A short line after a good check that says how close the answer is. */
+export function gradeMessage(value: number, lo: number, hi: number): string {
+  const grade = gradeValue(value, lo, hi);
+  if (grade === null) return '';
+  if (grade === 'exact') return 'Exact answer.';
+  return value < (lo + hi) / 2
+    ? 'In the zone. Move a little higher for an exact answer.'
+    : 'In the zone. Move a little lower for an exact answer.';
+}
+
+/** Keeps the better of two grades. */
+export function betterGrade(a: Grade | undefined, b: Grade): Grade {
+  return a === 'exact' || b === 'exact' ? 'exact' : 'zone';
 }
 
 export function feedbackMessage(mode: Mode, result: CheckResult, isLastExercise: boolean): string {
@@ -38,6 +60,10 @@ export function readout(mode: Mode, value: number, exercise: Exercise): string {
       return `Word space: ${value > 0 ? '+' : ''}${value} units`;
     case 'measure':
       return `Line length: ${value} characters`;
+    case 'paragraph': {
+      const lines = value / 100;
+      return `Paragraph space: ${value}% (${lines} ${lines === 1 ? 'line' : 'lines'})`;
+    }
   }
 }
 
@@ -48,6 +74,7 @@ export function zoneText(mode: Mode, exercise: Exercise): string {
         exercise.hi / UNITS_PER_SQUARE
       )} squares`;
     case 'leading':
+    case 'paragraph':
       return `Correct zone: ${exercise.lo}% to ${exercise.hi}%`;
     case 'measure':
       return `Correct zone: ${exercise.lo} to ${exercise.hi} characters`;

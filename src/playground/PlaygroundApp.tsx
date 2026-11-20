@@ -10,7 +10,7 @@ import { Stage } from './components/Stage';
 import { exercisesFor } from './content/exercises';
 import { lessonsFor } from './content/lessons';
 import { getMode } from './content/modes';
-import { checkValue, feedbackMessage, readout } from './logic/check';
+import { betterGrade, checkValue, feedbackMessage, gradeMessage, gradeValue, readout } from './logic/check';
 import { loadPlaygroundStore, savePlaygroundStore } from './state/storage';
 import { AssistId, CheckResult, ModeId, PlaygroundStore } from './types';
 
@@ -59,8 +59,12 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, onNavigate
     if (!exercise || !progress) return;
     const r = checkValue(value, exercise.lo, exercise.hi);
     setResult(r);
-    if (r === 'good' && !progress.completed.includes(exercise.id)) {
-      setModeField({ completed: [...progress.completed, exercise.id] });
+    const grade = gradeValue(value, exercise.lo, exercise.hi);
+    if (r === 'good' && grade) {
+      setModeField({
+        completed: progress.completed.includes(exercise.id) ? progress.completed : [...progress.completed, exercise.id],
+        best: { ...progress.best, [exercise.id]: betterGrade(progress.best[exercise.id], grade) },
+      });
     }
   };
 
@@ -88,6 +92,7 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, onNavigate
           onToggleAssist={toggleAssist}
           readoutText={readout(mode, value, exercise)}
           message={feedbackMessage(mode, result, isLast)}
+          gradeText={result === 'good' ? gradeMessage(value, exercise.lo, exercise.hi) : undefined}
         />
         <Dock
           mode={mode}

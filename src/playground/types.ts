@@ -1,8 +1,11 @@
-export type ModeId = 'kerning' | 'tracking' | 'leading' | 'wordspace' | 'measure';
+export type ModeId = 'kerning' | 'tracking' | 'leading' | 'wordspace' | 'measure' | 'paragraph';
 
 export type ThemeId = 'dark' | 'light';
 
 export type CheckResult = '' | 'tight' | 'loose' | 'good';
+
+/** How close a good answer is. Exact means the centre third of the answer zone. */
+export type Grade = 'exact' | 'zone';
 
 export type AssistId = 'answer' | 'guides' | 'blur' | 'grid' | 'compare';
 
@@ -64,6 +67,8 @@ export interface Exercise {
   width?: number;
   /** Upper-case transform and tracking for capital labels (word spacing). */
   caps?: boolean;
+  /** First-line indent on every paragraph after the first (paragraph spacing). */
+  indent?: boolean;
 }
 
 export type LessonVisual =
@@ -89,6 +94,11 @@ export type LessonVisual =
       kind: 'measureLines';
       size: number;
       rows: Array<{ ch: number; label: string }>;
+    }
+  | {
+      kind: 'paraCols';
+      /** Each column draws three short paragraphs. Gaps are in lines, one per break. */
+      cols: Array<{ gaps: [number, number]; indent?: boolean; label: string }>;
     }
   | { kind: 'blurWord'; text: string; size: number }
   | { kind: 'pairList'; size: number; items: string[] };
@@ -116,6 +126,8 @@ export interface ModeProgress {
   exerciseIndex: number;
   /** Exercise ids the learner has passed at least once. */
   completed: string[];
+  /** Best grade for each passed exercise id. */
+  best: Record<string, Grade>;
   lessonStep: number;
 }
 

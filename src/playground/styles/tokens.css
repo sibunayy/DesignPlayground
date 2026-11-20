@@ -2,7 +2,8 @@
  * Design Playground tokens.
  * Source: design/design-playground/design-system/tokens.json (Design Playground Design System).
  * The colour test in src/playground/__tests__/tokens.test.ts keeps this file in step with the source.
- * Extension: mode-wordspace and mode-measure are new mode accents for the two added modes.
+ * Extension: mode-wordspace, mode-measure and mode-paragraph are new mode accents for the added modes.
+ * Each passes 4.5:1 with on-accent and against stage, panel and ground.
  */
 
 .dp {
@@ -43,6 +44,7 @@
   --mode-leading: #7FD6A6;
   --mode-wordspace: #FF9DB8;
   --mode-measure: #C9A7FF;
+  --mode-paragraph: #6FD3E0;
   --on-accent: #121418;
   --bar: #5A616B;
   --grid: #ECE9E20D;
@@ -66,6 +68,7 @@
   --mode-leading: #17724A;
   --mode-wordspace: #B0305A;
   --mode-measure: #6B3FB8;
+  --mode-paragraph: #0E6F7C;
   --on-accent: #FFFFFF;
   --bar: #BDBBB4;
   --grid: #1B1B1A0F;
@@ -80,6 +83,7 @@
 .dp[data-mode='leading'] { --accent: var(--mode-leading); }
 .dp[data-mode='wordspace'] { --accent: var(--mode-wordspace); }
 .dp[data-mode='measure'] { --accent: var(--mode-measure); }
+.dp[data-mode='paragraph'] { --accent: var(--mode-paragraph); }
 
 .dp {
   --accent-tint: color-mix(in srgb, var(--accent) var(--tint-strength), transparent);

@@ -94,6 +94,38 @@ export const LessonVisual: React.FC<{ visual: Visual }> = ({ visual }) => {
         </div>
       );
 
+    case 'paraCols': {
+      // One line is 12px: an 8px bar and a 4px line gap. Paragraph gaps add whole lines.
+      const LINE = 12;
+      const widths = [100, 100, 60];
+      return (
+        <div className="dp-vis-cols">
+          {visual.cols.map((col, i) => (
+            <div key={i} style={{ width: 96 }}>
+              {[0, 1, 2].map((para) => (
+                <div key={para} style={{ marginTop: para === 0 ? 0 : col.gaps[para - 1] * LINE }}>
+                  {widths.map((w, line) => (
+                    <div
+                      key={line}
+                      style={{
+                        height: 8,
+                        marginBottom: 4,
+                        borderRadius: 2,
+                        background: 'var(--accent-tint-strong)',
+                        width: `${w - (col.indent && para > 0 && line === 0 ? 20 : 0)}%`,
+                        marginLeft: col.indent && para > 0 && line === 0 ? '20%' : 0,
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+              <div className="dp-vis-label" style={{ marginTop: 6 }}>{col.label}</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     case 'blurWord':
       return (
         <div style={{ fontSize: visual.size, fontWeight: 800, lineHeight: 1, filter: 'blur(5px)' }}>

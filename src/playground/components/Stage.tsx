@@ -13,6 +13,8 @@ interface StageProps {
   onToggleAssist: (id: AssistId) => void;
   readoutText: string;
   message: string;
+  /** Second feedback line after a good check, such as "Exact answer." */
+  gradeText?: string;
 }
 
 /** Width each mode needs at full size. The stage scales down below it. */
@@ -22,6 +24,7 @@ const DESIGN_WIDTH: Record<Mode['id'], number> = {
   leading: 1000,
   wordspace: 1000,
   measure: 1000,
+  paragraph: 1000,
 };
 
 const STAGE_PADDING = 64;
@@ -34,13 +37,16 @@ export const Stage: React.FC<StageProps> = ({
   onToggleAssist,
   readoutText,
   message,
+  gradeText,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const width = useElementWidth(ref, 800);
   const inner = Math.max(200, width - STAGE_PADDING);
-  const designWidth = mode.id === 'leading' ? exercise.width ?? 1000 : DESIGN_WIDTH[mode.id];
+  const designWidth = mode.id === 'leading' || mode.id === 'paragraph' ? exercise.width ?? 1000 : DESIGN_WIDTH[mode.id];
   const scale = Math.min(1, inner / designWidth);
-  const fontSize = exercise.size * scale;
+  // Wrapping text (leading, paragraphs) never drops below 16px. It wraps more instead.
+  const wraps = mode.id === 'leading' || mode.id === 'paragraph';
+  const fontSize = wraps ? Math.max(16, exercise.size * scale) : exercise.size * scale;
   const blur = assists.blur && mode.assists.includes('blur') ? `blur(${Math.max(1.5, fontSize * 0.03)}px)` : undefined;
 
   // Kerning: one grid cell is one square of gap at the current word size.
@@ -127,6 +133,45 @@ export const Stage: React.FC<StageProps> = ({
       );
       break;
     }
+    case 'paragraph': {
+      const LINE_HEIGHT = 1.45;
+      const lineHeightPx = fontSize * LINE_HEIGHT;
+      const gapPx = (lineHeightPx * value) / 100;
+      const paragraphs = exercise.text.split('\n\n');
+      canvas = (
+        <div
+          role="img"
+          aria-label={exercise.label}
+          style={{
+            width: (exercise.width ?? 1000) * scale,
+            maxWidth: '100%',
+            fontSize,
+            fontWeight: 400,
+            lineHeight: LINE_HEIGHT,
+            filter: blur,
+          }}
+        >
+          {paragraphs.map((para, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && (
+                <div
+                  aria-hidden="true"
+                  style={{
+                    height: gapPx,
+                    borderRadius: 4,
+                    background: assists.guides ? 'var(--accent-tint)' : undefined,
+                  }}
+                />
+              )}
+              <p aria-hidden="true" style={{ textIndent: exercise.indent && i > 0 ? '2em' : undefined }}>
+                {para}
+              </p>
+            </React.Fragment>
+          ))}
+        </div>
+      );
+      break;
+    }
     case 'measure': {
       // Fit the longest slider line inside the stage where possible. One ch is about 0.6 em.
       // Text never goes below 16px. On a narrow stage, long lines scroll inside the stage.
@@ -191,7 +236,13 @@ export const Stage: React.FC<StageProps> = ({
         ))}
       </div>
 
-      <div className={`dp-stage-canvas${mode.id === 'measure' ? ' dp-stage-canvas--scroll' : ''}`}>{canvas}</div>
+      <div
+        className={`dp-stage-canvas${mode.id === 'measure' ? ' dp-stage-canvas--scroll' : ''}${
+          wraps ? ' dp-stage-canvas--tall' : ''
+        }`}
+      >
+        {canvas}
+      </div>
 
       <div className="dp-stage-foot">
         {assists.answer && (
@@ -205,7 +256,13 @@ export const Stage: React.FC<StageProps> = ({
         )}
         <div className="dp-caption">{readoutText}</div>
         <div className="dp-message" aria-live="polite">
-          {message}
+          <span>{message}</span>
+          {gradeText && (
+            <>
+              {' '}
+              <span className="dp-grade">{gradeText}</span>
+            </>
+          )}
         </div>
       </div>
     </section>

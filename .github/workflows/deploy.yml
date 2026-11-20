@@ -1,4 +1,4 @@
-name: Deploy Sightline to GitHub Pages
+name: Deploy Design Playground to GitHub Pages
 
 on:
   push:

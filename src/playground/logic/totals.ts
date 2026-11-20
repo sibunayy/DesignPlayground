@@ -9,7 +9,7 @@ export interface PlaygroundTotals {
   modes: number;
 }
 
-/** Progress across every mode, for the Sightline home card. */
+/** Progress across every mode, for the home card. */
 export function playgroundTotals(store: PlaygroundStore): PlaygroundTotals {
   let done = 0;
   let exact = 0;

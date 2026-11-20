@@ -13,13 +13,7 @@ const base = {
   'aria-hidden': true,
 };
 
-const PATHS: Record<AssistId | 'back' | 'sun' | 'moon' | 'book', React.ReactNode> = {
-  answer: (
-    <>
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="4" />
-    </>
-  ),
+const PATHS: Record<AssistId | 'back' | 'sun' | 'moon' | 'book' | 'fine' | 'lock', React.ReactNode> = {
   guides: (
     <>
       <rect x="3" y="8" width="18" height="8" rx="1.5" />
@@ -35,6 +29,8 @@ const PATHS: Record<AssistId | 'back' | 'sun' | 'moon' | 'book', React.ReactNode
   grid: <path d="M4 4h16v16H4zM4 12h16M12 4v16" />,
   compare: <path d="M4 6h16M4 12h10M4 18h16" />,
   back: <path d="M15 5l-7 7 7 7" />,
+  fine: <path d="M4 8h9M17 8h3M4 16h3M11 16h9M15 5v6M9 13v6" />,
+  lock: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   sun: (
     <>
       <circle cx="12" cy="12" r="4" />
@@ -52,7 +48,6 @@ export const DpIcon: React.FC<{ name: keyof typeof PATHS; size?: number }> = ({ 
 );
 
 export const ASSIST_LABELS: Record<AssistId, string> = {
-  answer: 'Answer zone',
   guides: 'Guides and ruler',
   blur: 'Squint blur',
   grid: 'Grid',

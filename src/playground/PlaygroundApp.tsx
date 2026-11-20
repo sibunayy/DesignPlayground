@@ -1,8 +1,8 @@
 import '@fontsource-variable/bricolage-grotesque';
 import './styles/tokens.css';
 import './styles/playground.css';
-import React, { useEffect, useState } from 'react';
-import { Dock } from './components/Dock';
+import React, { useEffect, useMemo, useState } from 'react';
+import { randomSeedCode } from '../engine/prng';
 import { Header } from './components/Header';
 import { Hub } from './components/Hub';
 import { LessonPanel } from './components/LessonPanel';
@@ -12,15 +12,15 @@ import { Summary } from './components/Summary';
 import { exercisesFor } from './content/exercises';
 import { lessonsFor } from './content/lessons';
 import { getMode } from './content/modes';
-import { betterGrade, checkValue, feedbackMessage, gradeMessage, gradeValue, readout } from './logic/check';
+import { betterGrade, buildChallenge, ExerciseResult, gradeAnswer } from './logic/challenge';
 import { buildQuiz } from './logic/quiz';
 import { loadPlaygroundStore, savePlaygroundStore } from './state/storage';
-import { Activity, AssistId, CheckResult, ModeId, PlaygroundStore } from './types';
+import { Activity, AssistId, ModeId, PlaygroundStore } from './types';
 
 interface PlaygroundAppProps {
   /** Mode to open, or null for the hub. */
   modeId: ModeId | null;
-  /** Slider practice or the A/B quiz. Practice when not given. */
+  /** The drag challenge or the A/B quiz. The challenge when not given. */
   activity?: Activity;
   onNavigate: (modeId: ModeId | null, activity?: Activity) => void;
   onExit: () => void;
@@ -31,20 +31,43 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
   const mode = modeId ? getMode(modeId) : undefined;
   const exercises = modeId ? exercisesFor(modeId) : [];
   const progress = modeId ? store.modes[modeId] : undefined;
-  const exIndex = progress ? Math.min(progress.exerciseIndex, exercises.length - 1) : 0;
-  const exercise = exercises[exIndex];
 
-  const [value, setValue] = useState<number>(exercise?.start ?? 0);
-  const [result, setResult] = useState<CheckResult>('');
+  // A run is one pass through a mode with one seed. Results stay hidden until the run ends.
+  const [seed, setSeed] = useState(() => randomSeedCode());
+  const [exIndex, setExIndex] = useState(0);
+  const [run, setRun] = useState<Record<string, ExerciseResult>>({});
   const [showSummary, setShowSummary] = useState(false);
+  const [selected, setSelected] = useState(0);
+  const [fineOpen, setFineOpen] = useState(false);
+  const exercise = exercises[Math.min(exIndex, exercises.length - 1)];
 
-  // A new mode or exercise resets the slider and the feedback.
+  const challenge = useMemo(
+    () => (mode && exercise ? buildChallenge(exercise, mode, seed, exIndex) : null),
+    [mode, exercise, seed, exIndex]
+  );
+  const key = `${modeId}:${seed}:${exIndex}`;
+  const [edit, setEdit] = useState<{ key: string; vals: number[] }>({ key: '', vals: [] });
+  const values = challenge ? (edit.key === key ? edit.vals : challenge.start) : [];
+
+  const setValue = (index: number, v: number) => {
+    if (!challenge) return;
+    setEdit((prev) => ({
+      key,
+      vals: (prev.key === key ? prev.vals : challenge.start).map((x, i) => (i === index ? v : x)),
+    }));
+  };
+
+  // A new mode or activity starts a fresh run.
   useEffect(() => {
-    if (exercise) setValue(exercise.start);
-    setResult('');
-  }, [exercise]);
+    setSeed(randomSeedCode());
+    setExIndex(0);
+    setRun({});
+    setShowSummary(false);
+    setSelected(0);
+  }, [modeId, activity]);
 
-  useEffect(() => setShowSummary(false), [modeId, activity]);
+  // A new exercise starts with the first handle selected.
+  useEffect(() => setSelected(0), [exIndex, seed]);
 
   useEffect(() => savePlaygroundStore(store), [store]);
 
@@ -61,47 +84,33 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     update((s) => ({ ...s, modes: { ...s.modes, [modeId]: { ...s.modes[modeId], ...patch } } }));
   };
 
-  const isLast = exIndex === exercises.length - 1;
+  const isLast = exIndex >= exercises.length - 1;
 
-  const onCheck = () => {
-    if (!exercise || !progress) return;
-    const r = checkValue(value, exercise.lo, exercise.hi);
-    setResult(r);
-    const grade = gradeValue(value, exercise.lo, exercise.hi);
-    if (r === 'good' && grade) {
-      setModeField({
-        completed: progress.completed.includes(exercise.id) ? progress.completed : [...progress.completed, exercise.id],
-        best: { ...progress.best, [exercise.id]: betterGrade(progress.best[exercise.id], grade) },
-      });
-    }
-  };
-
-  const onNext = () => {
-    if (isLast) {
-      setResult('');
-      setShowSummary(true);
-    } else {
-      setModeField({ exerciseIndex: exIndex + 1 });
-    }
+  // Lock in records the grade and moves on. The learner sees no result until the summary.
+  const onLockIn = () => {
+    if (!challenge || !progress || !exercise) return;
+    const result = gradeAnswer(values, challenge.targets);
+    setRun((r) => ({ ...r, [exercise.id]: result }));
+    setModeField({
+      completed: progress.completed.includes(exercise.id) ? progress.completed : [...progress.completed, exercise.id],
+      best: { ...progress.best, [exercise.id]: betterGrade(progress.best[exercise.id], result.grade) },
+    });
+    if (isLast) setShowSummary(true);
+    else setExIndex(exIndex + 1);
   };
 
   const practiceAgain = () => {
+    setSeed(randomSeedCode());
+    setExIndex(0);
+    setRun({});
     setShowSummary(false);
-    setResult('');
-    if (exercise) setValue(exercise.start);
-    setModeField({ exerciseIndex: 0 });
     if (activity !== 'practice') onNavigate(modeId, 'practice');
   };
 
-  const onChange = (v: number) => {
-    setValue(v);
-    if (result) setResult('');
-  };
-
-  const working = Boolean(mode && exercise && progress) && activity !== 'quiz' && !showSummary;
+  const working = Boolean(mode && exercise && progress && challenge) && activity !== 'quiz' && !showSummary;
 
   let body: React.ReactNode;
-  if (!mode || !exercise || !progress) {
+  if (!mode || !exercise || !progress || !challenge) {
     body = <Hub store={store} onOpen={(id, act) => onNavigate(id, act)} />;
   } else if (activity === 'quiz') {
     body = (
@@ -120,7 +129,8 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
       <Summary
         mode={mode}
         exercises={exercises}
-        progress={progress}
+        results={run}
+        seed={seed}
         onPracticeAgain={practiceAgain}
         onQuiz={() => onNavigate(mode.id, 'quiz')}
         onHub={() => onNavigate(null)}
@@ -135,25 +145,17 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
         <h1 className="dp-sr">{mode.name}</h1>
         <Stage
           mode={mode}
-          exercise={exercise}
-          value={value}
+          challenge={challenge}
+          values={values}
           assists={store.assists}
+          selected={selected}
+          fineOpen={fineOpen}
+          counter={`${exIndex + 1} of ${exercises.length}`}
+          onSelect={setSelected}
+          onChange={setValue}
           onToggleAssist={toggleAssist}
-          readoutText={readout(mode, value, exercise)}
-          message={feedbackMessage(mode, result, isLast)}
-          gradeText={result === 'good' ? gradeMessage(value, exercise.lo, exercise.hi) : undefined}
-        />
-        <Dock
-          mode={mode}
-          exercise={exercise}
-          exerciseNumber={exIndex + 1}
-          exerciseCount={exercises.length}
-          value={value}
-          result={result}
-          isLast={isLast}
-          onChange={onChange}
-          onCheck={onCheck}
-          onNext={onNext}
+          onToggleFine={() => setFineOpen((o) => !o)}
+          onLockIn={onLockIn}
         />
         {store.panelOpen && (
           <LessonPanel

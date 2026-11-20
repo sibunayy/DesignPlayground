@@ -1,16 +1,14 @@
 export type ModeId = 'kerning' | 'tracking' | 'leading' | 'wordspace' | 'measure' | 'paragraph' | 'margins';
 
-/** What the learner does in a mode: slider practice or the A/B quiz. */
+/** What the learner does in a mode: the drag challenge or the A/B quiz. */
 export type Activity = 'practice' | 'quiz';
 
 export type ThemeId = 'dark' | 'light';
 
-export type CheckResult = '' | 'tight' | 'loose' | 'good';
+/** How an answer scored. Exact is the centre third of every target, zone is inside every target, miss is anything else. */
+export type Grade = 'exact' | 'zone' | 'miss';
 
-/** How close a good answer is. Exact means the centre third of the answer zone. */
-export type Grade = 'exact' | 'zone';
-
-export type AssistId = 'answer' | 'guides' | 'blur' | 'grid' | 'compare';
+export type AssistId = 'guides' | 'blur' | 'grid' | 'compare';
 
 /** Where the lesson panel sits on a landscape iPad. Portrait and phone always stack. */
 export type ModeLayout = 'panel-right' | 'panel-left' | 'panel-below';
@@ -22,7 +20,6 @@ export interface SliderSpec {
 }
 
 export interface ModeFeedback {
-  idle: string;
   tight: string;
   loose: string;
   good: string;
@@ -37,13 +34,9 @@ export interface Mode {
   accentToken: `mode-${ModeId}`;
   defaultTheme: ThemeId;
   layout: ModeLayout;
-  /** Unit label for the readout, such as "units" or "%". */
-  unit: string;
   slider: SliderSpec;
   /** Assists this mode offers, in toolbar order. */
   assists: AssistId[];
-  checkLabel: string;
-  nextLabel: string;
   /** Question at the top of the A/B quiz. */
   quizQuestion: string;
   feedback: ModeFeedback;
@@ -126,7 +119,6 @@ export interface LessonStep {
 }
 
 export interface Assists {
-  answer: boolean;
   guides: boolean;
   blur: boolean;
   grid: boolean;
@@ -135,10 +127,9 @@ export interface Assists {
 
 export interface ModeProgress {
   modeId: ModeId;
-  exerciseIndex: number;
-  /** Exercise ids the learner has passed at least once. */
+  /** Exercise ids the learner has locked in at least once. */
   completed: string[];
-  /** Best grade for each passed exercise id. */
+  /** Best grade for each locked-in exercise id. */
   best: Record<string, Grade>;
   lessonStep: number;
   /** Best quiz score: correct answers out of the quiz length. */

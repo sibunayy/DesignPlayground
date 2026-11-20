@@ -2,14 +2,28 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../../App';
 import { exercisesFor } from '../content/exercises';
-import { dailyPickMode, getMode } from '../content/modes';
+import { dailyPickMode, getMode, MODES } from '../content/modes';
+import { buildChallenge } from '../logic/challenge';
 import { buildQuiz } from '../logic/quiz';
-import { defaultStore, PLAYGROUND_STORAGE_KEY } from '../state/storage';
 
 beforeEach(() => window.localStorage.clear());
 afterEach(() => {
   window.location.hash = '';
 });
+
+const seedOnScreen = () => /Seed: #(\w{4})/.exec(screen.getByText(/Seed: #/).textContent ?? '')![1];
+const lockIn = () => fireEvent.click(screen.getByRole('button', { name: 'Lock in answer' }));
+
+/** Presses the arrow keys on a handle until it reads the wanted value. */
+function setHandle(name: string | RegExp, want: number) {
+  for (let n = 0; n < 200; n++) {
+    const el = screen.getByRole('slider', { name });
+    const now = Number(el.getAttribute('aria-valuenow'));
+    if (Math.abs(want - now) < 0.6) return;
+    fireEvent.keyDown(el, { key: want > now ? 'ArrowRight' : 'ArrowLeft', shiftKey: Math.abs(want - now) > 12 });
+  }
+  throw new Error('handle did not reach its value');
+}
 
 describe('Design Playground', () => {
   it('opens from the Sightline home page', async () => {
@@ -23,36 +37,61 @@ describe('Design Playground', () => {
   it('gives each practice screen one main landmark and one heading', async () => {
     window.location.hash = '#/playground/leading';
     render(<App />);
-    await screen.findByRole('slider');
+    await screen.findByRole('slider', { name: 'Leading' });
     expect(screen.getAllByRole('main')).toHaveLength(1);
     const headings = screen.getAllByRole('heading', { level: 1 });
     expect(headings).toHaveLength(1);
     expect(headings[0].textContent).toBe(getMode('leading')!.name);
   });
 
-  it('runs the kerning loop: slide, check, next', async () => {
+  it('opens Kerning as a seeded challenge with one handle per gap and no hints', async () => {
     window.location.hash = '#/playground/kerning';
+    const { container } = render(<App />);
+    const handles = await screen.findAllByRole('slider');
+    const challenge = buildChallenge(exercisesFor('kerning')[0], getMode('kerning')!, seedOnScreen(), 0);
+    expect(handles).toHaveLength(challenge.parts.length - 1);
+    expect(screen.getByRole('group', { name: `The word ${challenge.exercise.text}` })).toBeTruthy();
+    expect(handles.map((h) => Number(h.getAttribute('aria-valuenow')))).toEqual(challenge.start);
+    // No bottom dock, no readout, no answer zone, no instruction line.
+    expect(container.querySelector('.dp-dock')).toBeNull();
+    expect(container.querySelector('input[type="range"]')).toBeNull();
+    expect(screen.queryByText(/squares|Correct zone|Drag the slider|Too tight|Too open/)).toBeNull();
+    expect(screen.getByText('1 of 6')).toBeTruthy();
+  });
+
+  it('shows no hint in any mode', async () => {
+    for (const mode of MODES) {
+      window.location.hash = `#/playground/${mode.id}`;
+      const { container, unmount } = render(<App />);
+      await screen.findAllByRole('slider');
+      const text = container.textContent ?? '';
+      expect(text).not.toMatch(/Correct zone|Drag the slider|Too tight|Too loose|Too open|Balanced|units|squares/);
+      expect(container.querySelector('.dp-dock')).toBeNull();
+      expect(screen.getByRole('button', { name: 'Lock in answer' })).toBeTruthy();
+      expect(screen.queryByRole('button', { name: /Answer zone/ })).toBeNull();
+      unmount();
+    }
+  });
+
+  it('moves a handle with the arrow keys', async () => {
+    window.location.hash = '#/playground/tracking';
     render(<App />);
-    const mode = getMode('kerning')!;
-    const [first] = exercisesFor('kerning');
-    const slider = (await screen.findByRole('slider')) as HTMLInputElement;
-    expect(Number(slider.value)).toBe(first.start);
+    const handle = await screen.findByRole('slider', { name: 'Tracking' });
+    const start = Number(handle.getAttribute('aria-valuenow'));
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
+    expect(Number(handle.getAttribute('aria-valuenow'))).toBe(start + 1);
+    fireEvent.keyDown(handle, { key: 'ArrowLeft', shiftKey: true });
+    expect(Number(handle.getAttribute('aria-valuenow'))).toBe(start - 9);
+  });
 
-    // Too loose first.
-    fireEvent.click(screen.getByRole('button', { name: mode.checkLabel }));
-    expect(screen.getByText(first.start > first.hi ? mode.feedback.loose : mode.feedback.tight)).toBeTruthy();
-
-    // Then a value inside the zone.
-    const step = mode.slider.step;
-    const good = mode.slider.min + Math.ceil((first.lo - mode.slider.min) / step) * step;
-    fireEvent.change(slider, { target: { value: String(good) } });
-    fireEvent.click(screen.getByRole('button', { name: mode.checkLabel }));
-    expect(screen.getByText(mode.feedback.good)).toBeTruthy();
-    expect(screen.getByText(/Exact answer|In the zone/)).toBeTruthy();
-
-    fireEvent.click(screen.getByRole('button', { name: mode.nextLabel }));
-    expect(screen.getByText(/^2 of \d+$/)).toBeTruthy();
-    expect(Number((screen.getByRole('slider') as HTMLInputElement).value)).toBe(exercisesFor('kerning')[1].start);
+  it('locks in without showing a result and moves to the next exercise', async () => {
+    window.location.hash = '#/playground/leading';
+    render(<App />);
+    await screen.findByRole('slider', { name: 'Leading' });
+    expect(screen.getByText('1 of 5')).toBeTruthy();
+    lockIn();
+    expect(screen.getByText('2 of 5')).toBeTruthy();
+    expect(screen.queryByText(/Exact|In the zone|Missed/)).toBeNull();
   });
 
   it('steps through the lesson and switches modes', async () => {
@@ -83,32 +122,60 @@ describe('Design Playground', () => {
     expect(screen.queryByRole('complementary')).toBeNull();
   });
 
-  it('moves the slider one step with the fine-tune buttons', async () => {
+  it('adjusts the selected handle from the fine control popout', async () => {
     window.location.hash = '#/playground/tracking';
     render(<App />);
-    const mode = getMode('tracking')!;
-    const slider = (await screen.findByRole('slider')) as HTMLInputElement;
-    const start = Number(slider.value);
-    fireEvent.click(screen.getByRole('button', { name: 'Increase by one step' }));
-    expect(Number(slider.value)).toBe(start + mode.slider.step);
-    fireEvent.click(screen.getByRole('button', { name: 'Decrease by one step' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Decrease by one step' }));
-    expect(Number(slider.value)).toBe(start - mode.slider.step);
+    const handle = await screen.findByRole('slider', { name: 'Tracking' });
+    expect(screen.queryByRole('group', { name: 'Fine control' })).toBeNull();
+    const toggle = screen.getByRole('button', { name: 'Fine control' });
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    const start = Number(handle.getAttribute('aria-valuenow'));
+
+    const fine = screen.getByRole('slider', { name: 'Fine control for Tracking' }) as HTMLInputElement;
+    // The fine slider rests in the middle, so its thumb shows nothing about the answer.
+    expect(Number(fine.value)).toBe(0);
+    fireEvent.change(fine, { target: { value: '10' } });
+    expect(Number(handle.getAttribute('aria-valuenow'))).toBe(start + 10);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Nudge lower' }));
+    expect(Number(handle.getAttribute('aria-valuenow'))).toBe(start + 9);
+    fireEvent.click(toggle);
+    expect(screen.queryByRole('group', { name: 'Fine control' })).toBeNull();
   });
 
-  it('runs the Paragraphs mode and shows the grade on the hub', async () => {
-    window.location.hash = '#/playground/paragraph';
+  it('shows results only after the last exercise, then saves them to the hub', async () => {
+    window.location.hash = '#/playground/tracking';
     render(<App />);
-    const mode = getMode('paragraph')!;
-    const [first] = exercisesFor('paragraph');
-    const slider = (await screen.findByRole('slider')) as HTMLInputElement;
-    const centre = Math.round((first.lo + first.hi) / 2 / mode.slider.step) * mode.slider.step;
-    fireEvent.change(slider, { target: { value: String(centre) } });
-    fireEvent.click(screen.getByRole('button', { name: mode.checkLabel }));
-    expect(screen.getByText('Exact answer.')).toBeTruthy();
+    await screen.findByRole('slider', { name: 'Tracking' });
+    const mode = getMode('tracking')!;
+    const list = exercisesFor('tracking');
+    const challenge = buildChallenge(list[0], mode, seedOnScreen(), 0);
+    // Set the first exercise to the middle of its target. Lock the rest in untouched.
+    setHandle('Tracking', Math.round((challenge.targets[0].lo + challenge.targets[0].hi) / 2));
+    for (let i = 0; i < list.length; i++) {
+      expect(screen.queryByText(/results, seed/)).toBeNull();
+      lockIn();
+    }
+    expect(await screen.findByText(/^Tracking results, seed #/)).toBeTruthy();
+    expect(screen.getByText(`1 of ${list.length} in the zone.`)).toBeTruthy();
+    expect(screen.getByText(`1 of ${list.length} exact.`)).toBeTruthy();
+    expect(screen.getAllByText(/Exact, 1 of 1 spots/)).toHaveLength(1);
+    expect(screen.getAllByText(/Missed, 0 of 1 spots/)).toHaveLength(list.length - 1);
 
-    fireEvent.click(screen.getByRole('button', { name: 'All modes' }));
-    expect(await screen.findByText(new RegExp(`1 of ${exercisesFor('paragraph').length} done, 1 exact`))).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Choose another mode' }));
+    expect(await screen.findByText(new RegExp(`${list.length} of ${list.length} done, 1 exact`))).toBeTruthy();
+  });
+
+  it('starts a new run from the summary', async () => {
+    window.location.hash = '#/playground/margins';
+    render(<App />);
+    await screen.findAllByRole('slider');
+    for (let i = 0; i < exercisesFor('margins').length; i++) lockIn();
+    fireEvent.click(await screen.findByRole('button', { name: 'New seed' }));
+    await screen.findAllByRole('slider');
+    expect(screen.getByText('1 of 5')).toBeTruthy();
+    expect(seedOnScreen()).toMatch(/^[0-9A-F]{4}$/);
   });
 
   it('runs the Margins quiz to the end and saves the best score', async () => {
@@ -134,23 +201,12 @@ describe('Design Playground', () => {
     expect(screen.getByText(/^Not this one\./)).toBeTruthy();
   });
 
-  it('shows the summary after the last exercise and opens the quiz', async () => {
-    const store = defaultStore();
-    const exercises = exercisesFor('margins');
-    store.modes.margins.exerciseIndex = exercises.length - 1;
-    window.localStorage.setItem(PLAYGROUND_STORAGE_KEY, JSON.stringify(store));
+  it('opens the quiz from the summary', async () => {
     window.location.hash = '#/playground/margins';
     render(<App />);
-    const mode = getMode('margins')!;
-    const last = exercises[exercises.length - 1];
-    const slider = (await screen.findByRole('slider')) as HTMLInputElement;
-    const centre = Math.round((last.lo + last.hi) / 2 / mode.slider.step) * mode.slider.step;
-    fireEvent.change(slider, { target: { value: String(centre) } });
-    fireEvent.click(screen.getByRole('button', { name: mode.checkLabel }));
-    fireEvent.click(screen.getByRole('button', { name: 'See summary' }));
-    expect(screen.getByText('Margins summary')).toBeTruthy();
-    expect(screen.getByText(`1 of ${exercises.length} exercises done.`)).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Take the Margins quiz' }));
+    await screen.findAllByRole('slider');
+    for (let i = 0; i < exercisesFor('margins').length; i++) lockIn();
+    fireEvent.click(await screen.findByRole('button', { name: 'Take the Margins quiz' }));
     expect(window.location.hash).toBe('#/playground/margins/quiz');
     expect(await screen.findByText(/Question 1 of/)).toBeTruthy();
   });
@@ -161,6 +217,6 @@ describe('Design Playground', () => {
     const pick = getMode(dailyPickMode(new Date().toISOString().slice(0, 10)))!;
     fireEvent.click(screen.getByRole('button', { name: `Today's pick: ${pick.name}` }));
     expect(window.location.hash).toBe(`#/playground/${pick.id}`);
-    expect(await screen.findByRole('slider')).toBeTruthy();
+    expect((await screen.findAllByRole('slider')).length).toBeGreaterThan(0);
   });
 });

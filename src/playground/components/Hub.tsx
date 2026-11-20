@@ -18,8 +18,7 @@ export const Hub: React.FC<HubProps> = ({ store, onOpen, today = new Date().toIS
       <div className="dp-hub-intro">
         <h1 className="dp-hub-title">Train your eye for space.</h1>
         <p className="dp-hub-lede">
-          Move a slider until the space looks right. Then check your answer. Each mode has a short lesson and a
-          quiz.
+          Drag the type until the space looks right, then lock in. Scores come at the end. Each mode has a short lesson and a quiz.
         </p>
       </div>
       <ul className="dp-hub-list">
@@ -28,7 +27,7 @@ export const Hub: React.FC<HubProps> = ({ store, onOpen, today = new Date().toIS
           const total = exercisesFor(m.id).length;
           const done = progress.completed.length;
           const exact = Object.values(progress.best).filter((g) => g === 'exact').length;
-          const started = done > 0 || progress.exerciseIndex > 0;
+          const started = done > 0;
           return (
             <li key={m.id} className="dp-hub-item">
               <span className="dp-hub-swatch" style={{ background: `var(--${m.accentToken})` }} aria-hidden="true" />
@@ -54,10 +53,10 @@ export const Hub: React.FC<HubProps> = ({ store, onOpen, today = new Date().toIS
                 <button
                   type="button"
                   className="dp-btn-primary"
-                  aria-label={`${started ? 'Continue' : 'Start'} ${m.name}`}
+                  aria-label={`${started ? 'Play again' : 'Start'} ${m.name}`}
                   onClick={() => onOpen(m.id, 'practice')}
                 >
-                  {started ? 'Continue' : 'Start'}
+                  {started ? 'Play again' : 'Start'}
                 </button>
               </div>
             </li>

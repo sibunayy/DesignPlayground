@@ -209,7 +209,6 @@
 }
 
 .dp-stage { grid-area: stage; }
-.dp-dock { grid-area: dock; }
 .dp-panel { grid-area: panel; }
 
 .dp-body--panel-right {
@@ -336,50 +335,10 @@
   text-align: center;
 }
 
-.dp-zone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  margin-bottom: var(--space-1);
-}
-
-.dp-zone-track {
-  position: relative;
-  width: 280px;
-  max-width: 70vw;
-  height: 12px;
-  border-radius: 6px;
-  background: var(--tile);
-}
-
-.dp-zone-range {
-  position: absolute;
-  top: 0;
-  height: 12px;
-  border-radius: 6px;
-  background: var(--accent-tint-strong);
-}
-
-.dp-zone-mark {
-  position: absolute;
-  top: -4px;
-  height: 20px;
-  width: 4px;
-  margin-left: -2px;
-  border-radius: 2px;
-  background: var(--ink);
-}
-
 .dp-caption {
   font-size: 16px;
   line-height: 1.4;
   color: var(--muted);
-}
-
-.dp-zone-text {
-  font-size: 16px;
-  color: var(--ink-2);
 }
 
 .dp-message {
@@ -414,27 +373,6 @@
   background: var(--accent);
 }
 
-.dp-gap-ruler {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 26px);
-  height: 2px;
-  background: var(--accent);
-}
-
-.dp-gap-label {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: calc(100% + 34px);
-  white-space: nowrap;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--ink);
-}
-
 .dp-overlay {
   display: grid;
   justify-items: center;
@@ -461,65 +399,10 @@
   pointer-events: none;
 }
 
-/* Dock */
-
-.dp-dock {
-  padding: var(--space-2) var(--space-2) 0;
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.dp-dock-field {
-  flex: 1;
-  min-width: 0;
-}
-
-.dp-slider-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.dp-slider-row input[type='range'] {
-  flex: 1;
-  min-width: 0;
-}
-
-.dp-slider-row .dp-chip-btn {
-  flex: 0 0 auto;
-  width: var(--tap-target);
-  min-height: var(--tap-target);
-  padding: 0;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  font-size: 22px;
-  font-weight: 800;
-}
-
-.dp-grade {
-  color: var(--accent);
-  font-weight: 800;
-}
-
 .dp-dock-label {
   font-size: 16px;
   font-weight: 600;
   color: var(--muted);
-}
-
-.dp-dock-prompt {
-  display: block;
-  margin-bottom: var(--space-3);
-  font-size: 18px;
-  line-height: 1.4;
-}
-
-.dp-dock-count {
-  margin-left: var(--space-2);
-  font-size: 16px;
-  color: var(--muted);
-  white-space: nowrap;
 }
 
 .dp-sr {
@@ -529,14 +412,6 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
-}
-
-.dp-body--panel-below .dp-dock {
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-2);
 }
 
 /* Lesson panel */
@@ -720,11 +595,6 @@
     min-height: min(560px, 55dvh);
   }
 
-  .dp-body--panel-below .dp-dock {
-    flex-direction: row;
-    align-items: center;
-  }
-
   .dp-panel,
   .dp-body--panel-below .dp-panel {
     display: grid;
@@ -756,13 +626,6 @@
   .dp {
     padding: var(--space-4) var(--space-4) var(--space-6);
     gap: var(--space-4);
-  }
-
-  .dp-dock,
-  .dp-body--panel-below .dp-dock {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0;
   }
 
   .dp-panel,
@@ -1201,8 +1064,8 @@
   position: relative;
   gap: 0;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) auto;
-  grid-template-areas: 'stage' 'dock';
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: 'stage';
 }
 
 .dp--work .dp-stage {
@@ -1214,24 +1077,6 @@
 
 .dp--work.dp--lesson .dp-stage {
   padding-right: calc(var(--lesson-w) + var(--space-6));
-}
-
-.dp--work .dp-dock {
-  padding: var(--space-3) var(--space-6) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--bar);
-  background: transparent;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.dp--work.dp--lesson .dp-dock {
-  margin-right: var(--lesson-w);
-}
-
-.dp--work .dp-dock .dp-btn-primary {
-  flex: 0 0 auto;
-  min-width: 190px;
 }
 
 /* The lesson is a drawer on the right edge. It does not take space from the stage. */
@@ -1281,26 +1126,6 @@
 @media (max-width: 899px) {
   .dp--work.dp--lesson .dp-stage {
     padding-right: var(--space-6);
-  }
-
-  .dp--work.dp--lesson .dp-dock {
-    margin-right: 0;
-  }
-
-  .dp--work .dp-dock {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
-  }
-
-  .dp--work .dp-dock .dp-btn-primary {
-    min-height: 48px;
-  }
-
-  .dp--work .dp-dock-prompt {
-    margin-bottom: var(--space-2);
-    font-size: 16px;
   }
 
   .dp--work .dp-stage {
@@ -1371,4 +1196,183 @@
   .dp--flat:not(.dp--work) .dp-header {
     margin: 0 calc(var(--space-4) * -1);
   }
+}
+
+
+/* Challenge stage: prompt, tools and lock-in share one top row. Nothing here says how close an answer is. */
+
+.dp-stage-top {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: 'prompt tools lock';
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dp-stage-prompt {
+  grid-area: prompt;
+  font-size: 18px;
+  line-height: 1.35;
+  color: var(--ink-2);
+  max-width: 34ch;
+}
+
+.dp-stage-top .dp-assists { grid-area: tools; justify-self: center; }
+
+.dp-count {
+  margin-left: var(--space-1);
+  font-size: 16px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Lock in is an icon button like the tools. Its icon takes the mode accent. */
+.dp-lock { grid-area: lock; justify-self: end; }
+
+.dp--flat .dp-lock .dp-toggle-chip { color: var(--accent); }
+
+@media (max-width: 720px) {
+  .dp-stage-top {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'prompt lock' 'tools tools';
+  }
+}
+
+/* Drag handles */
+
+[data-handle] {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+[data-handle][data-axis='x'] { cursor: ew-resize; }
+[data-handle][data-axis='y'] { cursor: ns-resize; }
+
+[data-handle][data-selected='true'] {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-radius: 10px;
+}
+
+.dp-kern-letter,
+.dp-word {
+  display: inline-block;
+  position: relative;
+  line-height: 1;
+}
+
+/* A small bar under a draggable thing. It is lit when that handle is the one in use. */
+.dp-grab { position: relative; }
+
+.dp-grab::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  width: 36px;
+  height: 6px;
+  margin-left: -18px;
+  border-radius: 3px;
+  background: var(--accent);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.dp-grab[data-selected='true']::after { opacity: 1; }
+
+.dp-grab--edge::after {
+  left: auto;
+  right: -3px;
+  top: 50%;
+  bottom: auto;
+  width: 6px;
+  height: 36px;
+  margin: -18px 0 0;
+}
+
+.dp-stage-canvas--tall { padding-bottom: 16px; }
+
+/* Margins: the two edges of the box are the handles. */
+.dp-margin-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.dp-edge {
+  position: absolute;
+  width: var(--tap-target);
+  height: var(--tap-target);
+}
+
+.dp-edge[data-selected='true'] { background: transparent; }
+
+.dp-edge--x { right: calc(var(--tap-target) / -2); top: 50%; margin-top: calc(var(--tap-target) / -2); }
+.dp-edge--y { bottom: calc(var(--tap-target) / -2); left: 50%; margin-left: calc(var(--tap-target) / -2); }
+
+.dp-edge::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 3px;
+  background: var(--accent);
+  opacity: 0.45;
+}
+
+.dp-edge[data-selected='true']::after { opacity: 1; }
+.dp-edge--x::after { width: 6px; height: 36px; margin: -18px 0 0 -3px; }
+.dp-edge--y::after { width: 36px; height: 6px; margin: -3px 0 0 -18px; }
+
+/* Fine control popout. It sits low in the stage, under the work. */
+.dp-fine {
+  position: absolute;
+  left: 50%;
+  bottom: 56px;
+  transform: translateX(-50%);
+  z-index: 5;
+  width: min(340px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  border: 1px solid var(--bar);
+}
+
+.dp-fine-label {
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+.dp-fine-steps {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.dp-fine-steps .dp-chip-btn {
+  flex: 1;
+  min-height: var(--tap-target);
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--button-2);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* A letter or word can be narrower than a finger. Widen its hit area to 44px without moving anything. */
+.dp-kern-letter.dp-grab::before,
+.dp-word.dp-grab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: max(100%, var(--tap-target));
+  transform: translateX(-50%);
 }

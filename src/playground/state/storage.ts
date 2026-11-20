@@ -18,7 +18,8 @@ function emptyProgress(modeId: ModeId): ModeProgress {
 export function defaultStore(): PlaygroundStore {
   const modes = {} as Record<ModeId, ModeProgress>;
   for (const id of MODE_IDS) modes[id] = emptyProgress(id);
-  return { version: 1, theme: null, panelOpen: true, assists: { ...DEFAULT_ASSISTS }, modes };
+  // The lesson starts closed so the work area has the whole screen. The Lesson button opens it.
+  return { version: 1, theme: null, panelOpen: false, assists: { ...DEFAULT_ASSISTS }, modes };
 }
 
 const isNonNegInt = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0;

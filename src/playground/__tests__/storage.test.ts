@@ -28,7 +28,7 @@ describe('sanitizeStore', () => {
       },
     });
     expect(s.theme).toBe('light');
-    expect(s.panelOpen).toBe(true);
+    expect(s.panelOpen).toBe(false);
     expect(s.assists.blur).toBe(true);
     expect(s.assists.grid).toBe(true);
     expect(s.modes.kerning).toMatchObject({ exerciseIndex: 2, lessonStep: 0, completed: ['type'] });

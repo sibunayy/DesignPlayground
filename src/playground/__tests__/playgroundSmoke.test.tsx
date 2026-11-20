@@ -48,6 +48,7 @@ describe('Design Playground', () => {
   it('steps through the lesson and switches modes', async () => {
     window.location.hash = '#/playground/tracking';
     render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Lesson' }));
     const panel = await screen.findByRole('complementary', { name: getMode('tracking')!.lessonName });
     const prev = within(panel).getByRole('button', { name: 'Previous' }) as HTMLButtonElement;
     expect(prev.disabled).toBe(true);
@@ -60,11 +61,14 @@ describe('Design Playground', () => {
     expect(await screen.findByRole('complementary', { name: getMode('leading')!.lessonName })).toBeTruthy();
   });
 
-  it('hides the lesson panel with the Lesson toggle', async () => {
+  it('opens and hides the lesson panel with the Lesson toggle', async () => {
     window.location.hash = '#/playground/measure';
     render(<App />);
     const toggle = await screen.findByRole('button', { name: 'Lesson' });
-    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    expect(screen.queryByRole('complementary')).toBeNull();
+    fireEvent.click(toggle);
+    expect(screen.getByRole('complementary')).toBeTruthy();
     fireEvent.click(toggle);
     expect(screen.queryByRole('complementary')).toBeNull();
   });

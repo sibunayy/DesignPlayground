@@ -98,6 +98,8 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     if (result) setResult('');
   };
 
+  const working = Boolean(mode && exercise && progress) && activity !== 'quiz' && !showSummary;
+
   let body: React.ReactNode;
   if (!mode || !exercise || !progress) {
     body = <Hub store={store} onOpen={(id, act) => onNavigate(id, act)} />;
@@ -166,7 +168,10 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
   }
 
   return (
-    <div className={`dp${mode ? ' dp--mode' : ''}`} data-theme={theme} data-mode={mode?.id}>
+    <div
+      className={`dp${mode ? ' dp--mode dp--flat' : ''}${working ? ' dp--work' : ''}${working && store.panelOpen ? ' dp--lesson' : ''}`}
+      data-theme={theme} data-mode={mode?.id}
+    >
       <Header
         modeId={mode ? mode.id : null}
         theme={theme}

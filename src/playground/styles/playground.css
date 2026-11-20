@@ -1095,3 +1095,273 @@
     padding: var(--space-4) 0;
   }
 }
+
+/* Boundless work area. The stage fills the screen between a slim header and the controls.
+   The header, stage and controls share one surface, so no card edges show. */
+
+.dp--work {
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  background: var(--stage);
+}
+
+.dp--flat .dp-header {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  min-height: 0;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+.dp--flat .dp-title-group {
+  flex: 0 0 auto;
+}
+
+.dp--flat .dp-header-actions {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  gap: var(--space-1);
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.dp--flat .dp-app-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.dp--flat .dp-header .dp-chip-btn {
+  width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-2);
+}
+
+/* Tabs are plain words. The current mode has an accent underline. */
+.dp--flat .dp-mode-tabs {
+  flex: 1 1 auto;
+  order: 0;
+  gap: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  max-width: none;
+}
+
+.dp--flat .dp-mode-tab {
+  padding: 0 14px;
+  border-radius: 0;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dp--flat .dp-mode-tab[aria-current='page'] {
+  background: transparent;
+  color: var(--ink);
+  font-weight: 800;
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.dp--flat .dp-toggle-chip {
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.dp--flat .dp-toggle[aria-pressed='true'] .dp-toggle-chip {
+  background: transparent;
+  color: var(--accent);
+}
+
+.dp--work .dp-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  gap: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: 'stage' 'dock';
+}
+
+.dp--work .dp-stage {
+  min-height: 0;
+  border-radius: 0;
+  background-color: transparent;
+  padding: var(--space-2) var(--space-6) var(--space-4);
+}
+
+.dp--work.dp--lesson .dp-stage {
+  padding-right: calc(var(--lesson-w) + var(--space-6));
+}
+
+.dp--work .dp-dock {
+  padding: var(--space-3) var(--space-6) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--bar);
+  background: transparent;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.dp--work.dp--lesson .dp-dock {
+  margin-right: var(--lesson-w);
+}
+
+.dp--work .dp-dock .dp-btn-primary {
+  flex: 0 0 auto;
+  min-width: 190px;
+}
+
+/* The lesson is a drawer on the right edge. It does not take space from the stage. */
+.dp--work {
+  --lesson-w: 320px;
+}
+
+.dp--work .dp-panel,
+.dp--work .dp-body--panel-below .dp-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--lesson-w);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-5);
+  border-radius: 0;
+  border-top: 0;
+  border-left: 1px solid var(--bar);
+  background: var(--stage);
+  overflow: auto;
+}
+
+.dp--work .dp-visual,
+.dp--work .dp-body--panel-below .dp-visual {
+  min-height: 120px;
+}
+
+.dp--work .dp-panel-head,
+.dp--work .dp-body--panel-below .dp-panel-head {
+  flex-wrap: wrap;
+}
+
+.dp--work .dp-panel-controls,
+.dp--work .dp-body--panel-below .dp-panel-controls {
+  flex-direction: row;
+  margin-top: auto;
+}
+
+.dp--work .dp-panel-controls .dp-btn-primary,
+.dp--work .dp-body--panel-below .dp-panel-controls .dp-btn-primary {
+  flex: 1;
+}
+
+@media (max-width: 899px) {
+  .dp--work.dp--lesson .dp-stage {
+    padding-right: var(--space-6);
+  }
+
+  .dp--work.dp--lesson .dp-dock {
+    margin-right: 0;
+  }
+
+  .dp--work .dp-dock {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .dp--work .dp-dock .dp-btn-primary {
+    min-height: 48px;
+  }
+
+  .dp--work .dp-dock-prompt {
+    margin-bottom: var(--space-2);
+    font-size: 16px;
+  }
+
+  .dp--work .dp-stage {
+    padding: var(--space-2) var(--space-4) var(--space-3);
+  }
+
+  /* On a narrow screen the lesson is a sheet from the bottom edge. */
+  .dp--work .dp-panel,
+  .dp--work .dp-body--panel-below .dp-panel {
+    top: auto;
+    left: 0;
+    width: auto;
+    max-height: 62%;
+    border-left: 0;
+    border-top: 1px solid var(--bar);
+  }
+
+  .dp--flat .dp-header .dp-chip-btn,
+  .dp--flat .dp-toggle {
+    width: 40px;
+  }
+
+  .dp--flat .dp-mode-tab {
+    padding: 0 10px;
+  }
+}
+
+/* Quiz and summary use the full height too. */
+.dp--mode:not(.dp--work) .dp-quiz {
+  flex: 1;
+  max-width: none;
+}
+
+.dp--mode:not(.dp--work) .dp-quiz-choices {
+  flex: 1;
+}
+
+.dp--mode:not(.dp--work) .dp-quiz-card {
+  min-height: 0;
+}
+
+/* Drawer content keeps its size and scrolls. The buttons stay at the foot. */
+.dp--work .dp-panel > * {
+  flex-shrink: 0;
+}
+
+.dp--work .dp-panel-controls {
+  position: sticky;
+  bottom: calc(var(--space-5) * -1);
+  padding: var(--space-3) 0 0;
+  background: var(--stage);
+}
+
+/* Quiz and summary share the slim header. */
+.dp--flat:not(.dp--work) {
+  padding: 0 var(--space-6) var(--space-6);
+  gap: var(--space-4);
+}
+
+.dp--flat:not(.dp--work) .dp-header {
+  margin: 0 calc(var(--space-6) * -1);
+}
+
+.dp--flat:not(.dp--work) .dp-quiz-card {
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 899px) {
+  .dp--flat:not(.dp--work) {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
+  .dp--flat:not(.dp--work) .dp-header {
+    margin: 0 calc(var(--space-4) * -1);
+  }
+}

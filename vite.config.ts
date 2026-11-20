@@ -10,12 +10,12 @@ const nodeMajor = Number(nodeVersion.split('.')[0]);
 const testExecArgv = nodeMajor >= 25 ? ['--no-experimental-webstorage'] : [];
 
 export default defineConfig({
-  base: '/sightline/',
+  base: '/DesignPlayground/',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      base: '/sightline/',
+      base: '/DesignPlayground/',
       includeAssets: ['icons/*.png', 'icons/*.svg', 'photos/*.webp'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
@@ -28,8 +28,8 @@ export default defineConfig({
         name: 'Design Playground',
         short_name: 'Playground',
         description: 'Drag-to-fix spacing challenges that train your eye for type',
-        start_url: '/sightline/',
-        scope: '/sightline/',
+        start_url: '/DesignPlayground/',
+        scope: '/DesignPlayground/',
         display: 'standalone',
         background_color: '#F4F5F7',
         theme_color: '#F4F5F7',

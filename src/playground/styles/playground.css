@@ -1,4 +1,4 @@
-/* Design Playground layout. Every rule is scoped under .dp so Sightline styles stay as they are. */
+/* Design Playground layout. Every rule is scoped under .dp. */
 
 .dp {
   min-height: 100dvh;

@@ -154,6 +154,8 @@ export interface PlaygroundStore {
   version: 1;
   theme: ThemeId | null;
   panelOpen: boolean;
+  /** The lesson strip above the work. Open by default. */
+  tipsOpen: boolean;
   assists: Assists;
   modes: Record<ModeId, ModeProgress>;
   games: Record<GameId, GameProgress>;

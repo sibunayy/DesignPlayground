@@ -22,7 +22,7 @@ export function defaultStore(): PlaygroundStore {
   // The lesson starts closed so the work area has the whole screen. The Lesson button opens it.
   const games = {} as Record<GameId, GameProgress>;
   for (const id of GAME_IDS) games[id] = { best: 0, played: 0 };
-  return { version: 1, theme: null, panelOpen: false, assists: { ...DEFAULT_ASSISTS }, modes, games };
+  return { version: 1, theme: null, panelOpen: false, tipsOpen: true, assists: { ...DEFAULT_ASSISTS }, modes, games };
 }
 
 const isNonNegInt = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0;
@@ -35,6 +35,7 @@ export function sanitizeStore(raw: unknown): PlaygroundStore {
   if (r.version !== 1) return base;
   if (r.theme === 'dark' || r.theme === 'light') base.theme = r.theme;
   if (typeof r.panelOpen === 'boolean') base.panelOpen = r.panelOpen;
+  if (typeof r.tipsOpen === 'boolean') base.tipsOpen = r.tipsOpen;
   if (r.assists && typeof r.assists === 'object') {
     for (const key of Object.keys(DEFAULT_ASSISTS) as Array<keyof Assists>) {
       const v = (r.assists as Partial<Assists>)[key];

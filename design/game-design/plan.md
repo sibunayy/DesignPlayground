@@ -217,3 +217,49 @@ Route `#/layout/drift`. Hub section "Layout and grid".
 3. Pass the contrast: two-part score (pass gate and distance from brand colour).
 4. Engine work: a step handle, a two-part score and a shared SVG artboard.
 
+
+## 9. Context gaps, drag sensitivity and lesson tips
+
+Date: 25 November 2026. Trigger: the learner could not tell how to reach an ideal answer, and fine moves made the word sway.
+
+### 9.1 Assessment (5-component filter)
+
+| Component | Finding | Severity | Fix | Status |
+|---|---|---|---|---|
+| Response | The kerning word was centred. A changed gap moved every letter by half the change, so the whole word swayed. A 2:1 drag ratio kept the dragged letter under the pointer, but the word still moved. | High | The word keeps its left edge still while the learner works (anchor). The ratio is 1:1. | **Done** |
+| Response | One pixel of drag was 5 to 9 units at display sizes (1000 / font size). The centre third of a target is about 7 units wide, so it was 1 to 2 px wide. | High | Speed-based drag gain: slow drag has gain 0.3, fast drag has gain 1. Shift cuts it to 0.25. | **Done** |
+| Clarity | The learner saw only one big word. Nothing showed how the word reads at the size where it is used. Designers check at reading size. | High | Small size check: the learner's own answer at 26 px and 14 px under the word. | **Done** |
+| Clarity | The learner saw how the score worked only by guessing. The review gave numbers, not a picture of the target. | High | "How this score works" in the review: the rule in words and one scale row for each counted spot. | **Done** |
+| Motivation | The lesson was a closed side panel. Most learners never opened it. | Medium | A short tip above every work area. It can be hidden and the choice is saved. | **Done** |
+| Clarity | Other modes have no live context beside the stage (for example, a line of body text beside a leading drill). | Medium | Next: a live reference strip for each mode (see 9.4). | Next |
+
+### 9.2 Drag sensitivity
+
+State machine, one handle: *Idle* → *Dragging* on pointer down → *Idle* on pointer up. A locked answer ignores pointer and keys.
+
+Gain: `gain = 0.3 + 0.7 × smoothstep(speed, 0.08, 0.8)`, where speed is a smoothed pointer speed in px per ms. Value change = pointer move × ratio × gain. Shift multiplies by 0.25. The value is rounded to 0.5 only for display, so slow moves do not stall on a rounding step.
+
+| Value | Starting value | Test | Pass | If it fails |
+|---|---|---|---|---|
+| Slow gain | 0.3 | 5 players set one pair to within the centre third at a 200 px word | Median 4 s or less, median 2 corrections or fewer | Too slow: raise to 0.4. Still jumpy: cut to 0.2. |
+| Speed range | 0.08 to 0.8 px per ms | Same group: cross the full range in one move | One drag moves a gap across the range in 1 s | Raise the fast speed to 1.2 |
+| Shift gain | 0.25 | Same group, touch pad | Used by fewer than half of the players (the default is good enough) | If most use it, cut slow gain |
+
+Measured in the build: a 20 px slow drag on a 288 px word moved the dragged gap by 21 units and moved no letter to its left. The letters to its right moved by 6 px.
+
+ASSUMPTION: players drag slowly when they want to be exact.
+IMPACT: the gain depends on it.
+IF WRONG: a slow, deliberate drag feels sluggish, and a fast flick feels too coarse.
+VALIDATE: watch 5 players; the fine control and the arrow keys stay as a fallback.
+
+### 9.3 Lesson tips
+
+A strip above every work area, in kerning, the six other modes, the real-page work area and Spot the drift. It has a 112 × 66 vector (shapes only, no fonts, token colours), a title and one or two sentences. A tip teaches a way of looking and never gives a number. A test checks this: no digit in a tip body, a title under 8 words, a body under 27 words. The tip changes with the drill, so a run shows several. The strip hides during the review, so the review has the room.
+
+Playtest: new player, 60 s with the tip open and the tip hidden. Pass: with the tip open, the median first score is at least 5 points higher on runs 1 and 2.
+
+### 9.4 Next
+
+1. A live reference beside each mode's stage: body text next to the leading drill, a card in a page for margins, a paragraph for tracking.
+2. A "last time" ghost: the learner's previous answer for the same pair type, to show growth.
+3. Tips tied to the learner's weak pair type, after the mastery map (section 7, item 5).

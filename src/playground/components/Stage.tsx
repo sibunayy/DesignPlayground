@@ -5,7 +5,9 @@ import { AssistId, Assists, Mode } from '../types';
 import { HandleReview } from '../logic/scoring';
 import { FinePopout } from './FinePopout';
 import { ASSIST_LABELS, DpIcon } from './Icons';
+import type { Tip } from '../content/tips';
 import { KernWord } from './KernWord';
+import { TipStrip } from './TipStrip';
 import { useHandles } from './useHandles';
 
 interface StageProps {
@@ -30,6 +32,10 @@ interface StageProps {
   /** Review, kerning: show only the ideal word. */
   ghostOnly?: boolean;
   marks?: HandleReview[];
+  /** The lesson shown above the work, and whether it is open. */
+  tip?: Tip;
+  tipsOpen?: boolean;
+  onToggleTips?: () => void;
   children?: React.ReactNode;
 }
 
@@ -64,6 +70,9 @@ export const Stage: React.FC<StageProps> = ({
   ghost,
   ghostOnly,
   marks,
+  tip,
+  tipsOpen = true,
+  onToggleTips,
   children,
 }) => {
   const { exercise, parts } = challenge;
@@ -104,7 +113,8 @@ export const Stage: React.FC<StageProps> = ({
   switch (mode.id) {
     case 'kerning': {
       // Every letter after the first is a handle. Dragging it opens or closes the gap before it.
-      // The word is centred, so a letter moves by half of any change in its gap.
+      // The word is anchored at its left edge, so a letter moves by the full change in its gap.
+      // One pixel of drag is one pixel of movement: the letter stays under the pointer.
       canvas = (
         <KernWord
           letters={parts}
@@ -113,7 +123,8 @@ export const Stage: React.FC<StageProps> = ({
           fontSize={fontSize}
           font={challenge.font}
           bind={bind as never}
-          perPx={2000 / fontSize}
+          perPx={1000 / fontSize}
+          anchor={`${challenge.seed}:${parts.join('')}:${challenge.font?.id ?? ''}:${challenge.start.join(',')}`}
           labels={challenge.labels}
           step={step}
           guides={assists.guides}
@@ -354,6 +365,7 @@ export const Stage: React.FC<StageProps> = ({
       className={`dp-stage${showGrid ? ' dp-stage--grid' : ''}${locked ? ' dp-stage--locked' : ''}`}
       style={{ backgroundSize: `${cell}px ${cell}px` }}
     >
+      {tip && !locked && onToggleTips && <TipStrip tip={tip} open={tipsOpen} onToggle={onToggleTips} />}
       <div className="dp-stage-top">
         <p className="dp-stage-prompt">
           {challenge.prompt} <span className="dp-count">{counter}</span>
@@ -412,6 +424,15 @@ export const Stage: React.FC<StageProps> = ({
       >
         {canvas}
       </div>
+
+      {mode.id === 'kerning' && !locked && (
+        <div className="dp-preview" role="group" aria-label="Small size check" aria-hidden="true">
+          <span className="dp-preview-label">Small size</span>
+          {[26, 14].map((size) => (
+            <KernWord key={size} letters={parts} gapHandle={parts.slice(1).map((_, i) => i)} values={values} fontSize={size} font={challenge.font} />
+          ))}
+        </div>
+      )}
 
       {children ?? (
         <div className="dp-stage-foot">

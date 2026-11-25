@@ -18,6 +18,7 @@ import { SceneWork } from './components/Scene';
 import { Stage } from './components/Stage';
 import { Summary } from './components/Summary';
 import { exercisesFor } from './content/exercises';
+import { tipFor } from './content/tips';
 import { lessonsFor } from './content/lessons';
 import { getMode } from './content/modes';
 import { betterGrade, buildChallenge, ExerciseResult, kernFontFor } from './logic/challenge';
@@ -99,6 +100,7 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
 
   const toggleTheme = () => update((s) => ({ ...s, theme: theme === 'dark' ? 'light' : 'dark' }));
   const togglePanel = () => update((s) => ({ ...s, panelOpen: !s.panelOpen }));
+  const toggleTips = () => update((s) => ({ ...s, tipsOpen: !s.tipsOpen }));
   const toggleAssist = (id: AssistId) => update((s) => ({ ...s, assists: { ...s.assists, [id]: !s.assists[id] } }));
 
   const setModeField = (patch: Partial<PlaygroundStore['modes'][ModeId]>) => {
@@ -168,6 +170,8 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     body = (
       <DriftWork
         best={g.best}
+        tipsOpen={store.tipsOpen}
+        onToggleTips={toggleTips}
         onScored={(score) =>
           update((s) => ({ ...s, games: { ...s.games, drift: { best: Math.max(s.games.drift.best, score), played: s.games.drift.played + 1 } } }))
         }
@@ -179,6 +183,8 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     body = (
       <SceneWork
         best={progress.sceneBest ?? 0}
+        tipsOpen={store.tipsOpen}
+        onToggleTips={toggleTips}
         onScored={(score) => setModeField({ sceneBest: Math.max(progress.sceneBest ?? 0, score) })}
       />
     );
@@ -236,6 +242,9 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
           onToggleAssist={toggleAssist}
           onToggleFine={() => setFineOpen((o) => !o)}
           onLockIn={onLockIn}
+          tip={tipFor(mode.id, exIndex)}
+          tipsOpen={store.tipsOpen}
+          onToggleTips={toggleTips}
           locked={Boolean(review)}
           ghost={review && isKern && view !== 'yours' ? ideal : undefined}
           ghostOnly={Boolean(review && isKern && view === 'ideal')}
@@ -250,6 +259,7 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
               onView={setView}
               onNext={onNext}
               onRetry={onRetry}
+              labels={isKern ? challenge.parts.slice(1).map((ch, i) => `${challenge.parts[i]}${ch}`) : challenge.labels}
               nextLabel={isLast ? 'See results' : 'Next'}
               practice={retrying}
             />

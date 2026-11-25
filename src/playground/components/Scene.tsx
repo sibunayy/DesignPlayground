@@ -5,7 +5,9 @@ import { useFontReady } from '../state/useFontReady';
 import { kernNotes } from '../logic/notes';
 import { reviewAnswer } from '../logic/scoring';
 import { useElementWidth } from '../state/useElementWidth';
+import { tipFor } from '../content/tips';
 import { FinePopout } from './FinePopout';
+import { TipStrip } from './TipStrip';
 import { DpIcon } from './Icons';
 import { KernWord } from './KernWord';
 import { ReviewPanel, ReviewView } from './ReviewPanel';
@@ -15,6 +17,8 @@ interface SceneProps {
   /** Best scene score so far. */
   best: number;
   onScored: (score: number) => void;
+  tipsOpen: boolean;
+  onToggleTips: () => void;
   /** Fixed seed for tests and shared links. A new one for each scene when not given. */
   initialSeed?: string;
 }
@@ -105,7 +109,7 @@ function Layout({ s, headline }: { s: SceneData; headline: React.ReactNode }) {
  * The real-world work area. A headline sits in a full layout with its kerning off.
  * Fix the broken pairs, leave the good ones, lock in, then read the overlay and the notes.
  */
-export const SceneWork: React.FC<SceneProps> = ({ best, onScored, initialSeed }) => {
+export const SceneWork: React.FC<SceneProps> = ({ best, onScored, initialSeed, tipsOpen, onToggleTips }) => {
   const [seed, setSeed] = useState(() => initialSeed ?? randomSeedCode());
   const [genre, setGenre] = useState<Genre | undefined>(undefined);
   const ready = useFontReady(sceneFont(seed, genre));
@@ -123,7 +127,7 @@ export const SceneWork: React.FC<SceneProps> = ({ best, onScored, initialSeed })
   const width = useElementWidth(ref, 800);
   const [zoom, setZoom] = useState(false);
   // While the review shows, the artwork shrinks so the score and notes fit on the same screen.
-  const room = typeof window !== 'undefined' ? window.innerHeight - 250 - (locked ? 300 : 0) : 600;
+  const room = typeof window !== 'undefined' ? window.innerHeight - 250 - (locked ? 300 : tipsOpen ? 96 : 48) : 600;
   const fit = Math.min(1, (width - 8) / scene.w, Math.max(260, room) / scene.h);
   // Zoom shows the artwork at its full size, the way a designer zooms in to kern.
   const scale = zoom ? Math.max(1, fit * 2) : fit;
@@ -161,7 +165,7 @@ export const SceneWork: React.FC<SceneProps> = ({ best, onScored, initialSeed })
     setPractice(true);
   };
 
-  const perPx = (scene.align === 'center' ? 2000 : 1000) / (scene.size * scale);
+  const perPx = 1000 / (scene.size * scale);
   const headline = (
     <KernWord
       letters={scene.letters}
@@ -171,6 +175,7 @@ export const SceneWork: React.FC<SceneProps> = ({ best, onScored, initialSeed })
       font={scene.font}
       bind={bind as never}
       perPx={perPx}
+      anchor={`${seed}:${genre ?? ''}:${scene.start.join(',')}`}
       labels={scene.labels}
       step={1}
       ghost={locked && view === 'overlay' ? ideal : undefined}
@@ -185,6 +190,7 @@ export const SceneWork: React.FC<SceneProps> = ({ best, onScored, initialSeed })
   return (
     <main className={`dp-scene${locked ? ' dp-scene--locked' : ''}`}>
       <h1 className="dp-sr">Kerning on the page</h1>
+      {!locked && <TipStrip tip={tipFor('scene', session.count)} open={tipsOpen} onToggle={onToggleTips} />}
       <div className="dp-scene-top">
         <div className="dp-scene-brief">
           <p className="dp-scene-job">
@@ -255,6 +261,7 @@ export const SceneWork: React.FC<SceneProps> = ({ best, onScored, initialSeed })
           onView={setView}
           onNext={next}
           onRetry={retry}
+          labels={scene.pairs.map(([l, r]) => `${l}${r}`)}
           nextLabel="Next job"
           practice={practice}
           extra={session.count ? `Session average ${avg} over ${session.count} ${session.count === 1 ? 'job' : 'jobs'}. Best job ${best}.` : undefined}

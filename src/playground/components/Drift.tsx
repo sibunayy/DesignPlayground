@@ -5,13 +5,17 @@ import { Palette } from '../content/scenes';
 import { driftNotes } from '../logic/notes';
 import { HandleReview, reviewAnswer } from '../logic/scoring';
 import { useElementWidth } from '../state/useElementWidth';
+import { tipFor } from '../content/tips';
 import { DpIcon } from './Icons';
+import { TipStrip } from './TipStrip';
 import { ReviewPanel, ReviewView } from './ReviewPanel';
 
 interface DriftProps {
   /** Best score so far. */
   best: number;
   onScored: (score: number) => void;
+  tipsOpen: boolean;
+  onToggleTips: () => void;
   /** Fixed seed for tests and shared links. A new one for each page when not given. */
   initialSeed?: string;
 }
@@ -108,7 +112,7 @@ const worstGrade = (hs: HandleReview[]) =>
  * Spot the drift. A page sits on a hidden grid and a few blocks have moved off it by a few pixels.
  * Find them, put them back, leave the rest. Lock in to see the grid, the ideal places and the notes.
  */
-export const DriftWork: React.FC<DriftProps> = ({ best, onScored, initialSeed }) => {
+export const DriftWork: React.FC<DriftProps> = ({ best, onScored, initialSeed, tipsOpen, onToggleTips }) => {
   const [seed, setSeed] = useState(() => initialSeed ?? randomSeedCode());
   const [job, setJob] = useState<LayoutJob | undefined>(undefined);
   const layout = useMemo(() => buildDrift(seed, job), [seed, job]);
@@ -123,7 +127,7 @@ export const DriftWork: React.FC<DriftProps> = ({ best, onScored, initialSeed })
 
   const ref = useRef<HTMLDivElement>(null);
   const width = useElementWidth(ref, 800);
-  const room = typeof window !== 'undefined' ? window.innerHeight - 250 - (locked ? 300 : 0) : 600;
+  const room = typeof window !== 'undefined' ? window.innerHeight - 250 - (locked ? 300 : tipsOpen ? 96 : 48) : 600;
   const fit = Math.min(1, (width - 8) / layout.w, Math.max(260, room) / layout.h);
   const scale = zoom ? Math.max(1, fit * 2) : fit;
 
@@ -234,6 +238,7 @@ export const DriftWork: React.FC<DriftProps> = ({ best, onScored, initialSeed })
   return (
     <main className={`dp-scene dp-drift${locked ? ' dp-scene--locked' : ''}`}>
       <h1 className="dp-sr">Spot the drift</h1>
+      {!locked && <TipStrip tip={tipFor('drift', session.count)} open={tipsOpen} onToggle={onToggleTips} />}
       <div className="dp-scene-top">
         <div className="dp-scene-brief">
           <p className="dp-scene-job">
@@ -321,6 +326,7 @@ export const DriftWork: React.FC<DriftProps> = ({ best, onScored, initialSeed })
           onView={setView}
           onNext={next}
           onRetry={retry}
+          labels={layout.labels}
           nextLabel="Next page"
           practice={practice}
           itemWord="blocks"

@@ -17,6 +17,8 @@ interface ReviewPanelProps {
   practice?: boolean;
   /** Extra line under the score, such as a running total. */
   extra?: string;
+  /** What the learner can break, for the penalty line: "pairs" or "blocks". */
+  itemWord?: string;
 }
 
 const VIEW_TEXT: Record<ReviewView, string> = { yours: 'Yours', overlay: 'Overlay', ideal: 'Ideal' };
@@ -34,6 +36,7 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
   nextLabel,
   practice,
   extra,
+  itemWord = 'pairs',
 }) => {
   const next = useRef<HTMLButtonElement>(null);
   useEffect(() => next.current?.focus({ preventScroll: true }), [review]);
@@ -47,7 +50,7 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
         </p>
         <p className="dp-review-meta">
           {GRADE_TEXT[review.grade]}. {review.right} of {review.total} right
-          {review.penalty > 0 ? `. ${review.penalty} points off for breaking good pairs` : ''}.
+          {review.penalty > 0 ? `. ${review.penalty} points off for breaking good ${itemWord}` : ''}.
           {extra ? ` ${extra}` : ''}
         </p>
         <div role="group" aria-label="Compare" className="dp-seg">

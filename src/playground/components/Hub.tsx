@@ -1,17 +1,18 @@
 import React from 'react';
 import { exercisesFor } from '../content/exercises';
 import { dailyPickMode, MODES } from '../content/modes';
-import { Activity, ModeId, PlaygroundStore } from '../types';
+import { Activity, GameId, ModeId, PlaygroundStore } from '../types';
 
 interface HubProps {
   store: PlaygroundStore;
   onOpen: (id: ModeId, activity?: Activity) => void;
+  onOpenGame?: (id: GameId) => void;
   /** Date for the daily pick, as YYYY-MM-DD. Today when not given. */
   today?: string;
 }
 
 /** List of modes with progress. Each row opens practice or the quiz of one mode. */
-export const Hub: React.FC<HubProps> = ({ store, onOpen, today = new Date().toISOString().slice(0, 10) }) => {
+export const Hub: React.FC<HubProps> = ({ store, onOpen, onOpenGame, today = new Date().toISOString().slice(0, 10) }) => {
   const pick = dailyPickMode(today);
   return (
     <main className="dp-hub">
@@ -75,6 +76,28 @@ export const Hub: React.FC<HubProps> = ({ store, onOpen, today = new Date().toIS
           );
         })}
       </ul>
+      {onOpenGame && (
+        <>
+          <h2 className="dp-hub-section">Layout and grid</h2>
+          <ul className="dp-hub-list">
+            <li className="dp-hub-item">
+              <span className="dp-hub-swatch dp-hub-swatch--grid" aria-hidden="true" />
+              <div>
+                <h3 className="dp-hub-name">Spot the drift</h3>
+                <p className="dp-hub-meta">
+                  Find the blocks that moved off the grid and put them back
+                  {store.games.drift.played > 0 ? `. ${store.games.drift.played} played. Best page: ${store.games.drift.best}/100` : ''}.
+                </p>
+              </div>
+              <div className="dp-hub-actions">
+                <button type="button" className="dp-btn-primary" aria-label={`${store.games.drift.played ? 'Play again' : 'Start'} Spot the drift`} onClick={() => onOpenGame('drift')}>
+                  {store.games.drift.played ? 'Play again' : 'Start'}
+                </button>
+              </div>
+            </li>
+          </ul>
+        </>
+      )}
     </main>
   );
 };

@@ -13,6 +13,7 @@ import { Hub } from './components/Hub';
 import { LessonPanel } from './components/LessonPanel';
 import { Quiz } from './components/Quiz';
 import { ReviewPanel, ReviewView } from './components/ReviewPanel';
+import { DriftWork } from './components/Drift';
 import { SceneWork } from './components/Scene';
 import { Stage } from './components/Stage';
 import { Summary } from './components/Summary';
@@ -25,7 +26,7 @@ import { centreOf, reviewAnswer } from './logic/scoring';
 import { useFontReady } from './state/useFontReady';
 import { buildQuiz } from './logic/quiz';
 import { loadPlaygroundStore, savePlaygroundStore } from './state/storage';
-import { Activity, AssistId, ModeId, PlaygroundStore } from './types';
+import { Activity, AssistId, GameId, ModeId, PlaygroundStore } from './types';
 
 interface PlaygroundAppProps {
   /** Mode to open, or null for the hub. */
@@ -33,9 +34,12 @@ interface PlaygroundAppProps {
   /** The drag challenge or the A/B quiz. The challenge when not given. */
   activity?: Activity;
   onNavigate: (modeId: ModeId | null, activity?: Activity) => void;
+  /** A game outside the type modes. Shown in place of the hub. */
+  game?: GameId | null;
+  onOpenGame?: (game: GameId) => void;
 }
 
-export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity = 'practice', onNavigate }) => {
+export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity = 'practice', onNavigate, game = null, onOpenGame }) => {
   const [store, setStore] = useState<PlaygroundStore>(() => loadPlaygroundStore());
   const mode = modeId ? getMode(modeId) : undefined;
   const exercises = modeId ? exercisesFor(modeId) : [];
@@ -159,8 +163,18 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
   const working = Boolean(mode && exercise && progress && challenge) && activity === 'practice' && !showSummary;
 
   let body: React.ReactNode;
-  if (!mode || !exercise || !progress || !challenge) {
-    body = <Hub store={store} onOpen={(id, act) => onNavigate(id, act)} />;
+  if (!mode && game === 'drift') {
+    const g = store.games.drift;
+    body = (
+      <DriftWork
+        best={g.best}
+        onScored={(score) =>
+          update((s) => ({ ...s, games: { ...s.games, drift: { best: Math.max(s.games.drift.best, score), played: s.games.drift.played + 1 } } }))
+        }
+      />
+    );
+  } else if (!mode || !exercise || !progress || !challenge) {
+    body = <Hub store={store} onOpen={(id, act) => onNavigate(id, act)} onOpenGame={onOpenGame} />;
   } else if (activity === 'scene') {
     body = (
       <SceneWork
@@ -261,6 +275,7 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     >
       <Header
         modeId={mode ? mode.id : null}
+        inGame={!mode && Boolean(game)}
         theme={theme}
         panelOpen={store.panelOpen}
         onBack={() => onNavigate(null)}

@@ -4,6 +4,7 @@ import { App } from '../../App';
 import { exercisesFor } from '../content/exercises';
 import { dailyPickMode, getMode, MODES } from '../content/modes';
 import { buildChallenge } from '../logic/challenge';
+import { buildDrift } from '../content/layouts';
 import { buildQuiz } from '../logic/quiz';
 
 beforeEach(() => window.localStorage.clear());
@@ -285,5 +286,30 @@ describe('Design Playground', () => {
     expect(screen.getByRole('button', { name: 'Next job' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Next job' }));
     expect(screen.getByRole('button', { name: 'Lock in answer' })).toBeTruthy();
+  });
+
+  it('opens Spot the drift from the hub, scores a fixed page 100 and a page left alone 0', async () => {
+    window.location.hash = '';
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Spot the drift' }));
+    expect(window.location.hash).toBe('#/layout/drift');
+    const seed = /#(\w{4})/.exec(screen.getByText(/columns · #/).textContent ?? '')![1];
+    const layout = buildDrift(seed);
+    // Put every drifted block back with the arrow keys.
+    layout.blocks.forEach((b, i) => {
+      const el = screen.getByRole('button', { name: new RegExp(`^${b.label}\\. Drag it`) });
+      const [x, y] = [layout.start[i * 2], layout.start[i * 2 + 1]];
+      for (let k = 0; k < Math.abs(x); k++) fireEvent.keyDown(el, { key: x > 0 ? 'ArrowLeft' : 'ArrowRight' });
+      for (let k = 0; k < Math.abs(y); k++) fireEvent.keyDown(el, { key: y > 0 ? 'ArrowUp' : 'ArrowDown' });
+    });
+    lockIn();
+    expect(screen.getByText('100')).toBeTruthy();
+    expect(screen.getByText(/back on the grid/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    lockIn();
+    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.getAllByText(/not moved/).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: 'All modes' }));
+    expect(await screen.findByText(/2 played\. Best page: 100\/100/)).toBeTruthy();
   });
 });

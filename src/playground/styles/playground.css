@@ -1703,3 +1703,139 @@
 .dp-art-board > * { position: absolute; }
 .dp-art-awning { left: 60px; right: 60px; top: 30px; height: 90px; display: flex; border-radius: 0 0 24px 24px; overflow: hidden; }
 .dp-art-awning span { flex: 1; }
+
+/* Layout games */
+
+.dp-hub-section {
+  margin: var(--space-5) 0 calc(var(--space-3) * -1);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dp-hub-swatch--grid {
+  background: repeating-linear-gradient(180deg, var(--ink) 0 6px, transparent 6px 10px);
+}
+
+/* Spot the drift: a page of blocks on a hidden grid. */
+.dp-drift-page {
+  position: relative;
+  transform-origin: 0 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.dp-drift-block {
+  position: absolute;
+  display: flex;
+  cursor: grab;
+  outline: none;
+  touch-action: none;
+}
+
+.dp-drift-block:active { cursor: grabbing; }
+
+/* Selection: a ring outside the block, sized for the scale, so it never hides the block's own edge. */
+.dp-drift-block--sel,
+.dp-drift-block:focus-visible {
+  box-shadow: 0 0 0 calc(3px * var(--dp-inv, 1)) var(--accent);
+}
+
+.dp-scene--locked .dp-drift-block { cursor: default; }
+
+.dp-blk-fill {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.dp-blk-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dp-blk-line {
+  display: block;
+  flex-shrink: 0;
+}
+
+.dp-blk-sun {
+  position: absolute;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0.85;
+}
+
+.dp-blk-hill {
+  position: absolute;
+  bottom: -40%;
+  width: 140%;
+  height: 80%;
+  border-radius: 50%;
+}
+
+.dp-blk-mark {
+  width: 40px;
+  height: 28px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  border-radius: 4px 4px 4px 20px;
+}
+
+.dp-blk-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8%;
+  padding: 0 6%;
+}
+
+.dp-blk-chart > span { flex: 1; border-radius: 3px 3px 0 0; }
+
+.dp-blk-stat,
+.dp-blk-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 20px;
+}
+
+.dp-blk-stat > span,
+.dp-blk-card > span { display: block; flex-shrink: 0; border-radius: 3px; }
+
+.dp-drift-grid { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+
+.dp-drift-col {
+  position: absolute;
+  background: rgb(255 59 92 / 0.07);
+  box-shadow: inset 1px 0 0 rgb(255 59 92 / 0.6), inset -1px 0 0 rgb(255 59 92 / 0.6);
+}
+
+.dp-drift-row {
+  position: absolute;
+  height: 0;
+  border-top: 1px dashed rgb(255 59 92 / 0.55);
+}
+
+/* The ideal place of a block that drifted or that the learner moved. */
+.dp-drift-ghost {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  outline: calc(2px * var(--dp-inv, 1)) dashed #FF3B5C;
+  outline-offset: 0;
+}
+
+.dp-drift-mark {
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  width: calc(28px * var(--dp-inv, 1));
+  height: calc(28px * var(--dp-inv, 1));
+  font-size: calc(14px * var(--dp-inv, 1));
+  box-shadow: 0 0 0 calc(2px * var(--dp-inv, 1)) #FFFFFF;
+}

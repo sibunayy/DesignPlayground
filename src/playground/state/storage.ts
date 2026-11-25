@@ -1,5 +1,7 @@
 import { MODE_IDS } from '../content/modes';
-import { Assists, ModeId, ModeProgress, PlaygroundStore } from '../types';
+import { Assists, GameId, GameProgress, ModeId, ModeProgress, PlaygroundStore } from '../types';
+
+export const GAME_IDS: GameId[] = ['drift'];
 
 export const PLAYGROUND_STORAGE_KEY = 'design-playground:v1';
 
@@ -18,7 +20,9 @@ export function defaultStore(): PlaygroundStore {
   const modes = {} as Record<ModeId, ModeProgress>;
   for (const id of MODE_IDS) modes[id] = emptyProgress(id);
   // The lesson starts closed so the work area has the whole screen. The Lesson button opens it.
-  return { version: 1, theme: null, panelOpen: false, assists: { ...DEFAULT_ASSISTS }, modes };
+  const games = {} as Record<GameId, GameProgress>;
+  for (const id of GAME_IDS) games[id] = { best: 0, played: 0 };
+  return { version: 1, theme: null, panelOpen: false, assists: { ...DEFAULT_ASSISTS }, modes, games };
 }
 
 const isNonNegInt = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0;
@@ -53,6 +57,14 @@ export function sanitizeStore(raw: unknown): PlaygroundStore {
           if (grade === 'exact' || grade === 'zone' || grade === 'miss') base.modes[id].best[key] = grade;
         }
       }
+    }
+  }
+  if (r.games && typeof r.games === 'object') {
+    for (const id of GAME_IDS) {
+      const g = (r.games as Partial<Record<GameId, Partial<GameProgress>>>)[id];
+      if (!g) continue;
+      if (isNonNegInt(g.best) && g.best <= 100) base.games[id].best = g.best;
+      if (isNonNegInt(g.played)) base.games[id].played = g.played;
     }
   }
   return base;

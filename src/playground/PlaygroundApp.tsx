@@ -1,4 +1,9 @@
 import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/space-grotesk';
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/playfair-display';
+import '@fontsource/archivo-black';
 import './styles/tokens.css';
 import './styles/playground.css';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -7,12 +12,17 @@ import { Header } from './components/Header';
 import { Hub } from './components/Hub';
 import { LessonPanel } from './components/LessonPanel';
 import { Quiz } from './components/Quiz';
+import { ReviewPanel, ReviewView } from './components/ReviewPanel';
+import { SceneWork } from './components/Scene';
 import { Stage } from './components/Stage';
 import { Summary } from './components/Summary';
 import { exercisesFor } from './content/exercises';
 import { lessonsFor } from './content/lessons';
 import { getMode } from './content/modes';
-import { betterGrade, buildChallenge, ExerciseResult, gradeAnswer } from './logic/challenge';
+import { betterGrade, buildChallenge, ExerciseResult, kernFontFor } from './logic/challenge';
+import { kernNotes, modeNotes, MODE_UNIT } from './logic/notes';
+import { centreOf, reviewAnswer } from './logic/scoring';
+import { useFontReady } from './state/useFontReady';
 import { buildQuiz } from './logic/quiz';
 import { loadPlaygroundStore, savePlaygroundStore } from './state/storage';
 import { Activity, AssistId, ModeId, PlaygroundStore } from './types';
@@ -39,11 +49,18 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
   const [selected, setSelected] = useState(0);
   const [fineOpen, setFineOpen] = useState(false);
   const exercise = exercises[Math.min(exIndex, exercises.length - 1)];
+  // Kerning reads its answer key from the loaded font, so the challenge waits for the font.
+  const fontReady = useFontReady(modeId === 'kerning' ? kernFontFor(seed, exIndex) : undefined);
 
   const challenge = useMemo(
     () => (mode && exercise ? buildChallenge(exercise, mode, seed, exIndex) : null),
-    [mode, exercise, seed, exIndex]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mode, exercise, seed, exIndex, fontReady]
   );
+  // After lock in, the answer stays on the stage with its review. Retry does not score.
+  const [locked, setLocked] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [view, setView] = useState<ReviewView>('overlay');
   const key = `${modeId}:${seed}:${exIndex}`;
   const [edit, setEdit] = useState<{ key: string; vals: number[] }>({ key: '', vals: [] });
   const values = challenge ? (edit.key === key ? edit.vals : challenge.start) : [];
@@ -63,6 +80,8 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     setRun({});
     setShowSummary(false);
     setSelected(0);
+    setLocked(false);
+    setRetrying(false);
   }, [modeId, activity]);
 
   // A new exercise starts with the first handle selected.
@@ -85,32 +104,70 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
 
   const isLast = exIndex >= exercises.length - 1;
 
-  // Lock in records the grade and moves on. The learner sees no result until the summary.
+  // Lock in scores the answer and shows the review on the stage. Nothing showed how close it was before.
+  // A retry is practice: it shows a review but keeps the first score.
   const onLockIn = () => {
     if (!challenge || !progress || !exercise) return;
-    const result = gradeAnswer(values, challenge.targets);
-    setRun((r) => ({ ...r, [exercise.id]: result }));
-    setModeField({
+    setLocked(true);
+    setView(mode?.id === 'kerning' ? 'overlay' : 'yours');
+    setFineOpen(false);
+    if (retrying) return;
+    const r = reviewAnswer(values, challenge.start, challenge.targets);
+    const result: ExerciseResult = { grade: r.grade, right: r.right, total: r.total, score: r.score };
+    const nextRun = { ...run, [exercise.id]: result };
+    setRun(nextRun);
+    const patch: Partial<PlaygroundStore['modes'][ModeId]> = {
       completed: progress.completed.includes(exercise.id) ? progress.completed : [...progress.completed, exercise.id],
       best: { ...progress.best, [exercise.id]: betterGrade(progress.best[exercise.id], result.grade) },
-    });
+    };
+    if (isLast) {
+      const scores = exercises.map((e) => nextRun[e.id]?.score ?? 0);
+      const runScore = Math.round(scores.reduce((a, b) => a + b, 0) / exercises.length);
+      patch.runBest = Math.max(progress.runBest ?? 0, runScore);
+    }
+    setModeField(patch);
+  };
+
+  const onNext = () => {
+    setLocked(false);
+    setRetrying(false);
     if (isLast) setShowSummary(true);
     else setExIndex(exIndex + 1);
   };
+
+  const onRetry = () => {
+    setEdit({ key, vals: challenge ? challenge.start : [] });
+    setLocked(false);
+    setRetrying(true);
+  };
+
+  const review = useMemo(
+    () => (locked && challenge ? reviewAnswer(values, challenge.start, challenge.targets) : null),
+    [locked, challenge, values]
+  );
 
   const practiceAgain = () => {
     setSeed(randomSeedCode());
     setExIndex(0);
     setRun({});
     setShowSummary(false);
+    setLocked(false);
+    setRetrying(false);
     if (activity !== 'practice') onNavigate(modeId, 'practice');
   };
 
-  const working = Boolean(mode && exercise && progress && challenge) && activity !== 'quiz' && !showSummary;
+  const working = Boolean(mode && exercise && progress && challenge) && activity === 'practice' && !showSummary;
 
   let body: React.ReactNode;
   if (!mode || !exercise || !progress || !challenge) {
     body = <Hub store={store} onOpen={(id, act) => onNavigate(id, act)} />;
+  } else if (activity === 'scene') {
+    body = (
+      <SceneWork
+        best={progress.sceneBest ?? 0}
+        onScored={(score) => setModeField({ sceneBest: Math.max(progress.sceneBest ?? 0, score) })}
+      />
+    );
   } else if (activity === 'quiz') {
     body = (
       <Quiz
@@ -130,7 +187,9 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
         exercises={exercises}
         results={run}
         seed={seed}
+        runBest={progress.runBest ?? 0}
         onPracticeAgain={practiceAgain}
+        onScene={mode.id === 'kerning' ? () => onNavigate(mode.id, 'scene') : undefined}
         onQuiz={() => onNavigate(mode.id, 'quiz')}
         onHub={() => onNavigate(null)}
       />
@@ -139,13 +198,21 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     const steps = lessonsFor(mode.id);
     const stepIndex = Math.min(progress.lessonStep, steps.length - 1);
     const layout = store.panelOpen ? mode.layout : 'closed';
+    const ideal = challenge.targets.map(centreOf);
+    const isKern = mode.id === 'kerning';
+    const notes = review
+      ? isKern
+        ? kernNotes(review, challenge.parts.slice(1).map((ch, i) => [challenge.parts[i], ch] as [string, string]))
+        : modeNotes(review, mode, challenge.labels, MODE_UNIT[mode.id])
+      : [];
+    const shown = review && view === 'ideal' && !isKern ? ideal : values;
     body = (
       <main className={`dp-body dp-body--${layout}`}>
         <h1 className="dp-sr">{mode.name}</h1>
         <Stage
           mode={mode}
           challenge={challenge}
-          values={values}
+          values={shown}
           assists={store.assists}
           selected={selected}
           fineOpen={fineOpen}
@@ -155,7 +222,25 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
           onToggleAssist={toggleAssist}
           onToggleFine={() => setFineOpen((o) => !o)}
           onLockIn={onLockIn}
-        />
+          locked={Boolean(review)}
+          ghost={review && isKern && view !== 'yours' ? ideal : undefined}
+          ghostOnly={Boolean(review && isKern && view === 'ideal')}
+          marks={review && isKern && view === 'overlay' ? review.handles : undefined}
+        >
+          {review && (
+            <ReviewPanel
+              review={review}
+              notes={notes}
+              view={view}
+              views={isKern ? ['yours', 'overlay', 'ideal'] : ['yours', 'ideal']}
+              onView={setView}
+              onNext={onNext}
+              onRetry={onRetry}
+              nextLabel={isLast ? 'See results' : 'Next'}
+              practice={retrying}
+            />
+          )}
+        </Stage>
         {store.panelOpen && (
           <LessonPanel
             mode={mode}

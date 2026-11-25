@@ -13,6 +13,11 @@ afterEach(() => {
 
 const seedOnScreen = () => /Seed: #(\w{4})/.exec(screen.getByText(/Seed: #/).textContent ?? '')![1];
 const lockIn = () => fireEvent.click(screen.getByRole('button', { name: 'Lock in answer' }));
+/** Locks in, then leaves the review for the next exercise or the results. */
+const lockAndNext = () => {
+  lockIn();
+  fireEvent.click(screen.getByRole('button', { name: /^(Next|See results)$/ }));
+};
 
 /** Presses the arrow keys on a handle until it reads the wanted value. */
 function setHandle(name: string | RegExp, want: number) {
@@ -93,14 +98,51 @@ describe('Design Playground', () => {
     expect(Number(handle.getAttribute('aria-valuenow'))).toBe(start - 9);
   });
 
-  it('locks in without showing a result and moves to the next exercise', async () => {
+  it('shows a score and notes after lock in, then moves to the next exercise', async () => {
     window.location.hash = '#/playground/leading';
     render(<App />);
-    await screen.findByRole('slider', { name: 'Leading' });
+    const handle = await screen.findByRole('slider', { name: 'Leading' });
+    expect(screen.getByText('1 of 5')).toBeTruthy();
+    expect(screen.queryByText('/100')).toBeNull();
+    lockIn();
+    // Untouched: no points, and the note says so.
+    expect(screen.getByText('/100')).toBeTruthy();
+    expect(screen.getByText(/You did not move this/)).toBeTruthy();
+    // The locked answer does not move.
+    const before = handle.getAttribute('aria-valuenow');
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
+    expect(handle.getAttribute('aria-valuenow')).toBe(before);
+    expect(screen.queryByRole('button', { name: 'Lock in answer' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByText('2 of 5')).toBeTruthy();
+    expect(screen.queryByText('/100')).toBeNull();
+  });
+
+  it('lets the learner retry an exercise as practice, and compare with the ideal', async () => {
+    window.location.hash = '#/playground/tracking';
+    render(<App />);
+    const handle = await screen.findByRole('slider', { name: 'Tracking' });
+    const start = handle.getAttribute('aria-valuenow');
+    const challenge = buildChallenge(exercisesFor('tracking')[0], getMode('tracking')!, seedOnScreen(), 0);
+    lockIn();
+    fireEvent.click(screen.getByRole('button', { name: 'Ideal' }));
+    const centre = (challenge.targets[0].lo + challenge.targets[0].hi) / 2;
+    expect(Number(screen.getByRole('slider', { name: 'Tracking' }).getAttribute('aria-valuenow'))).toBe(centre);
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(screen.getByRole('slider', { name: 'Tracking' }).getAttribute('aria-valuenow')).toBe(start);
     expect(screen.getByText('1 of 5')).toBeTruthy();
     lockIn();
-    expect(screen.getByText('2 of 5')).toBeTruthy();
-    expect(screen.queryByText(/Exact|In the zone|Missed/)).toBeNull();
+    expect(screen.getByText('Practice, not scored')).toBeTruthy();
+  });
+
+  it('draws the ideal kerning over the answer with one mark per pair', async () => {
+    window.location.hash = '#/playground/kerning';
+    const { container } = render(<App />);
+    const handles = await screen.findAllByRole('slider');
+    lockIn();
+    expect(container.querySelectorAll('.dp-kw-ghost')).toHaveLength(1);
+    expect(container.querySelectorAll('.dp-kw-row:not(.dp-kw-ghost) .dp-mark')).toHaveLength(handles.length);
+    expect(screen.getAllByText(/: not moved\./).length).toBe(handles.length);
   });
 
   it('steps through the lesson and switches modes', async () => {
@@ -164,23 +206,25 @@ describe('Design Playground', () => {
     setHandle('Tracking', Math.round((challenge.targets[0].lo + challenge.targets[0].hi) / 2));
     for (let i = 0; i < list.length; i++) {
       expect(screen.queryByText(/results, seed/)).toBeNull();
-      lockIn();
+      lockAndNext();
     }
     expect(await screen.findByText(/^Tracking results, seed #/)).toBeTruthy();
-    expect(screen.getByText(`1 of ${list.length} in the zone.`)).toBeTruthy();
-    expect(screen.getByText(`1 of ${list.length} exact.`)).toBeTruthy();
-    expect(screen.getAllByText(/Exact, 1 of 1 spots/)).toHaveLength(1);
-    expect(screen.getAllByText(/Missed, 0 of 1 spots/)).toHaveLength(list.length - 1);
+    const runScore = Math.round(100 / list.length);
+    expect(screen.getByText(new RegExp(`^${runScore}/100\\.`))).toBeTruthy();
+    expect(screen.getByText(`1 of ${list.length} in the zone, 1 exact. New best run.`)).toBeTruthy();
+    expect(screen.getAllByText(/100 · Exact, 1 of 1 spots/)).toHaveLength(1);
+    expect(screen.getAllByText(/^0 · Missed, 0 of 1 spots/)).toHaveLength(list.length - 1);
 
     fireEvent.click(screen.getByRole('button', { name: 'Choose another mode' }));
     expect(await screen.findByText(new RegExp(`${list.length} of ${list.length} done, 1 exact`))).toBeTruthy();
+    expect(screen.getByText(new RegExp(`Best run: ${runScore}/100`))).toBeTruthy();
   });
 
   it('starts a new run from the summary', async () => {
     window.location.hash = '#/playground/margins';
     render(<App />);
     await screen.findAllByRole('slider');
-    for (let i = 0; i < exercisesFor('margins').length; i++) lockIn();
+    for (let i = 0; i < exercisesFor('margins').length; i++) lockAndNext();
     fireEvent.click(await screen.findByRole('button', { name: 'New seed' }));
     await screen.findAllByRole('slider');
     expect(screen.getByText('1 of 5')).toBeTruthy();
@@ -214,7 +258,7 @@ describe('Design Playground', () => {
     window.location.hash = '#/playground/margins';
     render(<App />);
     await screen.findAllByRole('slider');
-    for (let i = 0; i < exercisesFor('margins').length; i++) lockIn();
+    for (let i = 0; i < exercisesFor('margins').length; i++) lockAndNext();
     fireEvent.click(await screen.findByRole('button', { name: 'Take the Margins quiz' }));
     expect(window.location.hash).toBe('#/margins/quiz');
     expect(await screen.findByText(/Question 1 of/)).toBeTruthy();
@@ -227,5 +271,19 @@ describe('Design Playground', () => {
     fireEvent.click(await screen.findByRole('button', { name: `Start ${pick.name}` }));
     expect(window.location.hash).toBe(`#/${pick.id}`);
     expect((await screen.findAllByRole('slider')).length).toBeGreaterThan(0);
+  });
+
+  it('opens the real-world kerning work area from the hub and reviews a job', async () => {
+    window.location.hash = '';
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Kerning on a real page' }));
+    expect(window.location.hash).toBe('#/kerning/scene');
+    expect(await screen.findByRole('group', { name: /^Headline: / })).toBeTruthy();
+    lockIn();
+    // Nothing fixed: the broken pairs score nothing.
+    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Next job' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Next job' }));
+    expect(screen.getByRole('button', { name: 'Lock in answer' })).toBeTruthy();
   });
 });

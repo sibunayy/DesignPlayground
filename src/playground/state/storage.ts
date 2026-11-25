@@ -43,6 +43,8 @@ export function sanitizeStore(raw: unknown): PlaygroundStore {
       if (!m) continue;
       if (isNonNegInt(m.lessonStep)) base.modes[id].lessonStep = m.lessonStep;
       if (isNonNegInt(m.quizBest)) base.modes[id].quizBest = m.quizBest;
+      if (isNonNegInt(m.runBest) && m.runBest <= 100) base.modes[id].runBest = m.runBest;
+      if (isNonNegInt(m.sceneBest) && m.sceneBest <= 100) base.modes[id].sceneBest = m.sceneBest;
       if (Array.isArray(m.completed)) {
         base.modes[id].completed = m.completed.filter((c): c is string => typeof c === 'string');
       }

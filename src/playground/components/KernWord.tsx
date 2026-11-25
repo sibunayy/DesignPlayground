@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { FontSpec } from '../logic/fonts';
 import { HandleReview } from '../logic/scoring';
 import type { HandleOptions } from './useHandles';
@@ -27,6 +27,12 @@ interface KernWordProps {
   marks?: HandleReview[];
   /** Review: show only the outline, so the learner can compare without their own word. */
   ghostOnly?: boolean;
+  /**
+   * Anchors the word. The width it has when this key changes is kept, and the letters line up from
+   * the left. So a changed gap moves only the letters to its right. A centred word would move
+   * every letter by half the change, and the whole word sways while the learner makes a fine move.
+   */
+  anchor?: string;
   label?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -99,16 +105,27 @@ function Row({
 }
 
 export const KernWord: React.FC<KernWordProps> = (props) => {
-  const { font, fontSize, ghost, ghostOnly, label, className, style } = props;
+  const { font, fontSize, ghost, ghostOnly, label, className, style, anchor } = props;
   const fontStyle: React.CSSProperties = font ? { fontFamily: font.family, fontWeight: font.weight } : {};
+  const rowRef = useRef<HTMLSpanElement>(null);
+  const [anchored, setAnchored] = useState<number | null>(null);
+  // Measure the row when the anchor changes (a new drill, a new font size). The row has its own
+  // width, so a fixed outer width does not change what is measured. offsetWidth ignores scale transforms.
+  useLayoutEffect(() => {
+    if (anchor === undefined) return setAnchored(null);
+    const w = rowRef.current?.offsetWidth ?? 0;
+    setAnchored(w > 0 ? w : null);
+  }, [anchor, fontSize, font?.id]);
+  const anchorStyle: React.CSSProperties =
+    anchor !== undefined && anchored ? { width: anchored, justifyContent: 'flex-start' } : {};
   return (
     <span
       role="group"
       aria-label={label}
       className={`dp-kw dp-kern-word${className ? ` ${className}` : ''}`}
-      style={{ fontSize, ...fontStyle, ...style }}
+      style={{ fontSize, ...fontStyle, ...anchorStyle, ...style }}
     >
-      <span className="dp-kw-row" style={ghostOnly ? { visibility: 'hidden' } : undefined}>
+      <span ref={rowRef} className="dp-kw-row" style={ghostOnly ? { visibility: 'hidden' } : undefined}>
         <Row {...props} ghost={false} />
       </span>
       {ghost && (

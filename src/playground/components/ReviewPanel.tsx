@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { ReviewNote } from '../logic/notes';
 import { Review, scoreWord } from '../logic/scoring';
+import { ScoreScale } from './ScoreScale';
 
 export type ReviewView = 'yours' | 'overlay' | 'ideal';
 
@@ -17,6 +18,10 @@ interface ReviewPanelProps {
   practice?: boolean;
   /** Extra line under the score, such as a running total. */
   extra?: string;
+  /** What the learner can break, for the penalty line: "pairs" or "blocks". */
+  itemWord?: string;
+  /** One name for each handle, for the scale rows. */
+  labels?: string[];
 }
 
 const VIEW_TEXT: Record<ReviewView, string> = { yours: 'Yours', overlay: 'Overlay', ideal: 'Ideal' };
@@ -34,6 +39,8 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
   nextLabel,
   practice,
   extra,
+  itemWord = 'pairs',
+  labels = [],
 }) => {
   const next = useRef<HTMLButtonElement>(null);
   useEffect(() => next.current?.focus({ preventScroll: true }), [review]);
@@ -47,7 +54,7 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
         </p>
         <p className="dp-review-meta">
           {GRADE_TEXT[review.grade]}. {review.right} of {review.total} right
-          {review.penalty > 0 ? `. ${review.penalty} points off for breaking good pairs` : ''}.
+          {review.penalty > 0 ? `. ${review.penalty} points off for breaking good ${itemWord}` : ''}.
           {extra ? ` ${extra}` : ''}
         </p>
         <div role="group" aria-label="Compare" className="dp-seg">
@@ -70,6 +77,20 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
           ))}
         </ol>
       )}
+      <details className="dp-how">
+        <summary>How this score works</summary>
+        <p>
+          Each spot scores up to 100. The dark band is the centre third of the target: 100 points. The tinted band is the whole target: 70 to 100.
+          Beyond the pale band the spot scores 0. The score is the average of the spots.
+          {review.handles.some((h) => h.startedGood)
+            ? ` Only spots that started wrong count. Moving a right spot out of its target costs 10 points.`
+            : ''}
+        </p>
+        <p className="dp-scale-key">
+          <span className="ss-key ss-key--start" /> start <span className="ss-key ss-key--dot" /> yours
+        </p>
+        <ScoreScale handles={review.handles} labels={labels} />
+      </details>
       <div className="dp-review-actions">
         {onRetry && (
           <button type="button" className="dp-btn-secondary" onClick={onRetry}>

@@ -1,5 +1,7 @@
 import { MODE_IDS } from '../content/modes';
-import { Assists, ModeId, ModeProgress, PlaygroundStore } from '../types';
+import { Assists, GameId, GameProgress, ModeId, ModeProgress, PlaygroundStore } from '../types';
+
+export const GAME_IDS: GameId[] = ['drift'];
 
 export const PLAYGROUND_STORAGE_KEY = 'design-playground:v1';
 
@@ -18,7 +20,9 @@ export function defaultStore(): PlaygroundStore {
   const modes = {} as Record<ModeId, ModeProgress>;
   for (const id of MODE_IDS) modes[id] = emptyProgress(id);
   // The lesson starts closed so the work area has the whole screen. The Lesson button opens it.
-  return { version: 1, theme: null, panelOpen: false, assists: { ...DEFAULT_ASSISTS }, modes };
+  const games = {} as Record<GameId, GameProgress>;
+  for (const id of GAME_IDS) games[id] = { best: 0, played: 0 };
+  return { version: 1, theme: null, panelOpen: false, tipsOpen: true, assists: { ...DEFAULT_ASSISTS }, modes, games };
 }
 
 const isNonNegInt = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0;
@@ -31,6 +35,7 @@ export function sanitizeStore(raw: unknown): PlaygroundStore {
   if (r.version !== 1) return base;
   if (r.theme === 'dark' || r.theme === 'light') base.theme = r.theme;
   if (typeof r.panelOpen === 'boolean') base.panelOpen = r.panelOpen;
+  if (typeof r.tipsOpen === 'boolean') base.tipsOpen = r.tipsOpen;
   if (r.assists && typeof r.assists === 'object') {
     for (const key of Object.keys(DEFAULT_ASSISTS) as Array<keyof Assists>) {
       const v = (r.assists as Partial<Assists>)[key];
@@ -53,6 +58,14 @@ export function sanitizeStore(raw: unknown): PlaygroundStore {
           if (grade === 'exact' || grade === 'zone' || grade === 'miss') base.modes[id].best[key] = grade;
         }
       }
+    }
+  }
+  if (r.games && typeof r.games === 'object') {
+    for (const id of GAME_IDS) {
+      const g = (r.games as Partial<Record<GameId, Partial<GameProgress>>>)[id];
+      if (!g) continue;
+      if (isNonNegInt(g.best) && g.best <= 100) base.games[id].best = g.best;
+      if (isNonNegInt(g.played)) base.games[id].played = g.played;
     }
   }
   return base;

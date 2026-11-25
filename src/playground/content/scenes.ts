@@ -157,7 +157,7 @@ const GENRES: Record<Genre, GenreSpec> = {
 
 export const GENRE_IDS = Object.keys(GENRES) as Genre[];
 
-const PALETTES: Palette[] = [
+export const PALETTES: Palette[] = [
   { bg: '#F2EFE6', ink: '#141414', accent: '#E4362C', soft: '#D9D3C3' },
   { bg: '#101820', ink: '#F4F1EA', accent: '#F2B134', soft: '#26323D' },
   { bg: '#D9EEE1', ink: '#10302A', accent: '#FF6B3D', soft: '#B5DCC5' },

@@ -141,3 +141,125 @@ The seed picks the job, headline, font, palette and shape positions. The headlin
 | 6 | Loupe in scenes: a 4× lens that follows the selected pair | Scene work at real size on a phone |
 | 7 | Sound on lock in and on exact pairs, off by default | Second feedback channel for exact hits |
 | 8 | Expert check of model and font values for the 30 most common pairs | Validates the answer key |
+
+## 8. Layout and grid games (non-type)
+
+Date: 25 November 2026. Scope: graphic design basics with no type skill needed. Each game uses the same loop: try, lock in, review with an overlay and notes, next. Each game needs an answer key that the app can calculate.
+
+### 8.1 Ideas
+
+| Group | Game | Learner action | Answer key | Key quality | Status |
+|---|---|---|---|---|---|
+| Grid | **Spot the drift** | Find 2–4 blocks that moved off a hidden grid, put them back, leave the rest | The seed grid | Objective | **Done** |
+| Grid | Build the grid | Set column count, gutter and margin until the grid fits a layout | The seed grid | Objective | Next |
+| Grid | Snap to the grid | Place 4–8 elements on a hidden 12-column grid and baseline | Nearest grid line per edge | Objective | Next |
+| Grid | Name the system | Quiz: pick the column count, gutter and margin ratio of a layout | The seed grid | Objective | Next |
+| Optics | Optical centre | Centre a shape (a play triangle in a circle) so it looks centred | Area centroid; frames sit a little above centre | Needs expert check | Next |
+| Optics | Same size | Scale a circle and a triangle to look the same size as a square | Overshoot values (starting value: circle +3–5% diameter) | Needs expert check | Next |
+| Optics | Balance the page | Move one object until an asymmetric layout balances | Sum of area × darkness × distance from a pivot | Objective | Next |
+| Proportion | Proportion | Drag a rectangle edge to 1:√2, 1:1.618 or 16:9 | The ratio | Objective | Next |
+| Gestalt | Group it | Set spaces in a card so label–value pairs read as groups | Space between groups ≥ 2× space inside (starting value) | Rule | Next |
+| Gestalt | Spacing scale | Snap each space in a UI to an 8-point scale | Step per role | Rule | Next |
+| Gestalt | Size hierarchy | Set 3–5 shape sizes on a modular scale | The scale ratio | Objective | Next |
+| Colour | Pass the contrast | Change a brand colour's lightness until it passes WCAG 4.5:1 with the smallest change | WCAG formula plus distance from the brand colour | Objective | Next |
+| Colour | Value match | Set a grey to the same value as a colour | OKLCH lightness | Objective | Next |
+| Colour | Even steps | Make a 5-step tint ramp with equal visible steps | Equal OKLCH lightness steps | Objective | Next |
+| Composition | Crop it | Crop a scene so the focal point sits on a third line | Rule of thumb only | Low | Not planned |
+
+Colour-matching games exist as a genre. These rounds test design tasks (contrast, value, ramps). They do not copy the look of any existing game.
+
+### 8.2 Spot the drift (built)
+
+Route `#/layout/drift`. Hub section "Layout and grid".
+
+**Player goal.** See small breaks in alignment and fix them from the edges that blocks share. This is the core grid skill: a grid shows itself through shared edges, not through drawn lines.
+
+**System rules.**
+
+- The seed picks the job (Magazine page, Dashboard, Landing page, Swiss poster), the column count, the row count, the gutter, the palette and the blocks.
+- Rows split into bands. Each band splits into blocks across the columns, from a fixed set of column splits in twelfths. So blocks share column and row lines.
+- 2–4 blocks drift by 2.5–5.5 target half-widths, on x, y or both. A block drifts on an axis only when another block that did not drift shares its line on that axis. So the learner always has an edge to align to. A drifted block stays on the page.
+- The grid is hidden while the learner works. It shows in the review.
+- A drag picks one axis from the first 4 screen px. A tap never moves a block. Alt drags freely. Arrow keys move 1 px, Shift moves 10 px.
+- Each block has two handles (x and y offset). The answer for each handle is 0.
+
+**Scoring.** Same curve as kerning (section 4.2). Only drifted axes score. A block the learner did not move scores 0. Each good block that the learner breaks costs 10 points, once per block even if both axes break.
+
+**Review.** Overlay view shows the column bands, the row lines, a dashed outline at the true place of each drifted or broken block, and a numbered mark. Notes give the direction and size in px, and name a block that shares the line ("Line its left edge up with Photo 2.").
+
+**State machine.** Same as the kerning scene: Working → Locked (review) → Next page or Try again (practice, not scored). The job select is off while locked.
+
+**Numbers policy (starting values).**
+
+| Value | Starting value | Test | Pass | If it fails |
+|---|---|---|---|---|
+| Target half-width | 4 artboard px | 5 designers play 5 pages | Median page score 60–85 | Above 85: cut to 3. Below 60: raise to 6. |
+| Drift distance | 2.5–5.5 half-widths (10–22 px) | Same group, Fit zoom on a laptop | Designers find 3 of 4 drifted blocks before lock in | If fewer, raise the minimum to 3.5 half-widths |
+| Drifted blocks | 2–4 | 10 pages | Fewer than 20% of pages have a broken good block | If more, the break penalty is too low: raise to 15 |
+| Axis lock | 4 screen px | 5 players | Fewer than 1 in 10 drags break the other axis by accident | Raise to 8 px |
+
+**Abuse cases.**
+
+| # | Exploit | Guard |
+|---|---|---|
+| L1 | Lock in at once | Drifted axes score 0 when not moved |
+| L2 | Move every block a little | Break penalty per good block |
+| L3 | Snap spam | No snapping, and the grid is hidden until review |
+| L4 | Read the DOM | Accepted, as A9 |
+| L5 | Small phone: drifts too small to see | Zoom shows 2×. Playtest on a phone; raise the drift minimum on narrow screens if needed |
+
+**Playtest scripts.** New player: finds and fixes 1 block in 60 s without help. Stress: drag a block off the page edge, spam arrows, lock in twice. Skill: designer page 5 score ≥ page 1 + 10. Abuse: lock in at once (expect 0), nudge every block 1 px (expect no penalty, small score), move every block 20 px (expect a low score). Readability: an observer points to the worst block from the overlay in 10 s.
+
+### 8.3 Next for layout games
+
+1. Build the grid: reuses the layout generator; new handles for column count (step), gutter and margin.
+2. Optical centre and Same size: short warm-up drills with a strong overlay.
+3. Pass the contrast: two-part score (pass gate and distance from brand colour).
+4. Engine work: a step handle, a two-part score and a shared SVG artboard.
+
+
+## 9. Context gaps, drag sensitivity and lesson tips
+
+Date: 25 November 2026. Trigger: the learner could not tell how to reach an ideal answer, and fine moves made the word sway.
+
+### 9.1 Assessment (5-component filter)
+
+| Component | Finding | Severity | Fix | Status |
+|---|---|---|---|---|
+| Response | The kerning word was centred. A changed gap moved every letter by half the change, so the whole word swayed. A 2:1 drag ratio kept the dragged letter under the pointer, but the word still moved. | High | The word keeps its left edge still while the learner works (anchor). The ratio is 1:1. | **Done** |
+| Response | One pixel of drag was 5 to 9 units at display sizes (1000 / font size). The centre third of a target is about 7 units wide, so it was 1 to 2 px wide. | High | Speed-based drag gain: slow drag has gain 0.3, fast drag has gain 1. Shift cuts it to 0.25. | **Done** |
+| Clarity | The learner saw only one big word. Nothing showed how the word reads at the size where it is used. Designers check at reading size. | High | Small size check: the learner's own answer at 26 px and 14 px under the word. | **Done** |
+| Clarity | The learner saw how the score worked only by guessing. The review gave numbers, not a picture of the target. | High | "How this score works" in the review: the rule in words and one scale row for each counted spot. | **Done** |
+| Motivation | The lesson was a closed side panel. Most learners never opened it. | Medium | A short tip above every work area. It can be hidden and the choice is saved. | **Done** |
+| Clarity | Other modes have no live context beside the stage (for example, a line of body text beside a leading drill). | Medium | Next: a live reference strip for each mode (see 9.4). | Next |
+
+### 9.2 Drag sensitivity
+
+State machine, one handle: *Idle* → *Dragging* on pointer down → *Idle* on pointer up. A locked answer ignores pointer and keys.
+
+Gain: `gain = 0.3 + 0.7 × smoothstep(speed, 0.08, 0.8)`, where speed is a smoothed pointer speed in px per ms. Value change = pointer move × ratio × gain. Shift multiplies by 0.25. The value is rounded to 0.5 only for display, so slow moves do not stall on a rounding step.
+
+| Value | Starting value | Test | Pass | If it fails |
+|---|---|---|---|---|
+| Slow gain | 0.3 | 5 players set one pair to within the centre third at a 200 px word | Median 4 s or less, median 2 corrections or fewer | Too slow: raise to 0.4. Still jumpy: cut to 0.2. |
+| Speed range | 0.08 to 0.8 px per ms | Same group: cross the full range in one move | One drag moves a gap across the range in 1 s | Raise the fast speed to 1.2 |
+| Shift gain | 0.25 | Same group, touch pad | Used by fewer than half of the players (the default is good enough) | If most use it, cut slow gain |
+
+Measured in the build: a 20 px slow drag on a 288 px word moved the dragged gap by 21 units and moved no letter to its left. The letters to its right moved by 6 px.
+
+ASSUMPTION: players drag slowly when they want to be exact.
+IMPACT: the gain depends on it.
+IF WRONG: a slow, deliberate drag feels sluggish, and a fast flick feels too coarse.
+VALIDATE: watch 5 players; the fine control and the arrow keys stay as a fallback.
+
+### 9.3 Lesson tips
+
+A strip above every work area, in kerning, the six other modes, the real-page work area and Spot the drift. It has a 112 × 66 vector (shapes only, no fonts, token colours), a title and one or two sentences. A tip teaches a way of looking and never gives a number. A test checks this: no digit in a tip body, a title under 8 words, a body under 27 words. The tip changes with the drill, so a run shows several. The strip hides during the review, so the review has the room.
+
+Playtest: new player, 60 s with the tip open and the tip hidden. Pass: with the tip open, the median first score is at least 5 points higher on runs 1 and 2.
+
+### 9.4 Next
+
+1. A live reference beside each mode's stage: body text next to the leading drill, a card in a page for margins, a paragraph for tracking.
+2. A "last time" ghost: the learner's previous answer for the same pair type, to show growth.
+3. Tips tied to the learner's weak pair type, after the mastery map (section 7, item 5).

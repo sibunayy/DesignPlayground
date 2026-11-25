@@ -5,6 +5,8 @@ import { DpIcon } from './Icons';
 
 interface HeaderProps {
   modeId: ModeId | null;
+  /** A game outside the modes is open: show the back button but no mode tabs. */
+  inGame?: boolean;
   theme: ThemeId;
   panelOpen: boolean;
   onBack: () => void;
@@ -20,6 +22,7 @@ const scrollIntoTabs = (el: HTMLButtonElement | null) => {
 
 export const Header: React.FC<HeaderProps> = ({
   modeId,
+  inGame,
   theme,
   panelOpen,
   onBack,
@@ -29,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => (
   <header className="dp-header">
     <div className="dp-title-group">
-      {modeId && (
+      {(modeId || inGame) && (
         <button type="button" className="dp-chip-btn" onClick={onBack} aria-label="All modes">
           <DpIcon name="back" />
         </button>

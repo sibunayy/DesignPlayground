@@ -140,10 +140,23 @@ export interface ModeProgress {
   sceneBest?: number;
 }
 
+/** Games outside the type modes, such as layout and grid games. */
+export type GameId = 'drift';
+
+export interface GameProgress {
+  /** Best single score, 0 to 100. */
+  best: number;
+  /** Pages locked in. */
+  played: number;
+}
+
 export interface PlaygroundStore {
   version: 1;
   theme: ThemeId | null;
   panelOpen: boolean;
+  /** The lesson strip above the work. Open by default. */
+  tipsOpen: boolean;
   assists: Assists;
   modes: Record<ModeId, ModeProgress>;
+  games: Record<GameId, GameProgress>;
 }

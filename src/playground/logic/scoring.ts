@@ -66,7 +66,7 @@ export const BREAK_PENALTY = 10;
  * In a scene some handles start right: only the wrong ones score, and breaking a right one costs points.
  * So locking in without a change scores zero, and changing everything is not a safe plan.
  */
-export function reviewAnswer(values: number[], start: number[], targets: Target[]): Review {
+export function reviewAnswer(values: number[], start: number[], targets: Target[], groups?: number[]): Review {
   const handles: HandleReview[] = targets.map((t, i) => {
     const value = values[i];
     const grade = handleGrade(value, t);
@@ -89,7 +89,9 @@ export function reviewAnswer(values: number[], start: number[], targets: Target[
   const scored = handles.filter((h) => h.scored);
   const counted = scored.length ? scored : handles;
   const base = counted.reduce((s, h) => s + h.score, 0) / counted.length;
-  const penalty = handles.filter((h) => h.broken).length * BREAK_PENALTY;
+  // With groups (such as the x and y handles of one layout block), one broken group costs one penalty.
+  const brokenKeys = handles.filter((h) => h.broken).map((h) => (groups ? groups[h.index] : h.index));
+  const penalty = new Set(brokenKeys).size * BREAK_PENALTY;
   const score = Math.max(0, Math.round(base - penalty));
   const right = handles.filter((h) => h.grade !== 'miss').length;
   const grade: Grade = handles.every((h) => h.grade === 'exact') ? 'exact' : right === handles.length ? 'zone' : 'miss';

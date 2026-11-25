@@ -1,23 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { PlaygroundApp } from './playground/PlaygroundApp';
 import { isModeId } from './playground/content/modes';
-import type { Activity, ModeId } from './playground/types';
+import type { Activity, GameId, ModeId } from './playground/types';
 
 interface Route {
   /** Mode to open, or null for the hub. */
   modeId: ModeId | null;
   activity: Activity;
+  /** A game outside the type modes, such as "Spot the drift". */
+  game: GameId | null;
 }
 
 /** The hub is the default page. #/playground/... is accepted so older links keep working. */
 function parseHashRoute(): Route {
   const hash = window.location.hash.replace(/^#/, '');
+  if (/^\/layout\/drift\/?$/.test(hash)) return { modeId: null, activity: 'practice', game: 'drift' };
   const match = hash.match(/^\/(?:playground\/)?([^/]+)(?:\/(quiz|scene))?\/?$/);
   const modeId = match && isModeId(match[1]) ? match[1] : null;
   const sub = match?.[2];
   // Only Kerning has a real-world work area so far.
   const activity: Activity = sub === 'quiz' ? 'quiz' : sub === 'scene' && modeId === 'kerning' ? 'scene' : 'practice';
-  return { modeId, activity: modeId ? activity : 'practice' };
+  return { modeId, activity: modeId ? activity : 'practice', game: null };
 }
 
 const hashFor = (modeId: ModeId | null, activity?: Activity) =>
@@ -34,8 +37,15 @@ export const App: React.FC = () => {
 
   const navigate = (modeId: ModeId | null, activity: Activity = 'practice') => {
     window.location.hash = hashFor(modeId, activity);
-    setRoute({ modeId, activity });
+    setRoute({ modeId, activity, game: null });
   };
 
-  return <PlaygroundApp modeId={route.modeId} activity={route.activity} onNavigate={navigate} />;
+  const openGame = (game: GameId) => {
+    window.location.hash = '#/layout/drift';
+    setRoute({ modeId: null, activity: 'practice', game });
+  };
+
+  return (
+    <PlaygroundApp modeId={route.modeId} activity={route.activity} game={route.game} onNavigate={navigate} onOpenGame={openGame} />
+  );
 };

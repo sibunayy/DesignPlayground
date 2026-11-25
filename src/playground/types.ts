@@ -1,7 +1,7 @@
 export type ModeId = 'kerning' | 'tracking' | 'leading' | 'wordspace' | 'measure' | 'paragraph' | 'margins';
 
 /** What the learner does in a mode: the drag challenge or the A/B quiz. */
-export type Activity = 'practice' | 'quiz';
+export type Activity = 'practice' | 'quiz' | 'scene';
 
 export type ThemeId = 'dark' | 'light';
 
@@ -134,6 +134,10 @@ export interface ModeProgress {
   lessonStep: number;
   /** Best quiz score: correct answers out of the quiz length. */
   quizBest: number;
+  /** Best run score, 0 to 100: the mean exercise score of one full run. */
+  runBest?: number;
+  /** Kerning only: best single score on the real-world work area. */
+  sceneBest?: number;
 }
 
 export interface PlaygroundStore {

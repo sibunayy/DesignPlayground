@@ -12,13 +12,16 @@ interface Route {
 /** The hub is the default page. #/playground/... is accepted so older links keep working. */
 function parseHashRoute(): Route {
   const hash = window.location.hash.replace(/^#/, '');
-  const match = hash.match(/^\/(?:playground\/)?([^/]+)(?:\/(quiz))?\/?$/);
+  const match = hash.match(/^\/(?:playground\/)?([^/]+)(?:\/(quiz|scene))?\/?$/);
   const modeId = match && isModeId(match[1]) ? match[1] : null;
-  return { modeId, activity: modeId && match?.[2] === 'quiz' ? 'quiz' : 'practice' };
+  const sub = match?.[2];
+  // Only Kerning has a real-world work area so far.
+  const activity: Activity = sub === 'quiz' ? 'quiz' : sub === 'scene' && modeId === 'kerning' ? 'scene' : 'practice';
+  return { modeId, activity: modeId ? activity : 'practice' };
 }
 
 const hashFor = (modeId: ModeId | null, activity?: Activity) =>
-  modeId ? `#/${modeId}${activity === 'quiz' ? '/quiz' : ''}` : '#/';
+  modeId ? `#/${modeId}${activity && activity !== 'practice' ? `/${activity}` : ''}` : '#/';
 
 export const App: React.FC = () => {
   const [route, setRoute] = useState<Route>(() => parseHashRoute());

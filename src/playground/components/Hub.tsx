@@ -38,10 +38,22 @@ export const Hub: React.FC<HubProps> = ({ store, onOpen, today = new Date().toIS
                 </h2>
                 <p className="dp-hub-meta">
                   {m.teaches}. {done} of {total} done{exact > 0 ? `, ${exact} exact` : ''}
-                  {progress.quizBest > 0 ? `. Quiz best: ${progress.quizBest} of ${total}` : ''}.
+                  {progress.runBest ? `. Best run: ${progress.runBest}/100` : ''}
+                  {progress.quizBest > 0 ? `. Quiz best: ${progress.quizBest} of ${total}` : ''}
+                  {progress.sceneBest ? `. Best page: ${progress.sceneBest}/100` : ''}.
                 </p>
               </div>
               <div className="dp-hub-actions">
+                {m.id === 'kerning' && (
+                  <button
+                    type="button"
+                    className="dp-btn-secondary"
+                    aria-label="Kerning on a real page"
+                    onClick={() => onOpen(m.id, 'scene')}
+                  >
+                    On the page
+                  </button>
+                )}
                 <button
                   type="button"
                   className="dp-btn-secondary"

@@ -2,8 +2,10 @@ import React, { useRef } from 'react';
 import { Challenge, UNITS_PER_SQUARE } from '../logic/challenge';
 import { useElementWidth } from '../state/useElementWidth';
 import { AssistId, Assists, Mode } from '../types';
+import { HandleReview } from '../logic/scoring';
 import { FinePopout } from './FinePopout';
 import { ASSIST_LABELS, DpIcon } from './Icons';
+import { KernWord } from './KernWord';
 import { useHandles } from './useHandles';
 
 interface StageProps {
@@ -21,6 +23,14 @@ interface StageProps {
   onToggleAssist: (id: AssistId) => void;
   onToggleFine: () => void;
   onLockIn: () => void;
+  /** Review: the answer is locked. Handles do not move and the review shows in place of the foot. */
+  locked?: boolean;
+  /** Review, kerning: the ideal values drawn as an outline. */
+  ghost?: number[];
+  /** Review, kerning: show only the ideal word. */
+  ghostOnly?: boolean;
+  marks?: HandleReview[];
+  children?: React.ReactNode;
 }
 
 /** Width each mode needs at full size. The stage scales down below it. */
@@ -50,6 +60,11 @@ export const Stage: React.FC<StageProps> = ({
   onToggleAssist,
   onToggleFine,
   onLockIn,
+  locked,
+  ghost,
+  ghostOnly,
+  marks,
+  children,
 }) => {
   const { exercise, parts } = challenge;
   // Measure the canvas, not the stage: the lesson drawer takes padding from the stage,
@@ -63,7 +78,7 @@ export const Stage: React.FC<StageProps> = ({
   // A word's width depends on its letters, so Kerning works its design width out from the word.
   const designWidth =
     mode.id === 'kerning'
-      ? parts.length * 0.62 * exercise.size + (parts.length - 1) * 130
+      ? parts.length * 0.66 * exercise.size + (parts.length - 1) * 0.1 * exercise.size
       : mode.id === 'leading' || mode.id === 'paragraph'
         ? exercise.width ?? DESIGN_WIDTH[mode.id]
         : DESIGN_WIDTH[mode.id];
@@ -73,52 +88,42 @@ export const Stage: React.FC<StageProps> = ({
   const fontSize = Math.max(16, exercise.size * scale);
   const blur = assists.blur && mode.assists.includes('blur') ? `blur(${Math.max(1.5, fontSize * 0.03)}px)` : undefined;
 
-  // Kerning: one grid cell is one square of gap at the current word size.
-  const kernScale = fontSize / exercise.size;
-  const cell = mode.id === 'kerning' ? UNITS_PER_SQUARE * kernScale : 40 * Math.max(0.6, scale);
+  // Kerning: one grid cell is 0.1 em at the current word size.
+  const cell = mode.id === 'kerning' ? (UNITS_PER_SQUARE * fontSize) / 1000 : 40 * Math.max(0.6, scale);
   const showGrid = assists.grid && mode.assists.includes('grid');
 
   // With one handle there is nothing to choose between, so none is shown as selected.
-  const bind = useHandles(values, challenge.min, challenge.max, onChange, onSelect, values.length > 1 ? selected : -1);
+  const liveBind = useHandles(values, challenge.min, challenge.max, onChange, onSelect, values.length > 1 && !locked ? selected : -1);
+  // A locked answer keeps its slider names for screen readers, but nothing moves.
+  const bind: typeof liveBind = locked
+    ? (index, o) => ({ ...liveBind(index, o), onPointerDown: undefined, onPointerMove: undefined, onKeyDown: undefined, 'aria-readonly': true } as unknown as ReturnType<typeof liveBind>)
+    : liveBind;
   const step = challenge.fine.step;
 
   let canvas: React.ReactNode;
   switch (mode.id) {
     case 'kerning': {
       // Every letter after the first is a handle. Dragging it opens or closes the gap before it.
+      // The word is centred, so a letter moves by half of any change in its gap.
       canvas = (
-        <div role="group" aria-label={`The word ${exercise.text}`} className="dp-kern-word" style={{ fontSize, filter: blur }}>
-          {parts.map((ch, i) => {
-            const v = values[i - 1] ?? 0;
-            return (
-              <React.Fragment key={i}>
-                {i > 0 && (
-                  <span
-                    aria-hidden="true"
-                    className="dp-gap"
-                    style={{ width: Math.max(0, v) * kernScale, height: fontSize * 0.52 }}
-                  >
-                    {assists.guides && (
-                      <>
-                        <span className="dp-gap-edge" style={{ left: -1 }} />
-                        <span className="dp-gap-edge" style={{ right: -1 }} />
-                      </>
-                    )}
-                  </span>
-                )}
-                <span
-                  className={`dp-kern-letter${i > 0 ? ' dp-grab' : ''}`}
-                  style={i > 0 && v < 0 ? { marginLeft: v * kernScale } : undefined}
-                  {...(i > 0
-                    ? bind(i - 1, { axis: 'x', perPx: 2 / kernScale, label: challenge.labels[i - 1], step })
-                    : { 'aria-hidden': true })}
-                >
-                  {ch}
-                </span>
-              </React.Fragment>
-            );
-          })}
-        </div>
+        <KernWord
+          letters={parts}
+          gapHandle={parts.slice(1).map((_, i) => i)}
+          values={values}
+          fontSize={fontSize}
+          font={challenge.font}
+          bind={bind as never}
+          perPx={2000 / fontSize}
+          labels={challenge.labels}
+          step={step}
+          guides={assists.guides}
+          ghost={ghost}
+          ghostOnly={ghostOnly}
+          marks={marks}
+          label={`The word ${exercise.text}`}
+          className={ghostOnly ? 'dp-kw--ideal' : undefined}
+          style={{ filter: blur }}
+        />
       );
       break;
     }
@@ -346,13 +351,14 @@ export const Stage: React.FC<StageProps> = ({
   return (
     <section
       aria-label="Stage"
-      className={`dp-stage${showGrid ? ' dp-stage--grid' : ''}`}
+      className={`dp-stage${showGrid ? ' dp-stage--grid' : ''}${locked ? ' dp-stage--locked' : ''}`}
       style={{ backgroundSize: `${cell}px ${cell}px` }}
     >
       <div className="dp-stage-top">
         <p className="dp-stage-prompt">
           {challenge.prompt} <span className="dp-count">{counter}</span>
         </p>
+        {!locked && (
         <div role="group" aria-label="Tools" className="dp-assists">
           {mode.assists.map((id) => (
             <button
@@ -382,6 +388,8 @@ export const Stage: React.FC<StageProps> = ({
             </span>
           </button>
         </div>
+        )}
+        {!locked && (
         <button
           type="button"
           className="dp-toggle dp-lock"
@@ -393,6 +401,7 @@ export const Stage: React.FC<StageProps> = ({
             <DpIcon name="lock" />
           </span>
         </button>
+        )}
       </div>
 
       <div
@@ -404,11 +413,16 @@ export const Stage: React.FC<StageProps> = ({
         {canvas}
       </div>
 
-      <div className="dp-stage-foot">
-        <p className="dp-caption">Seed: #{challenge.seed}</p>
-      </div>
+      {children ?? (
+        <div className="dp-stage-foot">
+          <p className="dp-caption">
+            Seed: #{challenge.seed}
+            {challenge.font ? ` \u00b7 ${challenge.font.name}` : ''}
+          </p>
+        </div>
+      )}
 
-      {fineOpen && (
+      {fineOpen && !locked && (
         <FinePopout
           label={challenge.labels[selected] ?? challenge.labels[0]}
           value={selectedValue}

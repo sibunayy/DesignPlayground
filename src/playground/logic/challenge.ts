@@ -1,5 +1,8 @@
 import { hashSeed, SeededRng } from '../../engine/prng';
 import { Exercise, Grade, Mode } from '../types';
+import { FontSpec, pickFont } from './fonts';
+import { fontKern, modelKern } from './kern';
+import { handleGrade } from './scoring';
 
 /**
  * A challenge is one exercise turned into a small test: several things to set, each with its own
@@ -27,19 +30,26 @@ export interface Challenge {
   prompt: string;
   /** Range of the fine-control slider on either side of the picked-up value, and its step. */
   fine: { span: number; step: number };
+  /** Kerning only: the typeface whose kerning table is the answer key. */
+  font?: FontSpec;
 }
 
 export interface ExerciseResult {
   grade: Grade;
   right: number;
   total: number;
+  /** 0 to 100. Missing in results saved before scores existed. */
+  score?: number;
 }
 
-/** One kerning unit is 1/290 em. Forty units make one square of the grid. */
-export const UNITS_PER_SQUARE = 40;
+/** One kerning unit is 1/1000 em, as in Illustrator, InDesign and Figma. One square of the grid is 0.1 em. */
+export const UNITS_PER_SQUARE = 100;
+
+/** Half-width of a kerning target, in 1/1000 em. Starting value: see design/game-design/plan.md. */
+export const KERN_TOLERANCE = 20;
 
 const FINE: Record<Mode['id'], { span: number; step: number }> = {
-  kerning: { span: 24, step: 1 },
+  kerning: { span: 60, step: 1 },
   tracking: { span: 40, step: 1 },
   leading: { span: 24, step: 1 },
   wordspace: { span: 50, step: 1 },
@@ -48,37 +58,24 @@ const FINE: Record<Mode['id'], { span: number; step: number }> = {
   margins: { span: 40, step: 1 },
 };
 
-/** Six or more words to draw from. Each letter must appear in SIDES. */
+/**
+ * Words to draw from. Each is rich in pairs that a type designer kerns: diagonals, overhangs and rounds.
+ * Capitals are kept as written. Lower-case words get a capital first letter.
+ */
 export const KERN_WORDS = [
-  'Type', 'Home', 'Light', 'River', 'Quilt', 'Frame', 'Stone', 'Water', 'Index', 'Grain', 'Print', 'Beach',
-  'Pixel', 'Mango', 'Ocean', 'Table', 'Voice', 'Wheel', 'Youth', 'Craft', 'Drift', 'Flame', 'Plumb', 'Skate',
-  'Glyph', 'Tower', 'Yacht', 'Block', 'Fresh', 'Orange', 'Wave', 'Avoid', 'Punch', 'Mirror', 'Panel', 'Lunar',
+  'Type', 'Wave', 'Yacht', 'Avoid', 'Tower', 'Voyage', 'Travel', 'Lava', 'Party', 'Tavern', 'Avenue', 'Toast',
+  'Yoga', 'Value', 'Rover', 'Fjord', 'Kayak', 'Pyramid', 'Lyra', 'Today', 'Vortex', 'Wolf', 'Paw', 'Raven',
+  'AVATAR', 'WAVY', 'LATTE', 'TOKYO', 'VAULT', 'YOLK', 'AWAY', 'FLY', 'PLAY', 'VELVET', 'ATLAS', 'LAYOUT',
 ];
 
-/**
- * How closed each side of a letter is: 3 is a straight stem, 2 a round, 1 a partly open side,
- * 0 an open or diagonal side. A pair needs more room the more closed its two facing sides are.
- * Prototype values: confirm them with a typographer before release.
- */
-const SIDES: Record<string, [number, number]> = {
-  A: [0, 0], B: [3, 2], C: [2, 1], D: [3, 2], E: [3, 1], F: [3, 0.5], G: [2, 2.5], H: [3, 3], I: [3, 3],
-  J: [1, 2], K: [3, 0.5], L: [3, 0.5], M: [3, 3], N: [3, 3], O: [2, 2], P: [3, 1], Q: [2, 2], R: [3, 1],
-  S: [2, 2], T: [0, 0], U: [3, 3], V: [0, 0], W: [0, 0], X: [0, 0], Y: [0, 0], Z: [1, 1],
-  a: [2, 3], b: [3, 2], c: [2, 1.5], d: [2, 3], e: [2, 1.5], f: [1, 0.5], g: [2, 3], h: [3, 3], i: [3, 3],
-  j: [1, 3], k: [3, 0.5], l: [3, 3], m: [3, 3], n: [3, 3], o: [2, 2], p: [3, 2], q: [2, 3], r: [3, 0.5],
-  s: [1.5, 1.5], t: [1, 1], u: [3, 3], v: [0, 0], w: [0, 0], x: [0, 0.5], y: [0, 0.5], z: [1, 1],
-};
+/** The passing range for a pair, in 1/1000 em, centred on a kerning value. */
+export function kernTarget(kern: number): Target {
+  return { lo: kern - KERN_TOLERANCE, hi: kern + KERN_TOLERANCE };
+}
 
-const PAIR_BASE = 8;
-const PAIR_PER_SIDE = 8;
-const PAIR_TOLERANCE = 15;
-
-/** The passing range for the space between two letters, in kerning units. */
+/** The passing range for a pair from the model. Used when no font is measured. */
 export function pairTarget(left: string, right: string): Target {
-  const a = SIDES[left] ?? [2, 2];
-  const b = SIDES[right] ?? [2, 2];
-  const centre = PAIR_BASE + PAIR_PER_SIDE * (a[1] + b[0]);
-  return { lo: centre - PAIR_TOLERANCE, hi: centre + PAIR_TOLERANCE };
+  return kernTarget(modelKern(left, right));
 }
 
 /** A four-character hex code for one exercise in a run, so each exercise draws its own numbers. */
@@ -87,19 +84,35 @@ function exerciseCode(seed: string, index: number): string {
   return n.toString(16).toUpperCase().padStart(4, '0');
 }
 
-/** A start value well away from the target, on a random side, kept inside the slider range. */
+/**
+ * A start value well away from the target, kept inside the slider range.
+ * The distance is set in target widths, not as a share of the range, and the side is random when both fit.
+ * So the start does not tell the learner which way to move.
+ */
 export function farStart(target: Target, min: number, max: number, rng: SeededRng): number {
   const span = max - min;
+  const half = (target.hi - target.lo) / 2;
   const centre = (target.lo + target.hi) / 2;
-  const distance = rng.range(0.28, 0.5) * span;
-  const sign = rng.chance() ? 1 : -1;
-  let value = centre + sign * distance;
-  if (value > max || value < min) value = centre - sign * distance;
-  value = Math.min(max, Math.max(min, value));
+  const unit = Math.max(half, span * 0.06);
+  const distance = half + unit * rng.range(1.2, 3.5);
+  const up = centre + distance;
+  const down = centre - distance;
+  const upOk = up <= max;
+  const downOk = down >= min;
+  let value: number;
+  if (upOk && downOk) value = rng.chance() ? up : down;
+  else if (upOk) value = up;
+  else if (downOk) value = down;
+  else value = max - target.hi > target.lo - min ? max : min;
   return Math.round(value * 2) / 2;
 }
 
-const word = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const word = (s: string) => (s === s.toUpperCase() ? s : s.charAt(0).toUpperCase() + s.slice(1));
+
+/** The typeface for one kerning exercise of a run. */
+export function kernFontFor(seed: string, index: number): FontSpec {
+  return pickFont(new SeededRng(exerciseCode(seed, index) + 'F'));
+}
 
 /** Builds the challenge for one exercise of a run. */
 export function buildChallenge(exercise: Exercise, mode: Mode, seed: string, index: number): Challenge {
@@ -111,6 +124,7 @@ export function buildChallenge(exercise: Exercise, mode: Mode, seed: string, ind
   let labels: string[];
   let text = exercise.text;
   let prompt = exercise.prompt;
+  let font: FontSpec | undefined;
 
   switch (mode.id) {
     case 'kerning': {
@@ -118,9 +132,11 @@ export function buildChallenge(exercise: Exercise, mode: Mode, seed: string, ind
       const picked = word(new SeededRng(exerciseCode(seed, 0)).shuffle(KERN_WORDS)[index % KERN_WORDS.length]);
       parts = Array.from(picked);
       text = picked;
-      targets = parts.slice(1).map((ch, i) => pairTarget(parts[i], ch));
+      font = kernFontFor(seed, index);
+      const f = font;
+      targets = parts.slice(1).map((ch, i) => kernTarget(fontKern(f, parts[i], ch)));
       labels = parts.slice(1).map((ch, i) => `Space between ${parts[i]} and ${ch}`);
-      prompt = 'Space every pair of letters so the word looks even.';
+      prompt = 'Kern every pair so the word looks evenly spaced.';
       break;
     }
     case 'wordspace': {
@@ -170,15 +186,12 @@ export function buildChallenge(exercise: Exercise, mode: Mode, seed: string, ind
     labels,
     prompt,
     fine,
+    font,
   };
 }
 
 /** Exact in the centre third of a target, right anywhere inside it, otherwise off. */
-function gradeOne(value: number, t: Target): Grade {
-  if (value < t.lo || value > t.hi) return 'miss';
-  const centre = (t.lo + t.hi) / 2;
-  return Math.abs(value - centre) <= (t.hi - t.lo) / 6 ? 'exact' : 'zone';
-}
+const gradeOne = handleGrade;
 
 /** Grades a whole answer. Exact needs every handle exact, in the zone needs every handle inside its range. */
 export function gradeAnswer(values: number[], targets: Target[]): ExerciseResult {

@@ -24,9 +24,9 @@ describe('pairTarget', () => {
     const rounds = pairTarget('o', 'o');
     expect((mixed.lo + mixed.hi) / 2).toBeGreaterThan((rounds.lo + rounds.hi) / 2);
   });
-  it('is thirty units wide', () => {
+  it('is forty units wide', () => {
     const t = pairTarget('a', 'c');
-    expect(t.hi - t.lo).toBe(30);
+    expect(t.hi - t.lo).toBe(40);
   });
 });
 

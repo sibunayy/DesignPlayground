@@ -100,7 +100,8 @@ describe('the work area', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Lock in answer' }));
     expect(screen.getByText('How this score works')).toBeTruthy();
     const rows = document.querySelectorAll('.dp-scale-row');
-    expect(rows.length).toBe(screen.getAllByRole('slider', { hidden: true }).length);
+    // A word of n letters has n - 1 gaps and n - 2 movable letters.
+    expect(rows.length).toBe(screen.getAllByRole('slider', { hidden: true }).length + 1);
     window.location.hash = '';
   });
 });

@@ -34,6 +34,11 @@ export interface Challenge {
   font?: FontSpec;
   /** Kerning only: what the word is for and which typeface it is set in, shown above the word. */
   context?: string;
+  /**
+   * Kerning only: the first and last letters are fixed. The learner moves the letters between them,
+   * one at a time, so the word keeps its length. The start has the same total width as the answer.
+   */
+  pinned?: boolean;
 }
 
 export interface ExerciseResult {
@@ -66,14 +71,14 @@ const FINE: Record<Mode['id'], { span: number; step: number }> = {
  */
 export const KERN_WORDS = [
   'Type', 'Wave', 'Yacht', 'Avoid', 'Tower', 'Voyage', 'Travel', 'Lava', 'Party', 'Tavern', 'Avenue', 'Toast',
-  'Yoga', 'Value', 'Rover', 'Fjord', 'Kayak', 'Pyramid', 'Lyra', 'Today', 'Vortex', 'Wolf', 'Paw', 'Raven',
-  'AVATAR', 'WAVY', 'LATTE', 'TOKYO', 'VAULT', 'YOLK', 'AWAY', 'FLY', 'PLAY', 'VELVET', 'ATLAS', 'LAYOUT',
+  'Yoga', 'Value', 'Rover', 'Fjord', 'Kayak', 'Pyramid', 'Lyra', 'Today', 'Vortex', 'Wolf', 'Raven',
+  'AVATAR', 'WAVY', 'LATTE', 'TOKYO', 'VAULT', 'YOLK', 'AWAY', 'PLAY', 'VELVET', 'ATLAS', 'LAYOUT',
 ];
 
 /** Context for a kerning drill: the use, the typeface, and the fact that tracking is the learner's choice. */
 export function kernContext(font: FontSpec, word: string): string {
   const use = /^[A-Z]+$/.test(word) ? 'A title in capitals' : 'A display word, such as a logo or a heading';
-  return `${use}, set large in ${font.name}, ${font.desc}. Set the whole word tighter or looser if you like. That is tracking, and it is not scored.`;
+  return `${use}, set large in ${font.name}, ${font.desc}. The first and last letters are fixed. Space the letters between them.`;
 }
 
 /** The passing range for a pair, in 1/1000 em, centred on a kerning value. */
@@ -115,6 +120,40 @@ export function farStart(target: Target, min: number, max: number, rng: SeededRn
   return Math.round(value * 2) / 2;
 }
 
+/** Nearest a pinned start may be to a target, in target half-widths. Starting value, as the scene nudge. */
+const PIN_MIN = 3;
+/** Furthest a pinned start may be from a target, in target half-widths. */
+const PIN_MAX = 8;
+
+/**
+ * Start values for a drill with the first and last letters fixed. A displacement for each inner
+ * letter is drawn, and every gap moves by the difference of its two letters. So the gaps change but
+ * their sum does not: the word has the width of the answer, and the learner shares space out.
+ * Every gap starts outside its target, so no gap scores for being left alone. The distance of a gap
+ * from its target is between PIN_MIN and PIN_MAX half-widths, and the gap stays inside the range.
+ */
+export function pinnedStart(targets: Target[], min: number, max: number, rng: SeededRng): number[] {
+  const gaps = targets.length;
+  const inner = gaps - 1;
+  const half = KERN_TOLERANCE;
+  const centre = (t: Target) => (t.lo + t.hi) / 2;
+  const fits = (e: number[]) => {
+    for (let j = 0; j < gaps; j++) {
+      const d = (j < inner ? e[j] : 0) - (j > 0 ? e[j - 1] : 0);
+      const v = centre(targets[j]) + d;
+      if (Math.abs(d) < PIN_MIN * half || Math.abs(d) > PIN_MAX * half || v < min || v > max) return false;
+    }
+    return true;
+  };
+  for (let tries = 0; tries < 400; tries++) {
+    const e = Array.from({ length: inner }, () => Math.round(rng.range(2, 6) * half) * (rng.chance() ? 1 : -1));
+    if (fits(e)) return targets.map((t, j) => centre(t) + (j < inner ? e[j] : 0) - (j > 0 ? e[j - 1] : 0));
+  }
+  // Alternating letters always give every gap the same distance, in the allowed band.
+  const e = Array.from({ length: inner }, (_, i) => (i % 2 ? -1 : 1) * 3 * half);
+  return targets.map((t, j) => centre(t) + (j < inner ? e[j] : 0) - (j > 0 ? e[j - 1] : 0));
+}
+
 const word = (s: string) => (s === s.toUpperCase() ? s : s.charAt(0).toUpperCase() + s.slice(1));
 
 /** The typeface for one kerning exercise of a run. */
@@ -144,7 +183,7 @@ export function buildChallenge(exercise: Exercise, mode: Mode, seed: string, ind
       const f = font;
       targets = parts.slice(1).map((ch, i) => kernTarget(fontKern(f, parts[i], ch)));
       labels = parts.slice(1).map((ch, i) => `Space between ${parts[i]} and ${ch}`);
-      prompt = 'Kern every pair so the word looks evenly spaced.';
+      prompt = parts.length >= 4 ? 'Space the letters between the two fixed ones so the word looks even.' : 'Kern every pair so the word looks evenly spaced.';
       break;
     }
     case 'wordspace': {
@@ -182,8 +221,10 @@ export function buildChallenge(exercise: Exercise, mode: Mode, seed: string, ind
       break;
   }
 
-  const start = targets.map((t) => farStart(t, min, max, rng));
+  const pinned = mode.id === 'kerning' && parts.length >= 4;
+  const start = pinned ? pinnedStart(targets, min, max, rng) : targets.map((t) => farStart(t, min, max, rng));
   return {
+    pinned,
     seed,
     exercise: text === exercise.text ? exercise : { ...exercise, text },
     parts,

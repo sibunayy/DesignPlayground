@@ -61,6 +61,46 @@ export function fontKern(font: FontSpec, left: string, right: string): number {
   return value;
 }
 
+/** Heights that a type designer draws guide lines at, in em above the baseline, plus where the baseline sits. */
+export interface FontLines {
+  ascender: number;
+  xHeight: number;
+  capHeight: number;
+  /** Distance of the baseline from the top of a line box that is 1 em tall, in em. */
+  baseline: number;
+}
+
+/** Used when the font cannot be measured. Close to most grotesks and serifs. */
+export const FALLBACK_LINES: FontLines = { ascender: 0.76, xHeight: 0.52, capHeight: 0.71, baseline: 0.8 };
+
+const linesCache = new Map<string, FontLines>();
+
+/**
+ * The ascender, x-height and baseline of a font, read from a canvas. The ascender is the top of "d",
+ * the x-height is the top of "x", the cap height is the top of "H". With line-height 1, the baseline
+ * sits half-way through the line's leading: (1 + ascent - descent) / 2.
+ */
+export function fontLines(font: FontSpec): FontLines {
+  const hit = linesCache.get(font.id);
+  if (hit) return hit;
+  const c = context();
+  if (!c || !fontReady(font)) return FALLBACK_LINES;
+  c.font = fontShorthand(font, 1000);
+  const up = (s: string) => c.measureText(s).actualBoundingBoxAscent / 1000;
+  const ok = (v: number, fallback: number) => (Number.isFinite(v) && v > 0.1 && v < 1.2 ? v : fallback);
+  const probe = c.measureText('x');
+  const a = probe.fontBoundingBoxAscent / 1000;
+  const d = probe.fontBoundingBoxDescent / 1000;
+  const lines: FontLines = {
+    ascender: ok(up('d'), FALLBACK_LINES.ascender),
+    xHeight: ok(up('x'), FALLBACK_LINES.xHeight),
+    capHeight: ok(up('H'), FALLBACK_LINES.capHeight),
+    baseline: Number.isFinite(a) && Number.isFinite(d) && a > 0 ? (1 + a - d) / 2 : FALLBACK_LINES.baseline,
+  };
+  linesCache.set(font.id, lines);
+  return lines;
+}
+
 /** Width of a text in em with kerning off. Falls back to an estimate when the font is not measurable. */
 export function textWidthEm(font: FontSpec, text: string): number {
   const c = context();

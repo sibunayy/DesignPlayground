@@ -9,6 +9,7 @@ import {
   buildChallenge,
   farStart,
   gradeAnswer,
+  KERN_TOLERANCE,
   KERN_WORDS,
   pairTarget,
 } from '../logic/challenge';
@@ -66,6 +67,43 @@ describe('seeded kerning words', () => {
         expect(v < c.targets[g].lo || v > c.targets[g].hi).toBe(true);
       });
     });
+  });
+});
+
+describe('kerning with pinned ends', () => {
+  const mode = getMode('kerning')!;
+  const slots = exercisesFor('kerning');
+
+  it('uses only words with at least two letters that can move', () => {
+    KERN_WORDS.forEach((w) => expect(w.length).toBeGreaterThanOrEqual(4));
+  });
+
+  it('starts with the width of the answer, every gap wrong and no gap out of range', () => {
+    for (const seed of ['4F9A', '0B21', 'C0DE', '1234', 'FFFF', '0000', 'A1B2', '7E57']) {
+      slots.forEach((e, i) => {
+        const c = buildChallenge(e, mode, seed, i);
+        expect(c.pinned).toBe(true);
+        const centre = c.targets.map((t) => (t.lo + t.hi) / 2);
+        const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
+        // The first and last letter sit where the answer puts them, so the total is the same.
+        expect(sum(c.start)).toBeCloseTo(sum(centre), 6);
+        c.start.forEach((v, g) => {
+          expect(v).toBeGreaterThanOrEqual(mode.slider.min);
+          expect(v).toBeLessThanOrEqual(mode.slider.max);
+          expect(Math.abs(v - centre[g])).toBeGreaterThanOrEqual(KERN_TOLERANCE * 3);
+        });
+      });
+    }
+  });
+
+  it('does not always push the first gap the same way', () => {
+    const signs = new Set<number>();
+    for (let n = 0; n < 40; n++) {
+      const seed = n.toString(16).toUpperCase().padStart(4, '0');
+      const c = buildChallenge(slots[0], mode, seed, 0);
+      signs.add(Math.sign(c.start[0] - (c.targets[0].lo + c.targets[0].hi) / 2));
+    }
+    expect(signs).toEqual(new Set([1, -1]));
   });
 });
 

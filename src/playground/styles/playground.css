@@ -1951,3 +1951,12 @@
 .ss-key { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-left: var(--space-2); }
 .ss-key--start { border: 1.6px solid var(--ink-2); margin-left: 0; }
 .ss-key--dot { background: var(--ink-2); }
+
+/* Context under the prompt: the use, the typeface and what is scored. */
+.dp-stage-context {
+  margin: 0;
+  max-width: 76ch;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--ink-2);
+}

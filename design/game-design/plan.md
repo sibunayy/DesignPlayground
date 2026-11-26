@@ -263,3 +263,35 @@ Playtest: new player, 60 s with the tip open and the tip hidden. Pass: with the 
 1. A live reference beside each mode's stage: body text next to the leading drill, a card in a page for margins, a paragraph for tracking.
 2. A "last time" ghost: the learner's previous answer for the same pair type, to show growth.
 3. Tips tied to the learner's weak pair type, after the mastery map (section 7, item 5).
+
+### 9.5 Tracking, and the context of a kerning drill
+
+Trigger: a learner set "Avoid" tighter than the font's plain spacing, thought it looked right, and the overlay showed every pair too tight by 30 to 100 units.
+
+**Diagnosis.** The answer key was checked: the canvas value and the browser's own kerning agree to the unit in all six fonts (Bricolage: Av −54, vo −9, oi 0, id 0). So the key was right and the context was missing. The key is the font's kerning table, and a table only has an opinion about awkward pairs. Pairs such as "oi" and "id" are 0, which means the font's plain spacing. A designer who sets a heavy, display-size word tighter has changed the tracking, not the kerning. The drill scored that as kerning error, so every later letter looked "wildly off" in the overlay, because pair errors add up along the word.
+
+| Component | Finding | Fix | Status |
+|---|---|---|---|
+| Clarity | The stage did not say what the word is for, which typeface it is in, or what zero means. | A context line on the stage: the use, the typeface and its character, and that tracking is the learner's choice and is not scored. | **Done** |
+| Fit | The score treated tracking as kerning error. | The score takes out the learner's own whole-word tracking. | **Done** |
+| Clarity | The overlay compared absolute positions, so errors added up along the word. | The outline is drawn at the learner's tracking, so it shows only the pair errors. | **Done** |
+| Clarity | The review did not name the tracking. | A first note: "Your tracking: −57. That is tracking, so it is not scored." The notes show the ideal at the learner's tracking. | **Done** |
+
+**Rule.** Tracking = the median distance from the target of the moved gaps, limited to ±80 units. At least 3 gaps must move, or the tracking is 0. Each target moves by the tracking, then the normal curve applies (section 4.2). Real-page jobs (section 4.4) do not use this rule: there the headline arrives with kerning off, and only the broken pairs score.
+
+Check on the reported case: raw score under 25, score with tracking removed 73. The pair that is really wrong (A and v overlap) stays a miss.
+
+| Value | Starting value | Test | Pass | If it fails |
+|---|---|---|---|---|
+| Tracking limit | ±80 units | 5 designers, 3 runs each | 70% of runs have tracking inside ±80 | Raise to ±120 |
+| Median as the estimate | Median of moved gaps | Same runs | Tracking changes by less than 15 units when the worst gap is left out | Use a trimmed mean |
+
+ASSUMPTION: a designer judges pairs against each other and picks tracking for the use.
+IMPACT: the score rewards the rhythm of the pairs, not one fixed tightness.
+IF WRONG: a learner could set a poor tracking and not be told.
+VALIDATE: the review names the tracking. If testers ask for feedback on it, add a tracking drill (the Tracking mode already teaches it).
+
+Abuse cases: "close every gap to the end of the range" gets tracking −80, and the remaining error keeps the score under 20 (tested). "Move only two gaps" gets no tracking forgiveness. "Leave every gap" still scores 0.
+
+Next: a sample line in use (for example the word on a logo plate or in a page header) beside the stage, so the use is seen and not only read.
+

@@ -48,6 +48,8 @@ export interface HandleReview {
 }
 
 export interface Review {
+  /** Whole-word tracking that the learner set, in 1/1000 em. It is not scored. Zero when there is none. */
+  tracking: number;
   handles: HandleReview[];
   /** 0 to 100. */
   score: number;
@@ -58,6 +60,25 @@ export interface Review {
   penalty: number;
 }
 
+/**
+ * Kerning drills judge the pairs against each other, not against the font's plain spacing. A learner may
+ * set a whole word tighter or looser: that is tracking, and designers choose it for the use. So the
+ * score looks at the pairs after the learner's own tracking is taken out.
+ * Starting values (see design/game-design/plan.md, section 9.5).
+ */
+export const TRACKING_MAX = 80;
+/** At least this many moved handles are needed to tell tracking from kerning. */
+export const TRACKING_MIN_MOVED = 3;
+
+/** The learner's tracking: the median distance of the moved handles from their targets, kept within a limit. */
+export function trackingOffset(values: number[], start: number[], targets: Target[]): number {
+  const diffs = targets.flatMap((t, i) => (values[i] !== start[i] ? [values[i] - centreOf(t)] : [])).sort((a, b) => a - b);
+  if (diffs.length < TRACKING_MIN_MOVED) return 0;
+  const mid = diffs.length >> 1;
+  const median = diffs.length % 2 ? diffs[mid] : (diffs[mid - 1] + diffs[mid]) / 2;
+  return Math.round(Math.max(-TRACKING_MAX, Math.min(TRACKING_MAX, median)));
+}
+
 /** Points taken off for each correct pair that the learner moved out of its target. Starting value. */
 export const BREAK_PENALTY = 10;
 
@@ -66,7 +87,15 @@ export const BREAK_PENALTY = 10;
  * In a scene some handles start right: only the wrong ones score, and breaking a right one costs points.
  * So locking in without a change scores zero, and changing everything is not a safe plan.
  */
-export function reviewAnswer(values: number[], start: number[], targets: Target[], groups?: number[]): Review {
+export function reviewAnswer(
+  values: number[],
+  start: number[],
+  rawTargets: Target[],
+  groups?: number[],
+  opts?: { tracking?: boolean }
+): Review {
+  const tracking = opts?.tracking ? trackingOffset(values, start, rawTargets) : 0;
+  const targets = tracking ? rawTargets.map((t) => ({ lo: t.lo + tracking, hi: t.hi + tracking })) : rawTargets;
   const handles: HandleReview[] = targets.map((t, i) => {
     const value = values[i];
     const grade = handleGrade(value, t);
@@ -95,7 +124,7 @@ export function reviewAnswer(values: number[], start: number[], targets: Target[
   const score = Math.max(0, Math.round(base - penalty));
   const right = handles.filter((h) => h.grade !== 'miss').length;
   const grade: Grade = handles.every((h) => h.grade === 'exact') ? 'exact' : right === handles.length ? 'zone' : 'miss';
-  return { handles, score, grade, right, total: handles.length, penalty };
+  return { tracking, handles, score, grade, right, total: handles.length, penalty };
 }
 
 /** A word for a score, shown with the number. */

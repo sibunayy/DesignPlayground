@@ -416,6 +416,8 @@ export const Stage: React.FC<StageProps> = ({
         )}
       </div>
 
+      {challenge.context && !locked && <p className="dp-stage-context">{challenge.context}</p>}
+
       <div
         ref={ref}
         className={`dp-stage-canvas${mode.id === 'measure' ? ' dp-stage-canvas--scroll' : ''}${

@@ -13,15 +13,17 @@ export interface FontSpec {
   weight: number;
   /** Kind of face, for the notes and for scenes that want a style. */
   style: 'grotesk' | 'serif' | 'display';
+  /** A short description for the stage: "a heavy grotesk". */
+  desc: string;
 }
 
 export const FONTS: FontSpec[] = [
-  { id: 'bricolage', name: 'Bricolage Grotesque', family: "'Bricolage Grotesque Variable', sans-serif", weight: 800, style: 'grotesk' },
-  { id: 'inter', name: 'Inter', family: "'Inter Variable', sans-serif", weight: 800, style: 'grotesk' },
-  { id: 'space', name: 'Space Grotesk', family: "'Space Grotesk Variable', sans-serif", weight: 700, style: 'grotesk' },
-  { id: 'archivo', name: 'Archivo Black', family: "'Archivo Black', sans-serif", weight: 400, style: 'display' },
-  { id: 'fraunces', name: 'Fraunces', family: "'Fraunces Variable', serif", weight: 800, style: 'serif' },
-  { id: 'playfair', name: 'Playfair Display', family: "'Playfair Display Variable', serif", weight: 800, style: 'serif' },
+  { id: 'bricolage', name: 'Bricolage Grotesque', family: "'Bricolage Grotesque Variable', sans-serif", weight: 800, style: 'grotesk', desc: 'a heavy grotesk' },
+  { id: 'inter', name: 'Inter', family: "'Inter Variable', sans-serif", weight: 800, style: 'grotesk', desc: 'a heavy neutral sans' },
+  { id: 'space', name: 'Space Grotesk', family: "'Space Grotesk Variable', sans-serif", weight: 700, style: 'grotesk', desc: 'a heavy geometric sans' },
+  { id: 'archivo', name: 'Archivo Black', family: "'Archivo Black', sans-serif", weight: 400, style: 'display', desc: 'a very heavy grotesk' },
+  { id: 'fraunces', name: 'Fraunces', family: "'Fraunces Variable', serif", weight: 800, style: 'serif', desc: 'a heavy soft serif' },
+  { id: 'playfair', name: 'Playfair Display', family: "'Playfair Display Variable', serif", weight: 800, style: 'serif', desc: 'a heavy high-contrast serif' },
 ];
 
 export const DEFAULT_FONT = FONTS[0];

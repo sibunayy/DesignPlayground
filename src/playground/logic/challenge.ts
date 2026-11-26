@@ -32,6 +32,8 @@ export interface Challenge {
   fine: { span: number; step: number };
   /** Kerning only: the typeface whose kerning table is the answer key. */
   font?: FontSpec;
+  /** Kerning only: what the word is for and which typeface it is set in, shown above the word. */
+  context?: string;
 }
 
 export interface ExerciseResult {
@@ -67,6 +69,12 @@ export const KERN_WORDS = [
   'Yoga', 'Value', 'Rover', 'Fjord', 'Kayak', 'Pyramid', 'Lyra', 'Today', 'Vortex', 'Wolf', 'Paw', 'Raven',
   'AVATAR', 'WAVY', 'LATTE', 'TOKYO', 'VAULT', 'YOLK', 'AWAY', 'FLY', 'PLAY', 'VELVET', 'ATLAS', 'LAYOUT',
 ];
+
+/** Context for a kerning drill: the use, the typeface, and the fact that tracking is the learner's choice. */
+export function kernContext(font: FontSpec, word: string): string {
+  const use = /^[A-Z]+$/.test(word) ? 'A title in capitals' : 'A display word, such as a logo or a heading';
+  return `${use}, set large in ${font.name}, ${font.desc}. Set the whole word tighter or looser if you like. That is tracking, and it is not scored.`;
+}
 
 /** The passing range for a pair, in 1/1000 em, centred on a kerning value. */
 export function kernTarget(kern: number): Target {
@@ -187,6 +195,7 @@ export function buildChallenge(exercise: Exercise, mode: Mode, seed: string, ind
     prompt,
     fine,
     font,
+    context: font && mode.id === 'kerning' ? kernContext(font, text) : undefined,
   };
 }
 

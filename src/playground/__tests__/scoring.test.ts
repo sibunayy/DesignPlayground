@@ -3,7 +3,7 @@ import { SeededRng } from '../../engine/prng';
 import { buildScene, GENRE_IDS } from '../content/scenes';
 import { farStart, KERN_TOLERANCE } from '../logic/challenge';
 import { kernNotes } from '../logic/notes';
-import { BREAK_PENALTY, handleScore, reviewAnswer } from '../logic/scoring';
+import { BREAK_PENALTY, centreOf, handleScore, reviewAnswer, TRACKING_MAX, trackingOffset } from '../logic/scoring';
 
 const t = { lo: -20, hi: 20 };
 
@@ -90,5 +90,53 @@ describe('kernNotes', () => {
   it('says when a pair was right at the start and the learner broke it', () => {
     const r = reviewAnswer([90], [0], [t]);
     expect(kernNotes(r, [['H', 'H']])[0].title).toBe('HH: this pair was already right');
+  });
+});
+
+describe('tracking is not scored in a kerning drill', () => {
+  const tk = (c: number) => ({ lo: c - 20, hi: c + 20 });
+  // "Avoid" in Bricolage Grotesque: the font's own kerning for Av, vo, oi, id.
+  const key = [-54, -9, 0, 0].map(tk);
+  const start = [200, -150, 150, -200];
+  // A designer who set the whole word tighter, as a logo often is, and mis-set Av a little.
+  const tight = [-154, -62, -62, -31];
+
+  it('finds the whole-word tracking as the median distance from the targets', () => {
+    expect(trackingOffset(tight, start, key)).toBe(-57);
+    expect(trackingOffset([-54, -9, 0, 0], start, key)).toBe(0);
+  });
+
+  it('scores the pairs against the learner’s tracking, so a tight word is not wrong for being tight', () => {
+    const raw = reviewAnswer(tight, start, key);
+    const free = reviewAnswer(tight, start, key, undefined, { tracking: true });
+    expect(raw.score).toBeLessThan(25);
+    expect(free.tracking).toBe(-57);
+    expect(free.score).toBeGreaterThan(60);
+    // The pair that is really wrong stays wrong: A and v overlap by more than the font does.
+    expect(free.handles[0].grade).toBe('miss');
+    expect(free.handles[1].grade).toBe('exact');
+    // Each target moved by the tracking, so the overlay can draw the ideal at the learner's tracking.
+    expect(centreOf(free.handles[2].target)).toBe(-57);
+  });
+
+  it('limits the tracking, so closing every gap to the end of the range is not a free pass', () => {
+    const slam = [-300, -300, -300, -300];
+    const r = reviewAnswer(slam, start, key, undefined, { tracking: true });
+    expect(r.tracking).toBe(-TRACKING_MAX);
+    expect(r.score).toBeLessThan(20);
+  });
+
+  it('does not separate tracking from kerning with fewer than three moved gaps', () => {
+    const two = [-154, -62, 150, -200];
+    expect(trackingOffset(two, start, key)).toBe(0);
+    expect(reviewAnswer(start, start, key, undefined, { tracking: true }).score).toBe(0);
+  });
+
+  it('tells the learner about their tracking and uses the ideal at that tracking in the notes', () => {
+    const r = reviewAnswer(tight, start, key, undefined, { tracking: true });
+    const notes = kernNotes(r, [['A', 'v'], ['v', 'o'], ['o', 'i'], ['i', 'd']]);
+    expect(notes[0].title).toBe('Your tracking: -57');
+    expect(notes[0].body).toMatch(/whole word tighter/);
+    expect(notes[1].body).toMatch(/ideal at your tracking -111/);
   });
 });

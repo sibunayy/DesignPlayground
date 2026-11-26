@@ -85,6 +85,7 @@ export const ReviewPanel: React.FC<ReviewPanelProps> = ({
           {review.handles.some((h) => h.startedGood)
             ? ` Only spots that started wrong count. Moving a right spot out of its target costs 10 points.`
             : ''}
+          {review.tracking ? ` Your whole-word tracking (${review.tracking > 0 ? '+' : ''}${review.tracking}) is not scored. Each target moves by that amount.` : ''}
         </p>
         <p className="dp-scale-key">
           <span className="ss-key ss-key--start" /> start <span className="ss-key ss-key--dot" /> yours

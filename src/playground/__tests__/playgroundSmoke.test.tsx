@@ -59,14 +59,19 @@ describe('Design Playground', () => {
     expect(headings[0].textContent).toBe(getMode('leading')!.name);
   });
 
-  it('opens Kerning as a seeded challenge with one handle per gap and no hints', async () => {
+  it('opens Kerning as a seeded challenge with one handle per inner letter and no hints', async () => {
     window.location.hash = '#/playground/kerning';
     const { container } = render(<App />);
     const handles = await screen.findAllByRole('slider');
     const challenge = buildChallenge(exercisesFor('kerning')[0], getMode('kerning')!, seedOnScreen(), 0);
-    expect(handles).toHaveLength(challenge.parts.length - 1);
+    // The first and last letters are fixed. The letters between them are the handles.
+    expect(challenge.pinned).toBe(true);
+    expect(handles).toHaveLength(challenge.parts.length - 2);
     expect(screen.getByRole('group', { name: `The word ${challenge.exercise.text}` })).toBeTruthy();
-    expect(handles.map((h) => Number(h.getAttribute('aria-valuenow')))).toEqual(challenge.start);
+    // A handle reads the position of its letter: the sum of the gaps before it.
+    const positions = challenge.parts.slice(1, -1).map((_, k) => challenge.start.slice(0, k + 1).reduce((a, b) => a + b, 0));
+    expect(handles.map((h) => Number(h.getAttribute('aria-valuenow')))).toEqual(positions);
+    expect(handles.map((h) => h.getAttribute('aria-label'))).toEqual(challenge.parts.slice(1, -1).map((c) => `Letter ${c}`));
     // No bottom dock, no readout, no answer zone, no instruction line.
     expect(container.querySelector('.dp-dock')).toBeNull();
     expect(container.querySelector('input[type="range"]')).toBeNull();
@@ -142,8 +147,29 @@ describe('Design Playground', () => {
     const handles = await screen.findAllByRole('slider');
     lockIn();
     expect(container.querySelectorAll('.dp-kw-ghost')).toHaveLength(1);
-    expect(container.querySelectorAll('.dp-kw-row:not(.dp-kw-ghost) .dp-mark')).toHaveLength(handles.length);
-    expect(screen.getAllByText(/: not moved\./).length).toBe(handles.length);
+    // One mark per gap: a word of n letters has n - 1 gaps and n - 2 movable letters.
+    expect(container.querySelectorAll('.dp-kw-row:not(.dp-kw-ghost) .dp-mark')).toHaveLength(handles.length + 1);
+    expect(screen.getAllByText(/: not moved\./).length).toBe(handles.length + 1);
+  });
+
+  it('pins the first and last letters, moves one letter at a time and keeps the word length', async () => {
+    window.location.hash = '#/playground/kerning';
+    const { container } = render(<App />);
+    const handles = await screen.findAllByRole('slider');
+    const before = handles.map((h) => Number(h.getAttribute('aria-valuenow')));
+    // Two locks, and three guide lines behind the word.
+    expect(container.querySelectorAll('.dp-pin')).toHaveLength(2);
+    expect(container.querySelectorAll('.dp-kw-line')).toHaveLength(3);
+    expect(container.querySelectorAll('.dp-kern-letter--pinned')).toHaveLength(2);
+    // One key press moves one letter by one unit. The other letters stay where they are.
+    fireEvent.keyDown(handles[0], { key: 'ArrowRight' });
+    fireEvent.keyDown(handles[0], { key: 'ArrowRight', shiftKey: true });
+    const after = screen.getAllByRole('slider').map((h) => Number(h.getAttribute('aria-valuenow')));
+    expect(after[0]).toBe(before[0] + 11);
+    expect(after.slice(1)).toEqual(before.slice(1));
+    // Pressing a fixed letter says why it does not move.
+    fireEvent.pointerDown(container.querySelector('.dp-kern-letter--pinned')!);
+    expect(screen.getByRole('status').textContent).toBe('This letter is fixed.');
   });
 
   it('steps through the lesson and switches modes', async () => {

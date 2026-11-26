@@ -70,6 +70,10 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
   const [edit, setEdit] = useState<{ key: string; vals: number[] }>({ key: '', vals: [] });
   const values = challenge ? (edit.key === key ? edit.vals : challenge.start) : [];
 
+  const setAll = (vals: number[]) => {
+    if (challenge) setEdit({ key, vals });
+  };
+
   const setValue = (index: number, v: number) => {
     if (!challenge) return;
     setEdit((prev) => ({
@@ -118,7 +122,7 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     setView(mode?.id === 'kerning' ? 'overlay' : 'yours');
     setFineOpen(false);
     if (retrying) return;
-    const r = reviewAnswer(values, challenge.start, challenge.targets);
+    const r = reviewAnswer(values, challenge.start, challenge.targets, undefined, { tracking: mode?.id === 'kerning' && !challenge.pinned });
     const result: ExerciseResult = { grade: r.grade, right: r.right, total: r.total, score: r.score };
     const nextRun = { ...run, [exercise.id]: result };
     setRun(nextRun);
@@ -148,8 +152,8 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
   };
 
   const review = useMemo(
-    () => (locked && challenge ? reviewAnswer(values, challenge.start, challenge.targets) : null),
-    [locked, challenge, values]
+    () => (locked && challenge ? reviewAnswer(values, challenge.start, challenge.targets, undefined, { tracking: mode?.id === 'kerning' && !challenge.pinned }) : null),
+    [locked, challenge, values, mode]
   );
 
   const practiceAgain = () => {
@@ -218,7 +222,8 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
     const steps = lessonsFor(mode.id);
     const stepIndex = Math.min(progress.lessonStep, steps.length - 1);
     const layout = store.panelOpen ? mode.layout : 'closed';
-    const ideal = challenge.targets.map(centreOf);
+    // The ideal outline moves with the learner's own tracking, so it shows only the pair errors.
+    const ideal = (review ? review.handles.map((h) => centreOf(h.target)) : challenge.targets.map(centreOf));
     const isKern = mode.id === 'kerning';
     const notes = review
       ? isKern
@@ -239,6 +244,7 @@ export const PlaygroundApp: React.FC<PlaygroundAppProps> = ({ modeId, activity =
           counter={`${exIndex + 1} of ${exercises.length}`}
           onSelect={setSelected}
           onChange={setValue}
+          onChangeAll={setAll}
           onToggleAssist={toggleAssist}
           onToggleFine={() => setFineOpen((o) => !o)}
           onLockIn={onLockIn}

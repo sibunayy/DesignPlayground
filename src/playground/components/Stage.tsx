@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Challenge, UNITS_PER_SQUARE } from '../logic/challenge';
 import { useElementWidth } from '../state/useElementWidth';
 import { AssistId, Assists, Mode } from '../types';
@@ -6,6 +6,7 @@ import { HandleReview } from '../logic/scoring';
 import { FinePopout } from './FinePopout';
 import { ASSIST_LABELS, DpIcon } from './Icons';
 import type { Tip } from '../content/tips';
+import { fontLines, textWidthEm } from '../logic/kern';
 import { KernWord } from './KernWord';
 import { TipStrip } from './TipStrip';
 import { useHandles } from './useHandles';
@@ -32,6 +33,8 @@ interface StageProps {
   /** Review, kerning: show only the ideal word. */
   ghostOnly?: boolean;
   marks?: HandleReview[];
+  /** Kerning with pinned ends: sets every value at once, because moving one letter changes two gaps. */
+  onChangeAll?: (values: number[]) => void;
   /** The lesson shown above the work, and whether it is open. */
   tip?: Tip;
   tipsOpen?: boolean;
@@ -70,6 +73,7 @@ export const Stage: React.FC<StageProps> = ({
   ghost,
   ghostOnly,
   marks,
+  onChangeAll,
   tip,
   tipsOpen = true,
   onToggleTips,
@@ -94,12 +98,25 @@ export const Stage: React.FC<StageProps> = ({
   const scale = Math.min(1, inner / designWidth);
   // Stage text never drops below 16px. Wrapping text wraps more instead.
   const wraps = mode.id === 'leading' || mode.id === 'paragraph' || mode.id === 'margins';
-  const fontSize = Math.max(16, exercise.size * scale);
+  // Kerning fills the stage: the word is sized so that its own width is most of the canvas, up to a
+  // height limit. The word keeps its width while the learner works (pinned ends), so the size is steady.
+  const pinned = mode.id === 'kerning' && Boolean(challenge.pinned);
+  const viewH = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const kernEm =
+    mode.id === 'kerning'
+      ? (challenge.font ? textWidthEm(challenge.font, exercise.text) : parts.length * 0.64) + challenge.start.reduce((a, b) => a + b, 0) / 1000
+      : 1;
+  const kernMax = locked ? viewH * 0.26 : Math.min(viewH * 0.42, 440);
+  const fontSize =
+    mode.id === 'kerning'
+      ? Math.max(16, Math.min(kernMax, (inner * 0.94) / Math.max(1, kernEm)))
+      : Math.max(16, exercise.size * scale);
   const blur = assists.blur && mode.assists.includes('blur') ? `blur(${Math.max(1.5, fontSize * 0.03)}px)` : undefined;
 
   // Kerning: one grid cell is 0.1 em at the current word size.
   const cell = mode.id === 'kerning' ? (UNITS_PER_SQUARE * fontSize) / 1000 : 40 * Math.max(0.6, scale);
-  const showGrid = assists.grid && mode.assists.includes('grid');
+  // In kerning the Grid tool draws the type's guide lines (ascender, x-height, baseline) in place of squares.
+  const showGrid = mode.id !== 'kerning' && assists.grid && mode.assists.includes('grid');
 
   // With one handle there is nothing to choose between, so none is shown as selected.
   const liveBind = useHandles(values, challenge.min, challenge.max, onChange, onSelect, values.length > 1 && !locked ? selected : -1);
@@ -108,6 +125,40 @@ export const Stage: React.FC<StageProps> = ({
     ? (index, o) => ({ ...liveBind(index, o), onPointerDown: undefined, onPointerMove: undefined, onKeyDown: undefined, 'aria-readonly': true } as unknown as ReturnType<typeof liveBind>)
     : liveBind;
   const step = challenge.fine.step;
+
+  // Pinned ends: the handles are the letters between the first and last. Letter k+1 sits at the sum of
+  // the gaps before it, and moving it by d opens the gap before it by d and closes the gap after it by d.
+  const positions = useMemo(
+    () => (pinned ? parts.slice(1, -1).map((_, k) => values.slice(0, k + 1).reduce((a, b) => a + b, 0)) : []),
+    [pinned, parts, values]
+  );
+  const moveLetter = (k: number, v: number) => {
+    if (!onChangeAll || k < 0 || k >= positions.length) return;
+    const lo = Math.max(challenge.min - values[k], values[k + 1] - challenge.max);
+    const hi = Math.min(challenge.max - values[k], values[k + 1] - challenge.min);
+    const d = Math.min(hi, Math.max(lo, v - positions[k]));
+    if (d === 0) return;
+    const next = values.slice();
+    next[k] += d;
+    next[k + 1] -= d;
+    onChangeAll(next);
+  };
+  const liveLetters = useHandles(positions, -4000, 4000, moveLetter, onSelect, pinned && !locked ? selected : -1);
+  const letterBind = (i: number) => {
+    const props = liveLetters(i - 1, { axis: 'x', perPx: 1000 / fontSize, label: `Letter ${parts[i]}`, step });
+    return locked
+      ? ({ ...props, onPointerDown: undefined, onPointerMove: undefined, onKeyDown: undefined, 'aria-readonly': true } as Record<string, unknown>)
+      : (props as unknown as Record<string, unknown>);
+  };
+  // Pressing a pinned letter says why it does not move.
+  const [pinNote, setPinNote] = useState(false);
+  const pinTimer = useRef<number | undefined>(undefined);
+  const onPinnedPress = () => {
+    setPinNote(true);
+    window.clearTimeout(pinTimer.current);
+    pinTimer.current = window.setTimeout(() => setPinNote(false), 1800);
+  };
+  useEffect(() => () => window.clearTimeout(pinTimer.current), []);
 
   let canvas: React.ReactNode;
   switch (mode.id) {
@@ -123,6 +174,9 @@ export const Stage: React.FC<StageProps> = ({
           fontSize={fontSize}
           font={challenge.font}
           bind={bind as never}
+          letterBind={pinned ? letterBind : undefined}
+          onPinnedPress={pinned ? onPinnedPress : undefined}
+          lines={assists.grid && challenge.font ? fontLines(challenge.font) : undefined}
           perPx={1000 / fontSize}
           anchor={`${challenge.seed}:${parts.join('')}:${challenge.font?.id ?? ''}:${challenge.start.join(',')}`}
           labels={challenge.labels}
@@ -378,8 +432,8 @@ export const Stage: React.FC<StageProps> = ({
               type="button"
               className="dp-toggle"
               aria-pressed={assists[id]}
-              aria-label={ASSIST_LABELS[id]}
-              title={ASSIST_LABELS[id]}
+              aria-label={mode.id === 'kerning' && id === 'grid' ? 'Guide lines' : ASSIST_LABELS[id]}
+              title={mode.id === 'kerning' && id === 'grid' ? 'Guide lines' : ASSIST_LABELS[id]}
               onClick={() => onToggleAssist(id)}
             >
               <span className="dp-toggle-chip">
@@ -418,12 +472,17 @@ export const Stage: React.FC<StageProps> = ({
 
       <div
         ref={ref}
-        className={`dp-stage-canvas${mode.id === 'measure' ? ' dp-stage-canvas--scroll' : ''}${
+        className={`dp-stage-canvas${mode.id === 'kerning' ? ' dp-stage-canvas--kern' : ''}${mode.id === 'measure' ? ' dp-stage-canvas--scroll' : ''}${
           wraps ? ' dp-stage-canvas--tall' : ''
         }`}
       >
         {canvas}
       </div>
+      {pinned && !locked && (
+        <p className="dp-pin-note" role="status">
+          {pinNote ? 'This letter is fixed.' : ''}
+        </p>
+      )}
 
       {mode.id === 'kerning' && !locked && (
         <div className="dp-preview" role="group" aria-label="Small size check" aria-hidden="true">
@@ -437,20 +496,19 @@ export const Stage: React.FC<StageProps> = ({
       {children ?? (
         <div className="dp-stage-foot">
           <p className="dp-caption">
-            Seed: #{challenge.seed}
-            {challenge.font ? ` \u00b7 ${challenge.font.name}` : ''}
+            {challenge.font ? `${challenge.font.name}, ${challenge.font.desc} \u00b7 ` : ''}Seed: #{challenge.seed}
           </p>
         </div>
       )}
 
       {fineOpen && !locked && (
         <FinePopout
-          label={challenge.labels[selected] ?? challenge.labels[0]}
-          value={selectedValue}
-          min={challenge.min}
-          max={challenge.max}
+          label={pinned ? `Letter ${parts[selected + 1] ?? parts[1]}` : challenge.labels[selected] ?? challenge.labels[0]}
+          value={pinned ? positions[selected] ?? 0 : selectedValue}
+          min={pinned ? -4000 : challenge.min}
+          max={pinned ? 4000 : challenge.max}
           fine={challenge.fine}
-          onChange={(v) => onChange(selected, v)}
+          onChange={(v) => (pinned ? moveLetter(selected, v) : onChange(selected, v))}
         />
       )}
     </section>

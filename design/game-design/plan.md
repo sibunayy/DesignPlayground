@@ -263,3 +263,115 @@ Playtest: new player, 60 s with the tip open and the tip hidden. Pass: with the 
 1. A live reference beside each mode's stage: body text next to the leading drill, a card in a page for margins, a paragraph for tracking.
 2. A "last time" ghost: the learner's previous answer for the same pair type, to show growth.
 3. Tips tied to the learner's weak pair type, after the mastery map (section 7, item 5).
+
+### 9.5 Tracking, and the context of a kerning drill
+
+Trigger: a learner set "Avoid" tighter than the font's plain spacing, thought it looked right, and the overlay showed every pair too tight by 30 to 100 units.
+
+**Diagnosis.** The answer key was checked: the canvas value and the browser's own kerning agree to the unit in all six fonts (Bricolage: Av −54, vo −9, oi 0, id 0). So the key was right and the context was missing. The key is the font's kerning table, and a table only has an opinion about awkward pairs. Pairs such as "oi" and "id" are 0, which means the font's plain spacing. A designer who sets a heavy, display-size word tighter has changed the tracking, not the kerning. The drill scored that as kerning error, so every later letter looked "wildly off" in the overlay, because pair errors add up along the word.
+
+| Component | Finding | Fix | Status |
+|---|---|---|---|
+| Clarity | The stage did not say what the word is for, which typeface it is in, or what zero means. | A context line on the stage: the use, the typeface and its character, and that tracking is the learner's choice and is not scored. | **Done** |
+| Fit | The score treated tracking as kerning error. | The score takes out the learner's own whole-word tracking. | **Done** |
+| Clarity | The overlay compared absolute positions, so errors added up along the word. | The outline is drawn at the learner's tracking, so it shows only the pair errors. | **Done** |
+| Clarity | The review did not name the tracking. | A first note: "Your tracking: −57. That is tracking, so it is not scored." The notes show the ideal at the learner's tracking. | **Done** |
+
+**Rule.** Tracking = the median distance from the target of the moved gaps, limited to ±80 units. At least 3 gaps must move, or the tracking is 0. Each target moves by the tracking, then the normal curve applies (section 4.2). Real-page jobs (section 4.4) do not use this rule: there the headline arrives with kerning off, and only the broken pairs score.
+
+Check on the reported case: raw score under 25, score with tracking removed 73. The pair that is really wrong (A and v overlap) stays a miss.
+
+| Value | Starting value | Test | Pass | If it fails |
+|---|---|---|---|---|
+| Tracking limit | ±80 units | 5 designers, 3 runs each | 70% of runs have tracking inside ±80 | Raise to ±120 |
+| Median as the estimate | Median of moved gaps | Same runs | Tracking changes by less than 15 units when the worst gap is left out | Use a trimmed mean |
+
+ASSUMPTION: a designer judges pairs against each other and picks tracking for the use.
+IMPACT: the score rewards the rhythm of the pairs, not one fixed tightness.
+IF WRONG: a learner could set a poor tracking and not be told.
+VALIDATE: the review names the tracking. If testers ask for feedback on it, add a tracking drill (the Tracking mode already teaches it).
+
+Abuse cases: "close every gap to the end of the range" gets tracking −80, and the remaining error keeps the score under 20 (tested). "Move only two gaps" gets no tracking forgiveness. "Leave every gap" still scores 0.
+
+Next: a sample line in use (for example the word on a logo plate or in a page header) beside the stage, so the use is seen and not only read.
+
+
+## 10. Pinned ends, guide lines and a larger word (comparison with KernType)
+
+Date: 26 November 2026. Source: the public page of KernType (type.method.ac) and its public script, read on this date. The facts below come from that script. They are not a claim about the authors' intent.
+
+### 10.1 What KernType does
+
+| Part | KernType |
+|---|---|
+| Run | 10 words, each in one real typeface, with the type designer and year shown |
+| Letters | Real glyph outlines. Each letter is one shape |
+| Pinned ends | The first and last letters are fixed. A press on one shows "Letter is fixed" |
+| Input | Drag a letter. Tab selects the next letter. Arrow keys move 1 px. Shift moves 10 px |
+| Guide lines | Horizontal lines across the screen. The outer lines are drawn heavier (the baseline class) |
+| Score | Position error of each letter against the stored answer. 100 when the average error is 1 unit or less. It falls by 5 points for each unit, and 0 at 18 units. The run score is the mean of 10 words |
+| Review | A compare view with the answer |
+| Layout | The word, a few buttons, a menu behind one icon |
+
+### 10.2 Assessment of our kerning drill (5-component filter)
+
+| Component | Finding | Severity | Fix | Status |
+|---|---|---|---|---|
+| Clarity | The learner could set the whole word tighter or looser. Tracking was mixed into every answer. Section 9.5 removed the tracking from the score, but the learner still had no fixed frame to judge a gap against. | High | The first and last letters are fixed. The word keeps the length of the answer. | **Done** |
+| Clarity | The word floated on a grid of squares. Nothing said where the letters stand. | High | Ascender, x-height and baseline lines run across the stage behind the word. | **Done** |
+| Satisfaction | The word was 290 px on a 1366 px screen, with tinted boxes over the gaps and over the selected letter. | Medium | The word fills up to 94% of the stage width and 42% of the screen height. No tint. | **Done** |
+| Fit | Prompt, tip, tools, context line, small size check and seed all sat around the word. | Medium | The context line is gone. The font name and the seed share one quiet caption. The tip strip is slimmer. | **Done** |
+| Response | A gap handle moved all letters to its right. With fixed ends one gap cannot change alone. | High | A handle is a letter. A letter moves itself and changes the two gaps next to it by the same amount, in opposite directions. | **Done** |
+| Fit | The answer key is the font's own kerning table, as in KernType's stored answers. | Low | Kept. | Kept |
+
+### 10.3 System rules
+
+- A drill word has at least 4 letters, so at least 2 letters move. Words of 3 letters left the list.
+- **Start.** The learner's start is the answer with a displacement for each inner letter. Each gap changes by the difference of its two letters. So every gap is wrong and the total width does not change. A gap is 3 to 8 target half-widths from its target and stays inside the range.
+- **Move.** Letter *k* has position *p* = the sum of the gaps before it. A move by *d* adds *d* to the gap before the letter and takes *d* from the gap after it. *d* is limited so both gaps stay in the range. A drag uses the drag gain from section 9.2. The arrow keys move 1 unit. Shift moves 10. Tab selects the next letter.
+- **Fixed letters.** The first and last letters are quieter and show a lock. A press shows "This letter is fixed." They are not sliders.
+- **Guide lines.** The ascender is the top of "d". The x-height is the top of "x". The baseline sits at (1 + ascent − descent) / 2 em from the top of a one-em line. The numbers come from the font through a canvas. A fallback is used when the font cannot be measured. The Grid tool in Kerning turns the lines on and off, and it is on by default.
+- **Score.** Per gap, as in section 4.2. The score still shows each gap, because the type designer's value is stored for each pair. The tracking offset from section 9.5 is off for these drills: the errors of the gaps add up to zero, so a median would misread a good answer as tracking.
+- **Review.** Unchanged: Yours, Overlay and Ideal. The ideal outline now lies exactly on the fixed letters, which shows the learner that only the letters between them are wrong.
+
+State machine (letter): *Idle* → *Selected* (Tab, focus, press) → *Dragging* (pointer down on a movable letter) → *Selected*. A fixed letter has no states and only shows the note. A locked answer ignores pointer and keys.
+
+### 10.4 Numbers (starting values)
+
+| Value | Starting value | Test | Pass | If it fails |
+|---|---|---|---|---|
+| Nearest start | 3 half-widths (60 units) | 5 players, 5 words | Every gap looks clearly wrong; no player leaves a gap alone | Raise to 3.5 |
+| Furthest start | 8 half-widths (160 units) | Same | No letter starts on top of another letter in more than 1 word in 3 | Cut to 6 |
+| Word width | 94% of the stage | 5 phones, 5 laptops | No word is cut off at the edge in review | Cut to 88% |
+| Word height | 42% of the screen, up to 440 px | 1024 px tall laptop | The word and the lock row fit with no scroll | Cut to 36% |
+| Review height | 26% of the screen | Same | The score and two notes show with no scroll | Cut to 22% |
+| Guide line strength | 14% (ascender, x-height) and 32% (baseline) | 5 players | 4 of 5 say the lines help and none says they distract | Cut the x-height line to 8% |
+
+ASSUMPTION: players use the end letters as a frame, as they do in KernType.
+IMPACT: the fixed ends are the whole reason tracking stops.
+IF WRONG: players still judge each gap alone, and scores do not rise from run 1 to run 3.
+VALIDATE: the skill script in section 5 (run 3 mean is run 1 mean plus 10).
+
+### 10.5 Abuse cases
+
+| # | Exploit | Guard |
+|---|---|---|
+| P1 | Close every gap (the A1 exploit) | The total width is fixed. Closing one gap opens another |
+| P2 | Set the whole word tighter or looser (tracking) | Not possible: the ends are fixed |
+| P3 | Lock in without a move | Every gap starts outside its target, and an unmoved gap scores 0 |
+| P4 | Slam a letter to the end of the range | A move is limited so both gaps stay in the range |
+| P5 | Read the ideal from the fixed letters | The fixed letters show only the total width, not the value of any one gap |
+
+### 10.6 Playtest scripts
+
+1. **New player.** Open Kerning. Ask "What do you do?". Pass: the player drags a letter within 15 s, and says that the first and last letters do not move.
+2. **Stress.** Drag a letter to both ends, press arrow keys and Shift, press a fixed letter, lock in twice. Pass: no crash; a fixed letter never moves; the sum of the gaps does not change.
+3. **Skill.** Designers play 3 runs. Pass: run 3 mean is at least run 1 mean plus 10.
+4. **Abuse.** Lock in with no move (expect 0). Move every letter by the same amount (expect a low score: only the two end gaps change). Pass: no strategy beats honest play.
+5. **Readability.** An observer looks at the overlay for 10 s and names the worst pair. Pass: 4 of 5 name the right one.
+
+### 10.7 Next
+
+1. The type designer and year under the word in the review, as KernType shows. This is a lesson in who made the font.
+2. Pinned ends in the real-page work area: the headline keeps its width on the page.
+3. A 12-word "marathon" run with a shared score, after the daily seed (section 7, item 3).

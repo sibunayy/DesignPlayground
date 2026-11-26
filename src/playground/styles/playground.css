@@ -1849,7 +1849,7 @@
   width: 100%;
   max-width: 1040px;
   margin: 0 auto;
-  padding: var(--space-2) var(--space-3);
+  padding: 6px var(--space-3);
   border-radius: var(--radius-lg);
   background: var(--panel);
   box-shadow: 0 0 0 1px var(--tile);
@@ -1859,8 +1859,8 @@
 
 .dp-tip-art {
   flex: 0 0 auto;
-  width: 112px;
-  height: 66px;
+  width: 76px;
+  height: 46px;
   border-radius: var(--radius-sm);
   background: var(--tile);
   display: grid;
@@ -1882,7 +1882,7 @@
 
 .dp-tip-title {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.25;
 }
@@ -1892,8 +1892,8 @@
 .dp-tip-body {
   margin: 2px 0 0;
   max-width: 62ch;
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.35;
   color: var(--ink-2);
 }
 
@@ -1951,3 +1951,71 @@
 .ss-key { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-left: var(--space-2); }
 .ss-key--start { border: 1.6px solid var(--ink-2); margin-left: 0; }
 .ss-key--dot { background: var(--ink-2); }
+
+
+
+/* Kerning with pinned ends: guide lines, fixed letters, one quiet note. */
+
+.dp-stage-canvas--kern { overflow-x: clip; }
+
+/* Ascender, x-height and baseline run across the stage, behind the word. They are hairlines: the
+   word is the picture, and the lines only say where the letters stand. */
+.dp-kw-lines {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 240vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.dp-kw-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--ink);
+  opacity: 0.14;
+}
+
+.dp-kw-line--base { opacity: 0.32; }
+
+.dp-kw-row:not(.dp-kw-ghost) { position: relative; z-index: 1; }
+
+/* The space between letters is the white of the page. It is not tinted: the learner judges it by eye. */
+.dp-kw .dp-gap { background: none; }
+
+.dp-kern-letter { position: relative; }
+
+/* The first and last letters are fixed: quieter than the letters that move, with a small lock. */
+.dp-kern-letter--pinned { color: var(--muted); cursor: default; }
+
+.dp-pin {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 6px);
+  width: 22px;
+  height: 22px;
+  transform: translateX(-50%);
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.dp-pin-note {
+  min-height: 22px;
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* A selected letter shows its lit bar underneath. A tinted box over a word this large is noise. */
+.dp-kw [data-handle][data-selected='true'] { background: none; }
+
+/* In the review the marks take the row under the word, so the locks step aside. */
+.dp-stage--locked .dp-pin { display: none; }

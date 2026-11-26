@@ -21,7 +21,9 @@ export function kernNotes(review: Review, pairs: Array<[string, string]>): Revie
     const [l, r] = pairs[h.index];
     const name = `${l}${r}`;
     const font = centreOf(h.target);
-    const numbers = `Yours ${fmt(h.value)}, type designer ${fmt(font)}.`;
+    const numbers = review.tracking
+      ? `Yours ${fmt(h.value)}, ideal at your tracking ${fmt(font)}.`
+      : `Yours ${fmt(h.value)}, type designer ${fmt(font)}.`;
     if (h.broken) {
       notes.push({
         n: h.index + 1,
@@ -35,9 +37,9 @@ export function kernNotes(review: Review, pairs: Array<[string, string]>): Revie
     if (h.grade === 'exact') continue;
     const dir = h.error > 0 ? 'too open' : 'too tight';
     const fix = h.error > 0 ? 'Close it up' : 'Open it up';
-    const zero = Math.abs(font) <= 4;
+    const zero = Math.abs(font - review.tracking) <= 4;
     const reason = zero
-      ? 'This font needs no kerning here. Its plain spacing is already right, so leave the pair at 0.'
+      ? `This font needs no kerning here. Its plain spacing is already right, so leave the pair at ${review.tracking ? 'your tracking' : '0'}.`
       : KIND_REASON[pairKind(l, r)];
     if (h.untouched) {
       notes.push({ n: h.index + 1, grade: h.grade, title: `${name}: not moved`, body: `You left this pair where it started. ${numbers} ${reason}` });
@@ -48,6 +50,15 @@ export function kernNotes(review: Review, pairs: Array<[string, string]>): Revie
       grade: h.grade,
       title: h.grade === 'zone' ? `${name}: close, a little ${dir}` : `${name}: ${dir} by ${Math.abs(Math.round(h.error))}`,
       body: `${fix}. ${numbers} ${reason}`,
+    });
+  }
+  if (Math.abs(review.tracking) >= 8) {
+    const dir = review.tracking < 0 ? 'tighter' : 'looser';
+    notes.unshift({
+      n: 0,
+      grade: 'zone',
+      title: `Your tracking: ${fmt(review.tracking)}`,
+      body: `You set the whole word ${dir} than the font's plain spacing. That is tracking, so it is not scored. Display type is often set ${review.tracking < 0 ? 'tighter' : 'looser'}. The outline shows the ideal pairs at your tracking.`,
     });
   }
   const exact = review.handles.filter((h) => h.grade === 'exact' && h.scored).length;
